@@ -9,8 +9,6 @@ import com.tans.tuiutils.dialog.BaseDialogFragment
 
 class CenterDialog : BaseDialogFragment() {
 
-    override val dimAmount: Float = 0.8f
-
     override fun createContentView(context: Context, parent: ViewGroup): View {
         return LayoutInflater.from(context).inflate(R.layout.dialog_center, parent, false)
     }
