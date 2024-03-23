@@ -14,5 +14,6 @@ fun Activity.fullScreenStyle(sticky: Boolean = true) {
         controller.systemBarsBehavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
     controller.hide(WindowInsetsCompat.Type.systemBars())
+    controller.hide(WindowInsetsCompat.Type.displayCutout())
     tUiUtilsLog.d(msg = "${this::class.java} fullScreenStyle success.")
 }
