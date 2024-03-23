@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.*
-import android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND
 import android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND
 import androidx.annotation.FloatRange
 import androidx.annotation.StyleRes
@@ -34,7 +33,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
     @get:StyleRes
     open val defaultDialogAnima: Int get() {
         val g = gravity
-        return if (g == Gravity.BOTTOM) R.style.tUiDefaultButtonDialogAnima else R.style.tUiDefaultCenterDialogAnima
+        return if (g == Gravity.BOTTOM) R.style.tUiDefaultBottomDialogAnima else R.style.tUiDefaultCenterDialogAnima
     }
 
     private var contentView: View? = null

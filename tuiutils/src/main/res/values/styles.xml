@@ -17,7 +17,7 @@
         <item name="android:windowExitAnimation">@anim/tui_fade_out</item>
     </style>
 
-    <style name="tUiDefaultButtonDialogAnima">
+    <style name="tUiDefaultBottomDialogAnima">
         <item name="android:windowEnterAnimation">@anim/tui_slide_in</item>
         <item name="android:windowExitAnimation">@anim/tui_slide_out</item>
     </style>
