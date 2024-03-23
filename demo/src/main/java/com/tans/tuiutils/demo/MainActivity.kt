@@ -2,18 +2,16 @@ package com.tans.tuiutils.demo
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.tans.tuiutils.systembar.annotation.FullScreenStyle
-import com.tans.tuiutils.systembar.annotation.SystemBarStyle
+import com.tans.tuiutils.demo.databinding.ActivityMainBinding
 
-// @FullScreenStyle
-@SystemBarStyle(
-    lightStatusBar = false,
-    lightNavigationBar = false
-)
-// @FitSystemWindow
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        val viewBinding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(viewBinding.root)
+
+        viewBinding.centerDialogBt.setOnClickListener {
+            CenterDialog().show(supportFragmentManager, "CenterDialog${System.currentTimeMillis()}")
+        }
     }
 }
