@@ -7,10 +7,7 @@ import com.tans.tuiutils.demo.databinding.ActivityMainBinding
 import com.tans.tuiutils.systembar.annotation.FitSystemWindow
 import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 
-@SystemBarStyle(
-    lightStatusBar = true,
-    lightNavigationBar = true
-)
+@SystemBarStyle
 @FitSystemWindow
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
