@@ -54,7 +54,7 @@ object AutoApplySystemBarAnnotation : ActivityLifecycleCallbacks {
         val fitSystemWindowStyle = allAnnotations.filterIsInstance<FitSystemWindow>().getOrNull(0)
         if (fitSystemWindowStyle != null) {
             tUiUtilsLog.d(msg = "${activity::class.java} found FitSystemWindow annotation.")
-            activity.fitSystemWindow()
+            activity.fitSystemWindow(fitSystemWindow = fitSystemWindowStyle.fitSystemWindow)
         }
     }
 

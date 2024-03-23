@@ -13,6 +13,8 @@ annotation class SystemBarStyle(
     val navigationBarLightColor: String = TRANSPARENT_COLOR_STR,
     val navigationBarDarkColor: String = TRANSPARENT_COLOR_STR,
     val lightNavigationBar: Boolean = true
-)
-
-const val TRANSPARENT_COLOR_STR = "#00FFFFFF"
+) {
+    companion object {
+        const val TRANSPARENT_COLOR_STR = "#00FFFFFF"
+    }
+}

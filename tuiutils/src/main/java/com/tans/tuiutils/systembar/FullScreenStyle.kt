@@ -15,8 +15,8 @@ fun Activity.fullScreenStyle(sticky: Boolean = true, ignoreCutoutArea: Boolean =
     if (sticky) {
         controller.systemBarsBehavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
+    WindowCompat.setDecorFitsSystemWindows(window, false)
     if (ignoreCutoutArea) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val lp = window.attributes
             lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
