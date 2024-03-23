@@ -48,7 +48,7 @@ object AutoApplySystemBarAnnotation : ActivityLifecycleCallbacks {
         val fullScreenStyle = allAnnotations.filterIsInstance<FullScreenStyle>().getOrNull(0)
         if (fullScreenStyle != null) {
             tUiUtilsLog.d(msg = "${activity::class.java} found FullScreenStyle annotation.")
-            activity.fullScreenStyle(fullScreenStyle.sticky)
+            activity.fullScreenStyle(sticky = fullScreenStyle.sticky, ignoreCutoutArea = fullScreenStyle.ignoreCutoutArea)
         }
 
         val fitSystemWindowStyle = allAnnotations.filterIsInstance<FitSystemWindow>().getOrNull(0)
