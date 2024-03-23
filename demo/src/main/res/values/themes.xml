@@ -3,6 +3,9 @@
     <style name="Base.Theme.TUiUtils" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:navigationBarColor">@android:color/white</item>
+        <item name="android:windowBackground">@android:color/white</item>
     </style>
 
     <style name="Theme.TUiUtils" parent="Base.Theme.TUiUtils" />
