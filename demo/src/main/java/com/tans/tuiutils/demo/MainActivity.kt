@@ -1,5 +1,6 @@
 package com.tans.tuiutils.demo
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.tans.tuiutils.demo.databinding.ActivityMainBinding
@@ -16,6 +17,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+
+        viewBinding.transparentSystemBarActBt.setOnClickListener {
+            startActivity(Intent(this, TransparentSystemBarActivity::class.java))
+        }
+
+        viewBinding.fitSystemWindowActBt.setOnClickListener {
+            startActivity(Intent(this, FitSystemWindowActivity::class.java))
+        }
+
+        viewBinding.fullScreenActBt.setOnClickListener {
+            startActivity(Intent(this, FullScreenActivity::class.java))
+        }
 
         viewBinding.centerDialogBt.setOnClickListener {
             CenterDialog().show(supportFragmentManager, "CenterDialog${System.currentTimeMillis()}")

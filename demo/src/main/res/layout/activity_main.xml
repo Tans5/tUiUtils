@@ -22,9 +22,32 @@
     <com.google.android.flexbox.FlexboxLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:flexDirection="row"
+        app:flexWrap="wrap"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/full_screen_act_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:text="Full Screen Act"/>
+
+        <Button
+            android:id="@+id/transparent_system_bar_act_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:text="Transparent System Bar Act"/>
+
+        <Button
+            android:id="@+id/fit_system_window_act_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:text="Fit System Window Act"/>
 
         <Button
             android:id="@+id/center_dialog_bt"

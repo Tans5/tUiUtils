@@ -88,8 +88,13 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
         }
 
         dialog.window?.apply {
-            addFlags(FLAG_DIM_BEHIND)
-            setDimAmount(dimAmount)
+            if (dimAmount < 0.01f) {
+                clearFlags(FLAG_DIM_BEHIND)
+                setDimAmount(0.0f)
+            } else {
+                addFlags(FLAG_DIM_BEHIND)
+                setDimAmount(dimAmount)
+            }
             setGravity(gravity)
             setLayout(windowWith, windowHeight)
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
