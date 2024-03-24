@@ -18,6 +18,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
 
     open val dimAmount: Float = 0.4f
     open val isCanceledOnTouchOutside: Boolean = true
+    open val isCancelable: Boolean = true
     open val gravity = Gravity.CENTER
     open val windowWith: Int = WindowManager.LayoutParams.WRAP_CONTENT
     open val windowHeight: Int = WindowManager.LayoutParams.WRAP_CONTENT
@@ -84,6 +85,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
             requestWindowFeature(Window.FEATURE_NO_TITLE)
             setContentView(contentView)
             setCanceledOnTouchOutside(isCanceledOnTouchOutside)
+            setCancelable(isCancelable)
         }
 
         dialog.window?.apply {
