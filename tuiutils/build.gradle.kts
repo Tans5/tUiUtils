@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.androidx.activity)
 
     compileOnly(libs.rxjava3)
+    compileOnly(libs.rxandroid3)
 
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.core.jvm)
