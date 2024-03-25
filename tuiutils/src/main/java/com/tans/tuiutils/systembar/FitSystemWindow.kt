@@ -3,9 +3,11 @@ package com.tans.tuiutils.systembar
 import android.app.Activity
 import androidx.annotation.MainThread
 import androidx.core.view.WindowCompat
+import com.tans.tuiutils.assertMainThread
 
 @MainThread
 fun Activity.fitSystemWindow(fitSystemWindow: Boolean) {
+    assertMainThread { "fitSystemWindow() need invoke in main thread." }
     WindowCompat.setDecorFitsSystemWindows(window, fitSystemWindow)
 //    if (fitSystemWindow) {
 //        val viewTreeObserver = window.decorView.viewTreeObserver

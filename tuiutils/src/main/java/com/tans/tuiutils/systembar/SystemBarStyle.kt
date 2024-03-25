@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.ColorInt
 import androidx.annotation.MainThread
 import androidx.core.view.WindowCompat
+import com.tans.tuiutils.assertMainThread
 import com.tans.tuiutils.tUiUtilsLog
 
 @MainThread
@@ -20,6 +21,7 @@ fun Activity.lightSystemBar(lightStatusBar: Boolean, lightNavigationBar: Boolean
 
 @MainThread
 fun Window.lightSystemBar(lightStatusBar: Boolean, lightNavigationBar: Boolean) {
+    assertMainThread { "lightSystemBar() need invoke in main thread." }
     val controller =  WindowCompat.getInsetsController(this, decorView)
     controller.isAppearanceLightStatusBars = lightStatusBar
     controller.isAppearanceLightNavigationBars = lightNavigationBar
