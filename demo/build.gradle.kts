@@ -46,6 +46,13 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.flexbox)
+    implementation(libs.rxjava3)
+    implementation(libs.rxkotlin3)
+    implementation(libs.rxandroid3)
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.core.jvm)
+    implementation(libs.coroutines.android)
+    implementation(libs.coroutines.rx3)
 
     implementation(project(":tuiutils"))
 
