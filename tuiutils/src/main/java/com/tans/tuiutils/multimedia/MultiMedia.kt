@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.MainThread
+import androidx.fragment.app.FragmentActivity
 import com.tans.tuiutils.assertMainThread
 
 @MainThread
@@ -34,12 +35,19 @@ fun ComponentActivity.pickVideo(callback: (uri: Uri?) -> Unit) {
  *
  */
 @MainThread
-fun ComponentActivity.takeAPhoto(outputFileUri: Uri, callback: (success: Boolean) -> Unit) {
+fun FragmentActivity.takeAPhoto(outputFileUri: Uri, callback: (success: Boolean) -> Unit) {
     assertMainThread { "takeAPhoto() need invoke in main thread." }
-    val launcher = registerForActivityResult(
-        ActivityResultContracts.TakePicture()) {
-        callback(it)
+//    val launcher = registerForActivityResult(
+//        ActivityResultContracts.TakePicture()) {
+//        callback(it)
+//    }
+//    launcher.launch(outputFileUri)
+    val tc = supportFragmentManager.beginTransaction()
+    val fragment = TakeAPhotoFragment(
+        outputUri = outputFileUri
+    ) { isOk ->
+        callback(isOk)
     }
-    launcher.launch(outputFileUri)
-
+    tc.add(fragment, "TakeAPhotoFragment#${System.currentTimeMillis()}")
+    tc.commitAllowingStateLoss()
 }
