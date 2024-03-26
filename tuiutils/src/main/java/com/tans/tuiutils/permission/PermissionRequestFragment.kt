@@ -56,19 +56,9 @@ internal class PermissionRequestFragment : Fragment {
         val intent = Intent(ACTION_REQUEST_PERMISSIONS)
             .putExtra(EXTRA_PERMISSIONS, requestPermissions.toTypedArray())
 
-        val pm = context.packageManager
-        val infos = pm.queryIntentActivities(intent, 0)
-        if (infos.isNotEmpty()) {
-            val requestCode = Random(System.currentTimeMillis()).nextInt(0, 65535)
-            lastRequestCode = requestCode
-            startActivityForResult(intent, requestCode)
-        } else {
-            tUiUtilsLog.e(TAG, "No activity can request permissions.")
-            if (hasInvokeCallback.compareAndSet(false,true)) {
-                error?.invoke("No activity can request permissions.")
-            }
-            finishCurrentFragment()
-        }
+        val requestCode = Random(System.currentTimeMillis()).nextInt(0, 65535)
+        lastRequestCode = requestCode
+        startActivityForResult(intent, requestCode)
     }
 
     @Deprecated("Deprecated in Java")

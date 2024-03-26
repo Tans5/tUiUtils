@@ -18,7 +18,7 @@ fun FragmentActivity.permissionsRequest(vararg permissions: String, error: (msg:
         return
     }
     val permissionsSet = permissions.toSet()
-    val permissionsNeedRequestSet = permissionsSet.filter { permissionCheck(it) }.toSet()
+    val permissionsNeedRequestSet = permissionsSet.filter { !permissionCheck(it) }.toSet()
     val permissionsNotNeedRequestSet = permissionsSet - permissionsNeedRequestSet
 
     if (permissionsNeedRequestSet.isEmpty()) {
