@@ -65,12 +65,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope by CoroutineScope(Dispa
                 }
                 if (result.isSuccess) {
                     if (result.getOrThrow()) {
-                        Toast.makeText(this@MainActivity, "Take photo fail", Toast.LENGTH_SHORT).show()
-                    } else {
                         val bitmap = withContext(Dispatchers.IO) {
                             BitmapFactory.decodeFile(outputFile.canonicalPath)
                         }
                         viewBinding.displayIv.setImageBitmap(bitmap)
+                    } else {
+                        outputFile.delete()
+                        Toast.makeText(this@MainActivity, "Take photo cancel", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Toast.makeText(this@MainActivity, "Take photo error: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()

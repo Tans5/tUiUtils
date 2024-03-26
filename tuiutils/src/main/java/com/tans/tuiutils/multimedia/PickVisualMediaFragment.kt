@@ -89,19 +89,9 @@ internal class PickVisualMediaFragment : Fragment {
             }
         }
 
-        val pm = context.packageManager
-        val infos = pm.queryIntentActivities(intent, 0)
-        if (infos.isNotEmpty()) {
-            val requestCode = Random(System.currentTimeMillis()).nextInt(0, 65535)
-            lastRequestCode = requestCode
-            startActivityForResult(intent, requestCode)
-        } else {
-            tUiUtilsLog.e(TAG, "No activity can pick multi media file, exit.")
-            if (hasInvokeCallback.compareAndSet(false,true)) {
-                error?.invoke("No activity can pick multi media file.")
-            }
-            finishCurrentFragment()
-        }
+        val requestCode = Random(System.currentTimeMillis()).nextInt(0, 65535)
+        lastRequestCode = requestCode
+        startActivityForResult(intent, requestCode)
     }
 
     @Deprecated("Deprecated in Java")

@@ -58,19 +58,9 @@ internal class TakeAPhotoFragment : Fragment {
 
         val i = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         i.putExtra(MediaStore.EXTRA_OUTPUT, outputUri)
-        val pm = context.packageManager
-        val infos = pm.queryIntentActivities(i, 0)
-        if (infos.isNotEmpty()) {
-            val requestCode = Random(System.currentTimeMillis()).nextInt(0, 65535)
-            lastRequestCode = requestCode
-            startActivityForResult(i, requestCode)
-        } else {
-            tUiUtilsLog.e(TAG, "No activity can take photo, exit.")
-            if (hasInvokeCallback.compareAndSet(false, true)) {
-                error?.invoke("No activity can take photo.")
-            }
-            finishCurrentFragment()
-        }
+        val requestCode = Random(System.currentTimeMillis()).nextInt(0, 65535)
+        lastRequestCode = requestCode
+        startActivityForResult(i, requestCode)
     }
 
     @Deprecated("Deprecated in Java", ReplaceWith(
