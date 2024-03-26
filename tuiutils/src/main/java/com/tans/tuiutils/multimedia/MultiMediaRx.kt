@@ -2,15 +2,14 @@ package com.tans.tuiutils.multimedia
 
 import android.net.Uri
 import android.os.Looper
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.FragmentActivity
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
 
-fun FragmentActivity.pickVisualMediaRx(type: ActivityResultContracts.PickVisualMedia.VisualMediaType): Maybe<Uri> {
+fun FragmentActivity.pickVisualMediaRx(mimeType: String): Maybe<Uri> {
     return Maybe.create { emit ->
         val r = Runnable {
-            pickVisualMedia(type) { uri ->
+            pickVisualMedia(mimeType) { uri ->
                 if (uri != null) {
                     emit.onSuccess(uri)
                 } else {
@@ -27,11 +26,11 @@ fun FragmentActivity.pickVisualMediaRx(type: ActivityResultContracts.PickVisualM
 }
 
 fun FragmentActivity.pickImageRx(): Maybe<Uri> {
-    return pickVisualMediaRx(ActivityResultContracts.PickVisualMedia.ImageOnly)
+    return pickVisualMediaRx(mimeType = "image/*")
 }
 
 fun FragmentActivity.pickVideoRx(): Maybe<Uri> {
-    return pickVisualMediaRx(ActivityResultContracts.PickVisualMedia.VideoOnly)
+    return pickVisualMediaRx(mimeType = "video/*")
 }
 
 fun FragmentActivity.takeAPhotoRx(outputUri: Uri): Single<Boolean> {

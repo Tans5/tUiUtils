@@ -1,16 +1,15 @@
 package com.tans.tuiutils.multimedia
 
 import android.net.Uri
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.MainThread
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 @MainThread
-suspend fun FragmentActivity.pickVisualMediaSuspend(type: ActivityResultContracts.PickVisualMedia.VisualMediaType): Uri? {
+suspend fun FragmentActivity.pickVisualMediaSuspend(mimeType: String): Uri? {
     return suspendCancellableCoroutine { cont ->
-        pickVisualMedia(type) { uri ->
+        pickVisualMedia(mimeType) { uri ->
             if (cont.isActive && !(cont.isCancelled || cont.isCompleted)) {
                 cont.resume(uri)
             }
@@ -20,12 +19,12 @@ suspend fun FragmentActivity.pickVisualMediaSuspend(type: ActivityResultContract
 
 @MainThread
 suspend fun FragmentActivity.pickImageSuspend(): Uri? {
-    return pickVisualMediaSuspend(ActivityResultContracts.PickVisualMedia.ImageOnly)
+    return pickVisualMediaSuspend(mimeType = "image/*")
 }
 
 @MainThread
 suspend fun FragmentActivity.pickVideoSuspend(): Uri? {
-    return pickVisualMediaSuspend(ActivityResultContracts.PickVisualMedia.VideoOnly)
+    return pickVisualMediaSuspend(mimeType = "video/*")
 }
 
 @MainThread

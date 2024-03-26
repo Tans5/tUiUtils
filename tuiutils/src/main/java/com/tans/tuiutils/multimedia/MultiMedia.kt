@@ -1,32 +1,35 @@
 package com.tans.tuiutils.multimedia
 
 import android.net.Uri
-import androidx.activity.ComponentActivity
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.MainThread
 import androidx.fragment.app.FragmentActivity
 import com.tans.tuiutils.assertMainThread
 
 @MainThread
-fun ComponentActivity.pickVisualMedia(type: ActivityResultContracts.PickVisualMedia.VisualMediaType, callback: (uri: Uri?) -> Unit) {
+fun FragmentActivity.pickVisualMedia(mimeType: String, callback: (uri: Uri?) -> Unit) {
     assertMainThread { "pickVisualMedia() need invoke in main thread." }
-    val launcher = registerForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        callback(uri)
-    }
-    launcher.launch(PickVisualMediaRequest(type))
+//    val launcher = registerForActivityResult(
+//        ActivityResultContracts.PickVisualMedia()
+//    ) { uri ->
+//        callback(uri)
+//    }
+//    launcher.launch(PickVisualMediaRequest(type))
+    val fragment = PickVisualMediaFragment(
+        mimeType = mimeType,
+    ) { callback(it) }
+    val tc = supportFragmentManager.beginTransaction()
+    tc.add(fragment, "PickVisualMediaFragment#${System.currentTimeMillis()}")
+    tc.commitAllowingStateLoss()
 }
 
 @MainThread
-fun ComponentActivity.pickImage(callback: (uri: Uri?) -> Unit) {
-    pickVisualMedia(type = ActivityResultContracts.PickVisualMedia.ImageOnly, callback = callback)
+fun FragmentActivity.pickImage(callback: (uri: Uri?) -> Unit) {
+    pickVisualMedia(mimeType = "image/*", callback = callback)
 }
 
 @MainThread
-fun ComponentActivity.pickVideo(callback: (uri: Uri?) -> Unit) {
-    pickVisualMedia(type = ActivityResultContracts.PickVisualMedia.VideoOnly, callback = callback)
+fun FragmentActivity.pickVideo(callback: (uri: Uri?) -> Unit) {
+    pickVisualMedia(mimeType = "video/*", callback = callback)
 }
 
 

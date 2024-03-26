@@ -60,6 +60,13 @@
             android:layout_margin="2dp"
             android:text="Take A Photo"/>
 
+        <Button
+            android:id="@+id/pick_a_picture_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:text="Pick A Picture"/>
+
     </com.google.android.flexbox.FlexboxLayout>
 
     <ImageView
