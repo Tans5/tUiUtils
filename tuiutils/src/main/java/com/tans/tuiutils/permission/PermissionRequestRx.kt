@@ -1,18 +1,25 @@
 package com.tans.tuiutils.permission
 
 import android.os.Looper
-import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import io.reactivex.rxjava3.core.Single
 
 /**
  * @return first: granted permissions, second: not granted permissions.
  */
-fun ComponentActivity.permissionsRequestRx3(vararg permissions: String): Single<Pair<Set<String>, Set<String>>> {
+fun FragmentActivity.permissionsRequestRx3(vararg permissions: String): Single<Pair<Set<String>, Set<String>>> {
     return Single.create { emitter ->
         val r = Runnable {
-            this.permissionsRequest(permissions = permissions) { granted: Set<String>, notGranted: Set<String> ->
-                emitter.onSuccess(granted to notGranted)
+            this.permissionsRequest(permissions = permissions,
+                error = {
+                    if (!emitter.isDisposed) {
+                        emitter.onError(Throwable(it))
+                    }
+                }) { granted: Set<String>, notGranted: Set<String> ->
+                if (!emitter.isDisposed) {
+                    emitter.onSuccess(granted to notGranted)
+                }
             }
         }
         if (Looper.getMainLooper() === Looper.myLooper()) {
@@ -32,11 +39,19 @@ fun Fragment.permissionsRequestRx3(vararg permissions: String): Single<Pair<Set<
         ?: Single.error(Throwable("Activity is null, can't request permissions."))
 }
 
-fun ComponentActivity.permissionsRequestSimplifyRx3(vararg permissions: String): Single<Boolean> {
+fun FragmentActivity.permissionsRequestSimplifyRx3(vararg permissions: String): Single<Boolean> {
     return Single.create { emitter ->
         val r = Runnable {
-            this.permissionsRequestSimplify(permissions = permissions) {
-                emitter.onSuccess(it)
+            this.permissionsRequestSimplify(
+                permissions = permissions,
+                error = {
+                    if (!emitter.isDisposed) {
+                        emitter.onError(Throwable(it))
+                    }
+                }) {
+                if (!emitter.isDisposed) {
+                    emitter.onSuccess(it)
+                }
             }
         }
         if (Looper.getMainLooper() === Looper.myLooper()) {
