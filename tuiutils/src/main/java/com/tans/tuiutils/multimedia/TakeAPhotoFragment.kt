@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import androidx.fragment.app.Fragment
 import com.tans.tuiutils.tUiUtilsLog
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
 
 @Suppress("DEPRECATION")
@@ -16,15 +17,21 @@ internal class TakeAPhotoFragment : Fragment {
 
     private val callback: ((isOk: Boolean) -> Unit)?
 
+    private val error: ((msg: String) -> Unit)?
+
     private var lastRequestCode: Int? = null
+
+    private val hasInvokeCallback: AtomicBoolean = AtomicBoolean(false)
 
     constructor() {
         this.outputUri = null
         this.callback = null
+        this.error = null
     }
-    constructor(outputUri: Uri, callback: (isOk: Boolean) -> Unit) {
+    constructor(outputUri: Uri, error: (msg: String) -> Unit, callback: (isOk: Boolean) -> Unit) {
         this.outputUri = outputUri
         this.callback = callback
+        this.error = error
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,13 +41,18 @@ internal class TakeAPhotoFragment : Fragment {
         val context = activity
         if (outputUri == null) {
             tUiUtilsLog.e(TAG, "Output Uri is null, finish TakeAPhotoFragment.")
+            if (hasInvokeCallback.compareAndSet(false, true)) {
+                error?.invoke("Output Uri is null.")
+            }
             finishCurrentFragment()
-            callback?.invoke(false)
             return
         }
         if (context == null) {
             tUiUtilsLog.e(TAG, "Attached activity is null.")
-            callback?.invoke(false)
+            if (hasInvokeCallback.compareAndSet(false, true)) {
+                error?.invoke("Attached activity is null.")
+            }
+            finishCurrentFragment()
             return
         }
 
@@ -54,8 +66,10 @@ internal class TakeAPhotoFragment : Fragment {
             startActivityForResult(i, requestCode)
         } else {
             tUiUtilsLog.e(TAG, "No activity can take photo, exit.")
+            if (hasInvokeCallback.compareAndSet(false, true)) {
+                error?.invoke("No activity can take photo.")
+            }
             finishCurrentFragment()
-            callback?.invoke(false)
         }
     }
 
@@ -65,13 +79,18 @@ internal class TakeAPhotoFragment : Fragment {
     )
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == lastRequestCode) {
-            callback?.invoke(resultCode == Activity.RESULT_OK)
+            if (hasInvokeCallback.compareAndSet(false, true)) {
+                callback?.invoke(resultCode == Activity.RESULT_OK)
+            }
             finishCurrentFragment()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        if (hasInvokeCallback.compareAndSet(false, true)) {
+            error?.invoke("Fragment exit unexpectedly.")
+        }
         tUiUtilsLog.d(TAG, "Fragment destroyed.")
     }
 

@@ -5,15 +5,24 @@ import androidx.annotation.MainThread
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 @MainThread
 suspend fun FragmentActivity.pickVisualMediaSuspend(mimeType: String): Uri? {
     return suspendCancellableCoroutine { cont ->
-        pickVisualMedia(mimeType) { uri ->
-            if (cont.isActive && !(cont.isCancelled || cont.isCompleted)) {
-                cont.resume(uri)
+        pickVisualMedia(
+            mimeType = mimeType,
+            error = {
+                if (cont.isActive && !(cont.isCancelled || cont.isCompleted)) {
+                    cont.resumeWithException(Throwable(it))
+                }
+            },
+            callback = {
+                if (cont.isActive && !(cont.isCancelled || cont.isCompleted)) {
+                    cont.resume(it)
+                }
             }
-        }
+        )
     }
 }
 
@@ -30,10 +39,17 @@ suspend fun FragmentActivity.pickVideoSuspend(): Uri? {
 @MainThread
 suspend fun FragmentActivity.takeAPhotoSuspend(outputUri: Uri): Boolean {
     return suspendCancellableCoroutine { cont ->
-        this.takeAPhoto(outputUri) {
-            if (cont.isActive && !(cont.isCancelled || cont.isCompleted)) {
-                cont.resume(it)
-            }
-        }
+        this.takeAPhoto(
+            outputFileUri = outputUri,
+            error = {
+                if (cont.isActive && !(cont.isCancelled || cont.isCompleted)) {
+                    cont.resumeWithException(Throwable(it))
+                }
+            },
+            callback = {
+                if (cont.isActive && !(cont.isCancelled || cont.isCompleted)) {
+                    cont.resume(it)
+                }
+            })
     }
 }

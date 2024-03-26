@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentActivity
 import com.tans.tuiutils.assertMainThread
 
 @MainThread
-fun FragmentActivity.pickVisualMedia(mimeType: String, callback: (uri: Uri?) -> Unit) {
+fun FragmentActivity.pickVisualMedia(mimeType: String, error: (msg: String) -> Unit, callback: (uri: Uri?) -> Unit) {
     assertMainThread { "pickVisualMedia() need invoke in main thread." }
 //    val launcher = registerForActivityResult(
 //        ActivityResultContracts.PickVisualMedia()
@@ -16,20 +16,22 @@ fun FragmentActivity.pickVisualMedia(mimeType: String, callback: (uri: Uri?) -> 
 //    launcher.launch(PickVisualMediaRequest(type))
     val fragment = PickVisualMediaFragment(
         mimeType = mimeType,
-    ) { callback(it) }
+        error = error,
+        callback = callback
+    )
     val tc = supportFragmentManager.beginTransaction()
     tc.add(fragment, "PickVisualMediaFragment#${System.currentTimeMillis()}")
     tc.commitAllowingStateLoss()
 }
 
 @MainThread
-fun FragmentActivity.pickImage(callback: (uri: Uri?) -> Unit) {
-    pickVisualMedia(mimeType = "image/*", callback = callback)
+fun FragmentActivity.pickImage(error: (msg: String) -> Unit, callback: (uri: Uri?) -> Unit) {
+    pickVisualMedia(mimeType = "image/*", error = error, callback = callback)
 }
 
 @MainThread
-fun FragmentActivity.pickVideo(callback: (uri: Uri?) -> Unit) {
-    pickVisualMedia(mimeType = "video/*", callback = callback)
+fun FragmentActivity.pickVideo(error: (msg: String) -> Unit, callback: (uri: Uri?) -> Unit) {
+    pickVisualMedia(mimeType = "video/*", error = error, callback = callback)
 }
 
 
@@ -38,7 +40,7 @@ fun FragmentActivity.pickVideo(callback: (uri: Uri?) -> Unit) {
  *
  */
 @MainThread
-fun FragmentActivity.takeAPhoto(outputFileUri: Uri, callback: (success: Boolean) -> Unit) {
+fun FragmentActivity.takeAPhoto(outputFileUri: Uri, error: (msg: String) -> Unit, callback: (success: Boolean) -> Unit) {
     assertMainThread { "takeAPhoto() need invoke in main thread." }
 //    val launcher = registerForActivityResult(
 //        ActivityResultContracts.TakePicture()) {
@@ -47,10 +49,10 @@ fun FragmentActivity.takeAPhoto(outputFileUri: Uri, callback: (success: Boolean)
 //    launcher.launch(outputFileUri)
     val tc = supportFragmentManager.beginTransaction()
     val fragment = TakeAPhotoFragment(
-        outputUri = outputFileUri
-    ) { isOk ->
-        callback(isOk)
-    }
+        outputUri = outputFileUri,
+        error = error,
+        callback = callback
+    )
     tc.add(fragment, "TakeAPhotoFragment#${System.currentTimeMillis()}")
     tc.commitAllowingStateLoss()
 }

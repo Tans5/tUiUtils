@@ -9,13 +9,23 @@ import io.reactivex.rxjava3.core.Single
 fun FragmentActivity.pickVisualMediaRx(mimeType: String): Maybe<Uri> {
     return Maybe.create { emit ->
         val r = Runnable {
-            pickVisualMedia(mimeType) { uri ->
-                if (uri != null) {
-                    emit.onSuccess(uri)
-                } else {
-                    emit.onComplete()
+            pickVisualMedia(
+                mimeType = mimeType,
+                error = {
+                    if (!emit.isDisposed) {
+                        emit.onError(Throwable(it))
+                    }
+                },
+                callback = { uri ->
+                    if (!emit.isDisposed) {
+                        if (uri != null) {
+                            emit.onSuccess(uri)
+                        } else {
+                            emit.onComplete()
+                        }
+                    }
                 }
-            }
+            )
         }
         if (Looper.getMainLooper() === Looper.myLooper()) {
             r.run()
@@ -36,9 +46,18 @@ fun FragmentActivity.pickVideoRx(): Maybe<Uri> {
 fun FragmentActivity.takeAPhotoRx(outputUri: Uri): Single<Boolean> {
     return Single.create { emit ->
         val r = Runnable {
-            takeAPhoto(outputUri) {
-                emit.onSuccess(it)
-            }
+            takeAPhoto(
+                outputFileUri = outputUri,
+                error = {
+                    if (!emit.isDisposed) {
+                        emit.onError(Throwable(it))
+                    }
+                },
+                callback = {
+                    if (!emit.isDisposed) {
+                        emit.onSuccess(it)
+                    }
+                })
         }
         if (Looper.getMainLooper() === Looper.myLooper()) {
             r.run()

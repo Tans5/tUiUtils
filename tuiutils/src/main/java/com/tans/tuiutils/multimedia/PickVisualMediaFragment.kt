@@ -13,24 +13,30 @@ import android.os.ext.SdkExtensions
 import android.provider.MediaStore
 import androidx.fragment.app.Fragment
 import com.tans.tuiutils.tUiUtilsLog
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
 
 @Suppress("DEPRECATION")
 internal class PickVisualMediaFragment : Fragment {
 
     private val callback: ((uri: Uri?) -> Unit)?
+    private val error: ((msg: String) -> Unit)?
 
     private val mimeType: String?
 
     private var lastRequestCode: Int? = null
 
+    private val hasInvokeCallback: AtomicBoolean = AtomicBoolean(false)
+
     constructor() {
         this.callback = null
         this.mimeType = null
+        this.error = null
     }
-    constructor(mimeType: String, callback: (uri: Uri?) -> Unit) {
+    constructor(mimeType: String, error: (msg: String) -> Unit, callback: (uri: Uri?) -> Unit) {
         this.callback = callback
         this.mimeType = mimeType
+        this.error = error
     }
 
     @SuppressLint("InlinedApi")
@@ -40,14 +46,19 @@ internal class PickVisualMediaFragment : Fragment {
         val mimeType = mimeType
         val context = activity
         if (mimeType == null) {
-            tUiUtilsLog.e(TAG, "Output Uri is null, finish TakeAPhotoFragment.")
+            tUiUtilsLog.e(TAG, "Mimetype is null, finish TakeAPhotoFragment.")
+            if (hasInvokeCallback.compareAndSet(false, true)) {
+                error?.invoke("Mimetype is null.")
+            }
             finishCurrentFragment()
-            callback?.invoke(null)
             return
         }
         if (context == null) {
             tUiUtilsLog.e(TAG, "Attached activity is null.")
-            callback?.invoke(null)
+            if (hasInvokeCallback.compareAndSet(false, true)) {
+                error?.invoke("Attached activity is null.")
+            }
+            finishCurrentFragment()
             return
         }
 
@@ -78,36 +89,39 @@ internal class PickVisualMediaFragment : Fragment {
             }
         }
 
-        val requestCode = Random(System.currentTimeMillis()).nextInt(0, 65535)
-        lastRequestCode = requestCode
-        startActivityForResult(intent, requestCode)
-
-//        val pm = context.packageManager
-//        val infos = pm.queryIntentActivities(intent, 0)
-//        if (infos.isNotEmpty()) {
-//            val requestCode = Random(System.currentTimeMillis()).nextInt(0, 65535)
-//            lastRequestCode = requestCode
-//            startActivityForResult(intent, requestCode)
-//        } else {
-//            tUiUtilsLog.e(TAG, "No activity can pick photo, exit.")
-//            finishCurrentFragment()
-//            callback?.invoke(null)
-//        }
+        val pm = context.packageManager
+        val infos = pm.queryIntentActivities(intent, 0)
+        if (infos.isNotEmpty()) {
+            val requestCode = Random(System.currentTimeMillis()).nextInt(0, 65535)
+            lastRequestCode = requestCode
+            startActivityForResult(intent, requestCode)
+        } else {
+            tUiUtilsLog.e(TAG, "No activity can pick multi media file, exit.")
+            if (hasInvokeCallback.compareAndSet(false,true)) {
+                error?.invoke("No activity can pick multi media file.")
+            }
+            finishCurrentFragment()
+        }
     }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == lastRequestCode) {
             finishCurrentFragment()
-            val uri = data.takeIf { resultCode == Activity.RESULT_OK }?.run {
-                this.data ?: getClipDataUris().firstOrNull()
+            if (hasInvokeCallback.compareAndSet(false, true)) {
+                val uri = data.takeIf { resultCode == Activity.RESULT_OK }?.run {
+                    this.data ?: getClipDataUris().firstOrNull()
+                }
+                callback?.invoke(uri)
             }
-            callback?.invoke(uri)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        if (hasInvokeCallback.compareAndSet(false, true)) {
+            error?.invoke("Fragment exit unexpectedly.")
+        }
         tUiUtilsLog.d(TAG, "Fragment destroyed.")
     }
 
@@ -160,7 +174,7 @@ internal class PickVisualMediaFragment : Fragment {
         transaction.commitAllowingStateLoss()
     }
 
-    internal fun Intent.getClipDataUris(): List<Uri> {
+    private fun Intent.getClipDataUris(): List<Uri> {
         // Use a LinkedHashSet to maintain any ordering that may be
         // present in the ClipData
         val resultSet = LinkedHashSet<Uri>()

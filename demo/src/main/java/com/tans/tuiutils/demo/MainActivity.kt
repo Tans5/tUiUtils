@@ -60,38 +60,49 @@ class MainActivity : AppCompatActivity(), CoroutineScope by CoroutineScope(Dispa
                     }
                     FileProvider.getUriForFile(this@MainActivity, "${packageName}.provider", photoFile) to photoFile
                 }
-                val isSuccess = takeAPhotoSuspend(outputUri)
-                if (!isSuccess) {
-                    Toast.makeText(this@MainActivity, "Take photo fail", Toast.LENGTH_SHORT).show()
-                } else {
-                    val bitmap = withContext(Dispatchers.IO) {
-                        BitmapFactory.decodeFile(outputFile.canonicalPath)
+                val result = runCatching {
+                    takeAPhotoSuspend(outputUri)
+                }
+                if (result.isSuccess) {
+                    if (result.getOrThrow()) {
+                        Toast.makeText(this@MainActivity, "Take photo fail", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val bitmap = withContext(Dispatchers.IO) {
+                            BitmapFactory.decodeFile(outputFile.canonicalPath)
+                        }
+                        viewBinding.displayIv.setImageBitmap(bitmap)
                     }
-                    viewBinding.displayIv.setImageBitmap(bitmap)
+                } else {
+                    Toast.makeText(this@MainActivity, "Take photo error: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
         viewBinding.pickAPictureBt.setOnClickListener {
             launch {
-                val pickedUri = pickImageSuspend()
-                if (pickedUri == null) {
-                    Toast.makeText(this@MainActivity, "Pick image canceled.", Toast.LENGTH_SHORT).show()
-                } else {
-                    val bitmap = withContext(Dispatchers.IO) {
-                        val bytes = contentResolver.openInputStream(pickedUri)?.use { inputStream ->
-                            ByteArrayOutputStream().use { outputStream ->
-                                inputStream.copyTo(outputStream)
-                                outputStream.toByteArray()
+                val result = runCatching { pickImageSuspend() }
+                if (result.isSuccess) {
+                    val pickedUri = result.getOrThrow()
+                    if (pickedUri == null) {
+                        Toast.makeText(this@MainActivity, "Pick image canceled.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val bitmap = withContext(Dispatchers.IO) {
+                            val bytes = contentResolver.openInputStream(pickedUri)?.use { inputStream ->
+                                ByteArrayOutputStream().use { outputStream ->
+                                    inputStream.copyTo(outputStream)
+                                    outputStream.toByteArray()
+                                }
+                            }
+                            if (bytes != null) {
+                                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                            } else {
+                                null
                             }
                         }
-                        if (bytes != null) {
-                            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                        } else {
-                            null
-                        }
+                        viewBinding.displayIv.setImageBitmap(bitmap)
                     }
-                    viewBinding.displayIv.setImageBitmap(bitmap)
+                } else {
+                    Toast.makeText(this@MainActivity, "Pick image error: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
