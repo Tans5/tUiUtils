@@ -9,8 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.tans.tuiutils.demo.databinding.ActivityMainBinding
-import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
-import com.tans.tuiutils.mediastore.queryVideoFromMediaStore
+import com.tans.tuiutils.mediastore.queryImageFromMediaStore
 import com.tans.tuiutils.multimedia.pickImageSuspend
 import com.tans.tuiutils.multimedia.takeAPhotoSuspend
 import com.tans.tuiutils.permission.permissionsRequestSimplifySuspend
@@ -31,21 +30,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by CoroutineScope(Dispa
         super.onCreate(savedInstanceState)
         val viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
-
-        launch {
-            val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                Manifest.permission.READ_MEDIA_VIDEO
-            } else {
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            }
-            val grant = permissionsRequestSimplifySuspend(permission)
-            if (grant) {
-                withContext(Dispatchers.IO) {
-                    val videos = queryVideoFromMediaStore()
-                    println(videos)
-                }
-            }
-        }
 
         viewBinding.transparentSystemBarActBt.setOnClickListener {
             startActivity(Intent(this, TransparentSystemBarActivity::class.java))
