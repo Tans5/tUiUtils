@@ -2,7 +2,7 @@ package com.tans.tuiutils.mediastore
 
 import android.net.Uri
 
-data class MediaStoreAudio(
+data class MediaStoreVideo(
     val id: Long,
     val displayName: String,
     val size: Long,
@@ -13,12 +13,8 @@ data class MediaStoreAudio(
     val dateModified: Long,
 
     val title: String,
-    val albumId: Long,
-    val album: String,
-    val artistId: Long,
-    val artist: String,
+    val width: Int,
+    val height: Int,
     val duration: Long,
-    val bitrate: Int,
-    val track: Int,
-    val isMusic: Boolean
+    val bitrate: Int
 )
