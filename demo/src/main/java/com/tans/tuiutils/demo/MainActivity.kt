@@ -1,18 +1,14 @@
 package com.tans.tuiutils.demo
 
-import android.Manifest
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.tans.tuiutils.demo.databinding.ActivityMainBinding
-import com.tans.tuiutils.mediastore.queryImageFromMediaStore
 import com.tans.tuiutils.multimedia.pickImageSuspend
 import com.tans.tuiutils.multimedia.takeAPhotoSuspend
-import com.tans.tuiutils.permission.permissionsRequestSimplifySuspend
 import com.tans.tuiutils.systembar.annotation.FitSystemWindow
 import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import kotlinx.coroutines.CoroutineScope

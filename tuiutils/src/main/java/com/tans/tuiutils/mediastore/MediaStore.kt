@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.annotation.WorkerThread
@@ -30,6 +31,14 @@ fun Context.copyAndroidUriToLocalFile(inputUri: Uri, outputFile: File) {
             }
         }
     } ?: error("Can't open $inputUri.")
+}
+
+fun Context.insertMediaFilesToMediaStore(filesToMimeType: Map<File, String>) {
+    if (filesToMimeType.isEmpty()) {
+        return
+    }
+    val keyValues = filesToMimeType.entries.toList()
+    MediaScannerConnection.scanFile(this, keyValues.map { it.key.canonicalPath }.toTypedArray(), keyValues.map { it.value }.toTypedArray(), null)
 }
 
 /**
