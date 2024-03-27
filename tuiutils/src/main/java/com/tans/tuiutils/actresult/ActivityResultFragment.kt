@@ -3,7 +3,6 @@ package com.tans.tuiutils.actresult
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import com.tans.tuiutils.multimedia.PickVisualMediaFragment
 import com.tans.tuiutils.tUiUtilsLog
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
