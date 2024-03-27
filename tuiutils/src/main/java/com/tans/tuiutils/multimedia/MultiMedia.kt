@@ -2,6 +2,7 @@ package com.tans.tuiutils.multimedia
 
 import android.net.Uri
 import androidx.annotation.MainThread
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.tans.tuiutils.assertMainThread
 
@@ -25,13 +26,34 @@ fun FragmentActivity.pickVisualMedia(mimeType: String, error: (msg: String) -> U
 }
 
 @MainThread
+fun Fragment.pickVisualMedia(mimeType: String, error: (msg: String) -> Unit, callback: (uri: Uri?) -> Unit) {
+    val act = activity
+    com.tans.tuiutils.assert(act != null) { "Fragment's parent activity is null." }
+    act!!.pickVisualMedia(mimeType, error, callback)
+}
+
+@MainThread
 fun FragmentActivity.pickImage(error: (msg: String) -> Unit, callback: (uri: Uri?) -> Unit) {
     pickVisualMedia(mimeType = "image/*", error = error, callback = callback)
 }
 
 @MainThread
+fun Fragment.pickImage(error: (msg: String) -> Unit, callback: (uri: Uri?) -> Unit) {
+    val act = activity
+    com.tans.tuiutils.assert(act != null) { "Fragment's parent activity is null." }
+    act!!.pickImage(error, callback)
+}
+
+@MainThread
 fun FragmentActivity.pickVideo(error: (msg: String) -> Unit, callback: (uri: Uri?) -> Unit) {
     pickVisualMedia(mimeType = "video/*", error = error, callback = callback)
+}
+
+@MainThread
+fun Fragment.pickVideo(error: (msg: String) -> Unit, callback: (uri: Uri?) -> Unit) {
+    val act = activity
+    com.tans.tuiutils.assert(act != null) { "Fragment's parent activity is null." }
+    act!!.pickVideo(error, callback)
 }
 
 
@@ -55,4 +77,11 @@ fun FragmentActivity.takeAPhoto(outputFileUri: Uri, error: (msg: String) -> Unit
     )
     tc.add(fragment, "TakeAPhotoFragment#${System.currentTimeMillis()}")
     tc.commitAllowingStateLoss()
+}
+
+@MainThread
+fun Fragment.takeAPhoto(outputFileUri: Uri, error: (msg: String) -> Unit, callback: (success: Boolean) -> Unit) {
+    val act = activity
+    com.tans.tuiutils.assert(act != null) { "Fragment's parent activity is null." }
+    act!!.takeAPhoto(outputFileUri, error, callback)
 }
