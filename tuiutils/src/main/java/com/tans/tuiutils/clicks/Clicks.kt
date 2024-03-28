@@ -35,22 +35,30 @@ fun <T> Flow<T>.timeInterval(): Flow<TimeInterval<T>> = flow<TimeInterval<T>> {
     }
 }
 
+data class ClickTask(
+    val clickJob: Job,
+    val clickChannel: Channel<Unit>
+)
+
 fun View.clicks(
     coroutineScope: CoroutineScope,
     minInterval: Long = 300,
     clickWorkOn: CoroutineContext = EmptyCoroutineContext,
     click: suspend () -> Unit
 ) {
-    val lastJob = this.getTag(R.id.tui_clicks_job_id)
-    if (lastJob != null && lastJob is Job) {
-        tUiUtilsLog.d(tag = TAG, msg = "Find last click job and cancel it.")
-        lastJob.cancel("Cancel from new clicks.")
+    val lastClickTask = this.getTag(R.id.tui_clicks_job_id)
+    if (lastClickTask != null && lastClickTask is ClickTask) {
+        tUiUtilsLog.d(tag = TAG, msg = "Find last click task and cancel it.")
+        lastClickTask.clickChannel.cancel()
+        if (lastClickTask.clickJob.isActive) {
+            lastClickTask.clickJob.cancel("Cancel from new clicks.")
+        }
         this.setTag(R.id.tui_clicks_job_id, null)
     }
+    val channel = Channel<Unit>(capacity = Channel.RENDEZVOUS, onBufferOverflow = BufferOverflow.DROP_OLDEST) {
+        tUiUtilsLog.w(tag = TAG, msg = "Drop click event.")
+    }
     val job = coroutineScope.launch {
-        val channel = Channel<Unit>(capacity = Channel.RENDEZVOUS, onBufferOverflow = BufferOverflow.DROP_OLDEST) {
-            tUiUtilsLog.w(tag = TAG, msg = "Drop click event.")
-        }
         setOnClickListener {
            channel.trySend(Unit)
         }
@@ -77,10 +85,10 @@ fun View.clicks(
                         }
                     }
                 }
+            tUiUtilsLog.d(tag = TAG, msg = "Click job finished.")
         } catch (e: Throwable) {
             tUiUtilsLog.d(tag = TAG, msg = "Click job finished: ${e.message}")
         }
-        channel.cancel()
     }
-    this.setTag(R.id.tui_clicks_job_id, job)
+    this.setTag(R.id.tui_clicks_job_id, ClickTask(clickJob = job, clickChannel = channel))
 }
