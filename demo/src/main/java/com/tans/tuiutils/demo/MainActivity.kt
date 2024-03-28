@@ -15,6 +15,7 @@ import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File

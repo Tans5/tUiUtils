@@ -10,11 +10,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 private const val TAG = "tUiUtilsClicks"
 
@@ -37,6 +38,7 @@ fun <T> Flow<T>.timeInterval(): Flow<TimeInterval<T>> = flow<TimeInterval<T>> {
 fun View.clicks(
     coroutineScope: CoroutineScope,
     minInterval: Long = 300,
+    clickWorkOn: CoroutineContext = EmptyCoroutineContext,
     click: suspend () -> Unit
 ) {
     val lastJob = this.getTag(R.id.tui_clicks_job_id)
@@ -46,27 +48,34 @@ fun View.clicks(
         this.setTag(R.id.tui_clicks_job_id, null)
     }
     val job = coroutineScope.launch {
-        val channel = Channel<Unit>(capacity = Channel.CONFLATED)
+        val channel = Channel<Unit>(capacity = Channel.RENDEZVOUS, onBufferOverflow = BufferOverflow.DROP_OLDEST) {
+            tUiUtilsLog.w(tag = TAG, msg = "Drop click event.")
+        }
         setOnClickListener {
-            val sendResult = channel.trySend(Unit)
-            tUiUtilsLog.d(tag = TAG, msg = "Click send result: $sendResult")
+           channel.trySend(Unit)
         }
         val clickFlow = flow {
            this.emitAll(channel)
         }
         try {
+            var lastClickJob: Job? = null
             clickFlow
-                .conflate() // if collect is busy, drop oldest element
                 .timeInterval()
                 .filter {
                     val isOk = it.interval >= minInterval
-                    if (isOk) {
+                    if (!isOk) {
                         tUiUtilsLog.w(tag = TAG, msg = "Skip click, interval is ${it.interval}ms, min interval is ${minInterval}ms")
                     }
                     isOk
                 }
                 .collect {
-                    click()
+                    if (lastClickJob?.isCompleted == false) {
+                        tUiUtilsLog.w(tag = TAG, msg = "Last click don't completed, skip current job.")
+                    } else {
+                        lastClickJob = launch(clickWorkOn) {
+                            click()
+                        }
+                    }
                 }
         } catch (e: Throwable) {
             tUiUtilsLog.d(tag = TAG, msg = "Click job finished: ${e.message}")
