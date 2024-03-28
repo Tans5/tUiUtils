@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import com.tans.tuiutils.clicks.clicks
 import com.tans.tuiutils.demo.databinding.ActivityMainBinding
 import com.tans.tuiutils.multimedia.pickImageSuspend
 import com.tans.tuiutils.multimedia.takeAPhotoSuspend
@@ -14,7 +15,6 @@ import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -27,84 +27,80 @@ class MainActivity : AppCompatActivity(), CoroutineScope by CoroutineScope(Dispa
         val viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
-        viewBinding.transparentSystemBarActBt.setOnClickListener {
+        viewBinding.transparentSystemBarActBt.clicks(this) {
             startActivity(Intent(this, TransparentSystemBarActivity::class.java))
         }
 
-        viewBinding.fitSystemWindowActBt.setOnClickListener {
+        viewBinding.fitSystemWindowActBt.clicks(this) {
             startActivity(Intent(this, FitSystemWindowActivity::class.java))
         }
 
-        viewBinding.fullScreenActBt.setOnClickListener {
+        viewBinding.fullScreenActBt.clicks(this) {
             startActivity(Intent(this, FullScreenActivity::class.java))
         }
 
-        viewBinding.centerDialogBt.setOnClickListener {
+        viewBinding.centerDialogBt.clicks(this) {
             CenterDialog().show(supportFragmentManager, "CenterDialog${System.currentTimeMillis()}")
         }
 
-        viewBinding.bottomDialogBt.setOnClickListener {
+        viewBinding.bottomDialogBt.clicks(this) {
             BottomDialog().show(supportFragmentManager, "BottomDialog${System.currentTimeMillis()}")
         }
 
-        viewBinding.takeAPhotoBt.setOnClickListener {
-            launch {
-                val (outputUri, outputFile) = withContext(Dispatchers.IO) {
-                    val parentDir = File(filesDir, "take_photos")
-                    if (!parentDir.exists()) {
-                        parentDir.mkdirs()
-                    }
-                    val photoFile = File(parentDir, "${System.currentTimeMillis()}")
-                    if (!photoFile.exists()) {
-                        photoFile.createNewFile()
-                    }
-                    FileProvider.getUriForFile(this@MainActivity, "${packageName}.provider", photoFile) to photoFile
+        viewBinding.takeAPhotoBt.clicks(this) {
+            val (outputUri, outputFile) = withContext(Dispatchers.IO) {
+                val parentDir = File(filesDir, "take_photos")
+                if (!parentDir.exists()) {
+                    parentDir.mkdirs()
                 }
-                val result = runCatching {
-                    takeAPhotoSuspend(outputUri)
+                val photoFile = File(parentDir, "${System.currentTimeMillis()}")
+                if (!photoFile.exists()) {
+                    photoFile.createNewFile()
                 }
-                if (result.isSuccess) {
-                    if (result.getOrThrow()) {
-                        val bitmap = withContext(Dispatchers.IO) {
-                            BitmapFactory.decodeFile(outputFile.canonicalPath)
-                        }
-                        viewBinding.displayIv.setImageBitmap(bitmap)
-                    } else {
-                        outputFile.delete()
-                        Toast.makeText(this@MainActivity, "Take photo cancel", Toast.LENGTH_SHORT).show()
+                FileProvider.getUriForFile(this@MainActivity, "${packageName}.provider", photoFile) to photoFile
+            }
+            val result = runCatching {
+                takeAPhotoSuspend(outputUri)
+            }
+            if (result.isSuccess) {
+                if (result.getOrThrow()) {
+                    val bitmap = withContext(Dispatchers.IO) {
+                        BitmapFactory.decodeFile(outputFile.canonicalPath)
                     }
+                    viewBinding.displayIv.setImageBitmap(bitmap)
                 } else {
-                    Toast.makeText(this@MainActivity, "Take photo error: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
+                    outputFile.delete()
+                    Toast.makeText(this@MainActivity, "Take photo cancel", Toast.LENGTH_SHORT).show()
                 }
+            } else {
+                Toast.makeText(this@MainActivity, "Take photo error: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
             }
         }
 
-        viewBinding.pickAPictureBt.setOnClickListener {
-            launch {
-                val result = runCatching { pickImageSuspend() }
-                if (result.isSuccess) {
-                    val pickedUri = result.getOrThrow()
-                    if (pickedUri == null) {
-                        Toast.makeText(this@MainActivity, "Pick image canceled.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        val bitmap = withContext(Dispatchers.IO) {
-                            val bytes = contentResolver.openInputStream(pickedUri)?.use { inputStream ->
-                                ByteArrayOutputStream().use { outputStream ->
-                                    inputStream.copyTo(outputStream)
-                                    outputStream.toByteArray()
-                                }
-                            }
-                            if (bytes != null) {
-                                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                            } else {
-                                null
+        viewBinding.pickAPictureBt.clicks(this) {
+            val result = runCatching { pickImageSuspend() }
+            if (result.isSuccess) {
+                val pickedUri = result.getOrThrow()
+                if (pickedUri == null) {
+                    Toast.makeText(this@MainActivity, "Pick image canceled.", Toast.LENGTH_SHORT).show()
+                } else {
+                    val bitmap = withContext(Dispatchers.IO) {
+                        val bytes = contentResolver.openInputStream(pickedUri)?.use { inputStream ->
+                            ByteArrayOutputStream().use { outputStream ->
+                                inputStream.copyTo(outputStream)
+                                outputStream.toByteArray()
                             }
                         }
-                        viewBinding.displayIv.setImageBitmap(bitmap)
+                        if (bytes != null) {
+                            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                        } else {
+                            null
+                        }
                     }
-                } else {
-                    Toast.makeText(this@MainActivity, "Pick image error: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
+                    viewBinding.displayIv.setImageBitmap(bitmap)
                 }
+            } else {
+                Toast.makeText(this@MainActivity, "Pick image error: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
