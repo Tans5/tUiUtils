@@ -13,8 +13,8 @@ class CenterDialog : BaseDialogFragment() {
         return LayoutInflater.from(context).inflate(R.layout.dialog_center, parent, false)
     }
 
-    override fun onDialogCreated(view: View) {
-        super.onDialogCreated(view)
+    override fun onBindContentView(view: View) {
+        super.onBindContentView(view)
         val viewBinding = DialogCenterBinding.bind(view)
         // Do some logic.
     }

@@ -85,9 +85,9 @@ fun View.clicks(
                         }
                     }
                 }
-            tUiUtilsLog.d(tag = TAG, msg = "Click job finished.")
+            // tUiUtilsLog.d(tag = TAG, msg = "Click job finished.")
         } catch (e: Throwable) {
-            tUiUtilsLog.d(tag = TAG, msg = "Click job finished: ${e.message}")
+            // tUiUtilsLog.d(tag = TAG, msg = "Click job finished: ${e.message}")
         }
     }
     this.setTag(R.id.tui_clicks_job_id, ClickTask(clickJob = job, clickChannel = channel))

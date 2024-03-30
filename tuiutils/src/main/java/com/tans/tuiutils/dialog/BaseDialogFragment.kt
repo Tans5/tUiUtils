@@ -113,7 +113,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
         val layoutInflater =  super.onGetLayoutInflater(savedInstanceState)
         if (dialog != null && isDialogCreatedInvoked.compareAndSet(false , true)) {
             contentView?.let {
-                onDialogCreated(it)
+                onBindContentView(it)
             }
         }
         return layoutInflater
@@ -123,7 +123,10 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
         dismissAllowingStateLoss()
     }
 
-    open fun onDialogCreated(view: View) {
+    /**
+     * Do UI update.
+     */
+    open fun onBindContentView(view: View) {
 
     }
 

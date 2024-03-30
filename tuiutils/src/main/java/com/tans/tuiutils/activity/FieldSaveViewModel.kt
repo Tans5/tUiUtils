@@ -4,7 +4,7 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
 import com.tans.tuiutils.tUiUtilsLog
 
-internal class LazyMemberViewModel : ViewModel() {
+internal class FieldSaveViewModel : ViewModel() {
 
     private val lazyMembers: HashMap<String, Lazy<*>> by lazy {
         HashMap()
@@ -16,7 +16,7 @@ internal class LazyMemberViewModel : ViewModel() {
 
     @Suppress("UNCHECKED_CAST")
     @Synchronized
-    fun <T> registerLazyMember(key: String, initializer: () -> T): Lazy<T> {
+    fun <T> registerLazyField(key: String, initializer: () -> T): Lazy<T> {
         if (isCleared) {
             error("Can't register lazy member, ViewModel was cleared")
         }
@@ -29,18 +29,6 @@ internal class LazyMemberViewModel : ViewModel() {
             val new = lazy(initializer)
             lazyMembers[key] = new
             new
-        }
-    }
-
-    @Synchronized
-    fun syncWaitingLazyMembers(waitingSyncMembers: Map<String, Lazy<*>>) {
-        for ((k, v) in waitingSyncMembers) {
-            if (lazyMembers.containsKey(k)) {
-                tUiUtilsLog.w(TAG, "Skip register new lazy member: $k")
-            } else {
-                lazyMembers[k] = v
-                tUiUtilsLog.d(TAG, "Register new lazy member: $k")
-            }
         }
     }
 

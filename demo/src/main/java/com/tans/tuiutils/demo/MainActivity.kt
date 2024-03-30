@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.FileProvider
-import com.tans.tuiutils.activity.BaseLazyMemberViewModelActivity
+import com.tans.tuiutils.activity.BaseViewModelFieldActivity
 import com.tans.tuiutils.clicks.clicks
 import com.tans.tuiutils.demo.databinding.ActivityMainBinding
 import com.tans.tuiutils.multimedia.pickImageSuspend
@@ -22,7 +22,7 @@ import java.io.File
 
 @SystemBarStyle
 @FitSystemWindow
-class MainActivity : BaseLazyMemberViewModelActivity(), CoroutineScope by CoroutineScope(Dispatchers.Main) {
+class MainActivity : BaseViewModelFieldActivity(), CoroutineScope by CoroutineScope(Dispatchers.Main) {
 
     override val layoutId: Int = R.layout.activity_main
 
