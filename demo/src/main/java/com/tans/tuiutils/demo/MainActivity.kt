@@ -2,10 +2,11 @@ package com.tans.tuiutils.demo
 
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.os.Bundle
+import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.FileProvider
+import com.tans.tuiutils.activity.BaseLazyMemberViewModelActivity
 import com.tans.tuiutils.clicks.clicks
 import com.tans.tuiutils.demo.databinding.ActivityMainBinding
 import com.tans.tuiutils.multimedia.pickImageSuspend
@@ -15,19 +16,28 @@ import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
 
 @SystemBarStyle
 @FitSystemWindow
-class MainActivity : AppCompatActivity(), CoroutineScope by CoroutineScope(Dispatchers.Main) {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val viewBinding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(viewBinding.root)
+class MainActivity : BaseLazyMemberViewModelActivity(), CoroutineScope by CoroutineScope(Dispatchers.Main) {
 
+    override val layoutId: Int = R.layout.activity_main
+
+    override fun firstLaunchInitData() {
+        println("firstLaunchInitData()")
+    }
+
+
+    override fun bindContentView(contentView: View) {
+        onBackPressedDispatcher.addCallback(onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish()
+            }
+        })
+        val viewBinding = ActivityMainBinding.bind(contentView)
         viewBinding.transparentSystemBarActBt.clicks(this) {
             startActivity(Intent(this, TransparentSystemBarActivity::class.java))
         }
@@ -109,5 +119,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope by CoroutineScope(Dispa
     override fun onDestroy() {
         super.onDestroy()
         cancel("Activity closed.")
+        println("onDestroy()")
+    }
+
+    override fun onViewModelCleared() {
+        super.onViewModelCleared()
+        println("onViewModelCleared()")
     }
 }
