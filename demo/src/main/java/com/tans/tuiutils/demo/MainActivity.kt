@@ -4,11 +4,11 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.view.View
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.core.content.FileProvider
 import com.tans.tuiutils.activity.BaseCoroutineStateActivity
 import com.tans.tuiutils.clicks.clicks
 import com.tans.tuiutils.demo.databinding.ActivityMainBinding
+import com.tans.tuiutils.demo.myfragment.MyFragmentActivity
 import com.tans.tuiutils.multimedia.pickImageSuspend
 import com.tans.tuiutils.multimedia.takeAPhotoSuspend
 import com.tans.tuiutils.systembar.annotation.FitSystemWindow
@@ -105,6 +105,10 @@ class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
             } else {
                 Toast.makeText(this@MainActivity, "Pick image error: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        viewBinding.fragmentActBt.clicks(this) {
+            startActivity(Intent(this@MainActivity, MyFragmentActivity::class.java))
         }
     }
 }

@@ -1,0 +1,70 @@
+package com.tans.tuiutils.demo.myfragment
+
+import android.view.View
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import com.tans.tuiutils.activity.BaseCoroutineStateActivity
+import com.tans.tuiutils.clicks.clicks
+import com.tans.tuiutils.demo.R
+import com.tans.tuiutils.demo.databinding.ActivityMyFragmentBinding
+import com.tans.tuiutils.systembar.annotation.FitSystemWindow
+import com.tans.tuiutils.systembar.annotation.SystemBarStyle
+import kotlinx.coroutines.CoroutineScope
+
+@SystemBarStyle
+@FitSystemWindow
+class MyFragmentActivity : BaseCoroutineStateActivity<MyFragmentActivity.Companion.State>(State()) {
+
+    override val layoutId: Int = R.layout.activity_my_fragment
+
+    private val myFragments: Map<FragmentType, Fragment> by lazyViewModelField("myFragments") {
+        mapOf(FragmentType.A to MyFragmentA(), FragmentType.B to MyFragmentB())
+    }
+
+    override fun CoroutineScope.firstLaunchInitDataCoroutine() {
+
+    }
+
+    override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
+        val viewBinding = ActivityMyFragmentBinding.bind(contentView)
+
+        renderStateNewCoroutine({ it.selectedFragment }) { selectedType ->
+            val fm = this@MyFragmentActivity.supportFragmentManager
+            val tc = fm.beginTransaction()
+            for ((t, f) in myFragments) {
+                if (fm.findFragmentByTag(t.name) == null) {
+                    tc.add(R.id.fragment_container, f, t.name)
+                }
+            }
+
+            for ((t, f) in myFragments) {
+                if (t == selectedType) {
+                    tc.setMaxLifecycle(f, Lifecycle.State.RESUMED)
+                        .show(f)
+                } else {
+                    tc.setMaxLifecycle(f, Lifecycle.State.CREATED)
+                        .hide(f)
+                }
+            }
+            tc.commitAllowingStateLoss()
+        }
+
+        viewBinding.showFragmentABt.clicks(this) {
+            updateState { it.copy(selectedFragment = FragmentType.A) }
+        }
+
+        viewBinding.showFragmentBBt.clicks(this) {
+            updateState { it.copy(selectedFragment = FragmentType.B) }
+        }
+    }
+
+    companion object {
+        enum class FragmentType {
+            A, B
+        }
+
+        data class State(
+            val selectedFragment: FragmentType = FragmentType.A
+        )
+    }
+}

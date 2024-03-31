@@ -34,7 +34,7 @@ interface CoroutineState<State : Any> {
         stateFlow
             .map(m)
             .distinctUntilChanged()
-            .flowOn(Dispatchers.Main)
+            .flowOn(Dispatchers.Main.immediate)
             .collect {
                 render(it)
             }

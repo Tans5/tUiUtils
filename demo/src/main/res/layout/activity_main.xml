@@ -67,6 +67,13 @@
             android:layout_margin="2dp"
             android:text="Pick A Picture"/>
 
+        <Button
+            android:id="@+id/fragment_act_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:text="Fragment Activity"/>
+
     </com.google.android.flexbox.FlexboxLayout>
 
     <ImageView
