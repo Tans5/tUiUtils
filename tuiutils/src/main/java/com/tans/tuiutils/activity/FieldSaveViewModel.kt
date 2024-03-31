@@ -3,38 +3,39 @@ package com.tans.tuiutils.activity
 import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
 import com.tans.tuiutils.tUiUtilsLog
+import java.util.concurrent.ConcurrentHashMap
 
 internal class FieldSaveViewModel : ViewModel() {
 
-    private val lazyMembers: HashMap<String, Lazy<*>> by lazy {
-        HashMap()
-    }
 
-    private var isCleared: Boolean = false
+    private val savedFields: ConcurrentHashMap<String, Any> by lazy {
+        ConcurrentHashMap()
+    }
 
     private var clearObserver: ViewModelClearObserver? = null
 
-    @Suppress("UNCHECKED_CAST")
-    @Synchronized
-    fun <T> registerLazyField(key: String, initializer: () -> T): Lazy<T> {
-        if (isCleared) {
-            error("Can't register lazy member, ViewModel was cleared")
-        }
-        val last = lazyMembers[key]
-        return if (last != null) {
-            tUiUtilsLog.w(TAG, "Skip register new lazy member: $key")
-            last as Lazy<T>
-        } else {
-            tUiUtilsLog.d(TAG, "Register new lazy member: $key")
-            val new = lazy(initializer)
-            lazyMembers[key] = new
-            new
-        }
-    }
 
     @MainThread
     fun setViewModelClearObserver(o: ViewModelClearObserver?) {
         clearObserver = o
+    }
+
+    fun containField(key: String): Boolean = savedFields.containsKey(key)
+
+    fun getField(key: String): Any? = savedFields[key]
+
+    fun saveField(key: String, field: Any): Boolean {
+        synchronized(savedFields) {
+            val lastValue = savedFields[key]
+            if (lastValue != null) {
+                tUiUtilsLog.w(TAG, "Skip save new field: $key")
+                return false
+            } else {
+                savedFields[key] = field
+                tUiUtilsLog.d(TAG, "Save new field: $key")
+                return true
+            }
+        }
     }
 
     override fun onCleared() {
