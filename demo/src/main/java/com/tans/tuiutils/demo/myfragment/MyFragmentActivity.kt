@@ -31,19 +31,20 @@ class MyFragmentActivity : BaseCoroutineStateActivity<MyFragmentActivity.Compani
         renderStateNewCoroutine({ it.selectedFragment }) { selectedType ->
             val fm = this@MyFragmentActivity.supportFragmentManager
             val tc = fm.beginTransaction()
-            for ((t, f) in myFragments) {
-                if (fm.findFragmentByTag(t.name) == null) {
-                    tc.add(R.id.fragment_container, f, t.name)
-                }
-            }
 
             for ((t, f) in myFragments) {
+                val findResult = fm.findFragmentByTag(t.name)
                 if (t == selectedType) {
+                    if (findResult == null) {
+                        tc.add(R.id.fragment_container, f, t.name)
+                    }
                     tc.setMaxLifecycle(f, Lifecycle.State.RESUMED)
                         .show(f)
                 } else {
-                    tc.setMaxLifecycle(f, Lifecycle.State.CREATED)
-                        .hide(f)
+                    if (findResult != null) {
+                        tc.setMaxLifecycle(f, Lifecycle.State.CREATED)
+                            .hide(f)
+                    }
                 }
             }
             tc.commitAllowingStateLoss()
