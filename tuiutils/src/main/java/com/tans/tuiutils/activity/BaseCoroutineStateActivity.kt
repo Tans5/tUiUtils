@@ -46,10 +46,10 @@ abstract class BaseCoroutineStateActivity<State : Any>(defaultState: State) :
         CoroutineScope(Dispatchers.IO + dataCoroutineExceptionHandler)
     }
 
-    abstract fun CoroutineScope.firstLaunchInitData()
+    abstract fun CoroutineScope.firstLaunchInitDataCoroutine()
 
     final override fun firstLaunchInitData() {
-        dataCoroutineScope.firstLaunchInitData()
+        dataCoroutineScope.firstLaunchInitDataCoroutine()
     }
 
     abstract fun CoroutineScope.bindContentViewCoroutine(contentView: View)
