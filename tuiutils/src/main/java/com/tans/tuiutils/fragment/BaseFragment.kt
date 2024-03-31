@@ -19,6 +19,17 @@ abstract class BaseFragment : Fragment() {
         retainInstance = true
         if (savedInstanceState == null) {
             firstLaunchInitData()
+        } else {
+            val needRemoveFragments = parentFragmentManager.fragments.filter { it.tag == tag }
+            if (needRemoveFragments.isNotEmpty()) {
+                parentFragmentManager.beginTransaction().apply {
+                    for (f in needRemoveFragments) {
+                        remove(f)
+                    }
+                    commitAllowingStateLoss()
+                }
+                tUiUtilsLog.d(BASE_FRAGMENT_TAG, "Remove restore fragments: $needRemoveFragments")
+            }
         }
     }
 
