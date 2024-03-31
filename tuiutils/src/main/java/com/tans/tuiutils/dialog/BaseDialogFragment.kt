@@ -101,7 +101,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
             setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
             setWindowAnimations(defaultDialogAnima)
         }
-
+        firstLaunchInitData()
         return dialog
     }
 
@@ -121,6 +121,13 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
 
     override fun dismiss() {
         dismissAllowingStateLoss()
+    }
+
+    /**
+     * Do data load
+     */
+    open fun firstLaunchInitData() {
+
     }
 
     /**
