@@ -88,7 +88,6 @@ abstract class BaseViewModelFieldActivity : AppCompatActivity(), FieldSaveViewMo
             return application != null && this@BaseViewModelFieldActivity.fieldSaveViewModel.containField(key)
         }
 
-
     }
 
     override fun onDestroy() {
