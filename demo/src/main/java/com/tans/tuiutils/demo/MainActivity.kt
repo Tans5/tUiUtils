@@ -1,16 +1,20 @@
 package com.tans.tuiutils.demo
 
+import android.Manifest
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.view.View
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.tans.tuiutils.activity.BaseCoroutineStateActivity
 import com.tans.tuiutils.clicks.clicks
 import com.tans.tuiutils.demo.databinding.ActivityMainBinding
+import com.tans.tuiutils.demo.mediastore.MediaStoreActivity
 import com.tans.tuiutils.demo.myfragment.MyFragmentActivity
 import com.tans.tuiutils.multimedia.pickImageSuspend
 import com.tans.tuiutils.multimedia.takeAPhotoSuspend
+import com.tans.tuiutils.permission.permissionsRequestSuspend
 import com.tans.tuiutils.systembar.annotation.FitSystemWindow
 import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import kotlinx.coroutines.CoroutineScope
@@ -109,6 +113,26 @@ class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
 
         viewBinding.fragmentActBt.clicks(this) {
             startActivity(Intent(this@MainActivity, MyFragmentActivity::class.java))
+        }
+
+        viewBinding.mediaStoreActBt.clicks(this) {
+            val mediaStorePermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(Manifest.permission.READ_MEDIA_AUDIO,
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO)
+            } else {
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            val permissionResult = runCatching { permissionsRequestSuspend(*mediaStorePermissions) }
+            if (permissionResult.isSuccess) {
+                val (granted, denied) = permissionResult.getOrThrow()
+                if (granted.isNotEmpty()) {
+                    startActivity(Intent(this@MainActivity, MediaStoreActivity::class.java))
+                } else {
+                    Toast.makeText(this@MainActivity, "No MediaStore read permission.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
         }
     }
 }

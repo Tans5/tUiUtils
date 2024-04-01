@@ -41,6 +41,7 @@
         <activity android:name=".FitSystemWindowActivity" />
         <activity android:name=".FullScreenActivity" />
         <activity android:name=".myfragment.MyFragmentActivity" />
+        <activity android:name=".mediastore.MediaStoreActivity" />
     </application>
 
 </manifest>

@@ -23,56 +23,63 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="Full Screen Act"/>
+            android:text="FullScreenAct"/>
 
         <Button
             android:id="@+id/transparent_system_bar_act_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="Transparent System Bar Act"/>
+            android:text="TransparentSystemBarAct"/>
 
         <Button
             android:id="@+id/fit_system_window_act_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="Fit System Window Act"/>
+            android:text="FitSystemWindowAct"/>
 
         <Button
             android:id="@+id/center_dialog_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="Center Dialog"/>
+            android:text="CenterDialog"/>
 
         <Button
             android:id="@+id/bottom_dialog_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="Bottom Dialog"/>
+            android:text="BottomDialog"/>
 
         <Button
             android:id="@+id/take_a_photo_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="Take A Photo"/>
+            android:text="TakeAPhoto"/>
 
         <Button
             android:id="@+id/pick_a_picture_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="Pick A Picture"/>
+            android:text="PickAPicture"/>
 
         <Button
             android:id="@+id/fragment_act_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="Fragment Activity"/>
+            android:text="FragmentActivity"/>
+
+        <Button
+            android:id="@+id/media_store_act_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:text="MediaStoreActivity"/>
 
     </com.google.android.flexbox.FlexboxLayout>
 
