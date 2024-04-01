@@ -1,5 +1,6 @@
 package com.tans.tuiutils.demo.myfragment
 
+import android.os.Bundle
 import android.view.View
 import com.tans.tuiutils.demo.R
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
@@ -8,6 +9,11 @@ import kotlinx.coroutines.CoroutineScope
 class MyFragmentB : BaseCoroutineStateFragment<Unit>(Unit) {
 
     override val layoutId: Int = R.layout.fragment_my_fragment_b
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        println("${this@MyFragmentB::class.java.simpleName} onCreate(): $savedInstanceState")
+    }
 
     override fun CoroutineScope.firstLaunchInitDataCoroutine() {
         println("${this@MyFragmentB::class.java.simpleName}: firstLaunchInitDataCoroutine()")
@@ -32,4 +38,8 @@ class MyFragmentB : BaseCoroutineStateFragment<Unit>(Unit) {
         println("${this::class.java.simpleName}: onDestroy()")
     }
 
+    override fun onViewModelCleared() {
+        super.onViewModelCleared()
+        println("${this::class.java.simpleName} onViewModelCleared()")
+    }
 }

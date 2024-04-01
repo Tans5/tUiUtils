@@ -6,12 +6,10 @@ import com.tans.tuiutils.state.Rx3State
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.Subject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
 
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseRx3StateActivity<State : Any>(defaultState: State) :
-    BaseViewModelFieldActivity(), Rx3State<State> {
+    BaseActivity(), Rx3State<State> {
 
 
     override val stateSubject: Subject<State> by lazyViewModelField("stateSubject") {

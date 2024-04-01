@@ -10,7 +10,7 @@ abstract class BaseRx3StateFragment<State : Any>(defaultState: State) : BaseFrag
     protected var uiRxLife: Rx3Life? = null
         private set
 
-    protected val dataRxLife: Rx3Life by lazy {
+    protected val dataRxLife: Rx3Life by lazyViewModelField("dataRxLife") {
         Rx3Life()
     }
 
@@ -32,6 +32,9 @@ abstract class BaseRx3StateFragment<State : Any>(defaultState: State) : BaseFrag
     override fun onDestroy() {
         super.onDestroy()
         uiRxLife?.lifeCompositeDisposable?.clear()
+    }
+
+    override fun onViewModelCleared() {
         dataRxLife.lifeCompositeDisposable.clear()
     }
 }

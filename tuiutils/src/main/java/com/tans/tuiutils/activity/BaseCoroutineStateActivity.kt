@@ -12,7 +12,7 @@ import kotlin.coroutines.CoroutineContext
 
 @Suppress("MemberVisibilityCanBePrivate")
 abstract class BaseCoroutineStateActivity<State : Any>(defaultState: State) :
-    BaseViewModelFieldActivity(), CoroutineState<State> {
+    BaseActivity(), CoroutineState<State> {
 
     override val stateFlow: MutableStateFlow<State> by lazyViewModelField("stateFlow") {
         MutableStateFlow(defaultState)

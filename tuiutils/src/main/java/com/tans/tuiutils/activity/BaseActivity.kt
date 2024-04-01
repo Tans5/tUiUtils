@@ -11,10 +11,10 @@ import androidx.lifecycle.get
 /**
  * Support bind field to [androidx.lifecycle.ViewModel] lifecycle，When Activity configure change don't be recycled.
  */
-abstract class BaseViewModelFieldActivity : AppCompatActivity(), FieldSaveViewModel.Companion.ViewModelClearObserver {
+abstract class BaseActivity : AppCompatActivity(), BaseActivityViewModel.Companion.ViewModelClearObserver {
 
-    private val fieldSaveViewModel : FieldSaveViewModel by lazy {
-        ViewModelProvider(this).get<FieldSaveViewModel>()
+    private val baseActivityViewModel : BaseActivityViewModel by lazy {
+        ViewModelProvider(this).get<BaseActivityViewModel>()
     }
 
     @get:LayoutRes
@@ -22,7 +22,7 @@ abstract class BaseViewModelFieldActivity : AppCompatActivity(), FieldSaveViewMo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        fieldSaveViewModel.setViewModelClearObserver(this)
+        baseActivityViewModel.setViewModelClearObserver(this)
         if (savedInstanceState == null) {
             firstLaunchInitData()
         }
@@ -61,7 +61,7 @@ abstract class BaseViewModelFieldActivity : AppCompatActivity(), FieldSaveViewMo
                 if (application == null) {
                     error("Can't init view model lazy field, because activity is not attachted.")
                 }
-                val vm = this@BaseViewModelFieldActivity.fieldSaveViewModel
+                val vm = this@BaseActivity.baseActivityViewModel
                 val result: T?
                 while (true) {
                     val cacheField = vm.getField(key)
@@ -85,14 +85,14 @@ abstract class BaseViewModelFieldActivity : AppCompatActivity(), FieldSaveViewMo
             }
 
         override fun isInitialized(): Boolean {
-            return application != null && this@BaseViewModelFieldActivity.fieldSaveViewModel.containField(key)
+            return application != null && this@BaseActivity.baseActivityViewModel.containField(key)
         }
 
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        fieldSaveViewModel.setViewModelClearObserver(null)
+        baseActivityViewModel.setViewModelClearObserver(null)
     }
 
 }

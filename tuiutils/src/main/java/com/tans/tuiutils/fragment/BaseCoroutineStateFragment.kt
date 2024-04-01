@@ -13,7 +13,7 @@ import kotlin.coroutines.CoroutineContext
 abstract class BaseCoroutineStateFragment<State : Any>(defaultState: State) : BaseFragment(),
     CoroutineState<State> by CoroutineState(defaultState) {
 
-    private val uiCoroutineExceptionHandler: CoroutineExceptionHandler by lazy {
+    private val uiCoroutineExceptionHandler: CoroutineExceptionHandler by lazyViewModelField("uiCoroutineExceptionHandler") {
         object : CoroutineExceptionHandler {
             override val key: CoroutineContext.Key<CoroutineExceptionHandler> = CoroutineExceptionHandler
             override fun handleException(context: CoroutineContext, exception: Throwable) {
@@ -26,7 +26,7 @@ abstract class BaseCoroutineStateFragment<State : Any>(defaultState: State) : Ba
     protected var uiCoroutineScope: CoroutineScope? = null
         private set
 
-    private val dataCoroutineExceptionHandler: CoroutineExceptionHandler by lazy {
+    private val dataCoroutineExceptionHandler: CoroutineExceptionHandler by lazyViewModelField("dataCoroutineExceptionHandler") {
         object : CoroutineExceptionHandler {
             override val key: CoroutineContext.Key<CoroutineExceptionHandler> = CoroutineExceptionHandler
             override fun handleException(context: CoroutineContext, exception: Throwable) {
@@ -36,7 +36,7 @@ abstract class BaseCoroutineStateFragment<State : Any>(defaultState: State) : Ba
         }
     }
 
-    protected val dataCoroutineScope: CoroutineScope by lazy {
+    protected val dataCoroutineScope: CoroutineScope by lazyViewModelField("dataCoroutineScope") {
         CoroutineScope(Dispatchers.IO + dataCoroutineExceptionHandler)
     }
 
@@ -67,7 +67,10 @@ abstract class BaseCoroutineStateFragment<State : Any>(defaultState: State) : Ba
     override fun onDestroy() {
         super.onDestroy()
         uiCoroutineScope?.cancel("Fragment destroyed.")
-        dataCoroutineScope.cancel("Fragment destroyed.")
+    }
+
+    override fun onViewModelCleared() {
+        dataCoroutineScope.cancel("ViewModel cleared.")
     }
 
 }

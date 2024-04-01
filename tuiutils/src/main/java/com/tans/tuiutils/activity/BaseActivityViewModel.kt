@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.tans.tuiutils.tUiUtilsLog
 import java.util.concurrent.ConcurrentHashMap
 
-internal class FieldSaveViewModel : ViewModel() {
+internal class BaseActivityViewModel : ViewModel() {
 
 
     private val savedFields: ConcurrentHashMap<String, Any> by lazy {
@@ -45,7 +45,7 @@ internal class FieldSaveViewModel : ViewModel() {
 
     companion object {
 
-        private const val TAG = "LazyMemberViewModel"
+        private const val TAG = "BaseActivityViewModel"
         interface ViewModelClearObserver {
             fun onViewModelCleared()
         }

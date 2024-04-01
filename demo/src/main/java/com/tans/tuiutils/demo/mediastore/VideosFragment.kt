@@ -1,5 +1,6 @@
 package com.tans.tuiutils.demo.mediastore
 
+import android.os.Bundle
 import android.view.View
 import com.tans.tuiutils.demo.R
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
@@ -8,6 +9,12 @@ import kotlinx.coroutines.CoroutineScope
 class VideosFragment : BaseCoroutineStateFragment<Unit>(Unit) {
 
     override val layoutId: Int = R.layout.fragment_videos
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        println("${this@VideosFragment::class.java.simpleName} onCreate(): $savedInstanceState")
+    }
+
     override fun CoroutineScope.firstLaunchInitDataCoroutine() {
         println("${this@VideosFragment::class.java.simpleName} firstLaunchInitDataCoroutine()")
     }
@@ -29,5 +36,10 @@ class VideosFragment : BaseCoroutineStateFragment<Unit>(Unit) {
     override fun onDestroy() {
         super.onDestroy()
         println("${this@VideosFragment::class.java.simpleName} onDestroy()")
+    }
+
+    override fun onViewModelCleared() {
+        super.onViewModelCleared()
+        println("${this::class.java.simpleName} onViewModelCleared()")
     }
 }
