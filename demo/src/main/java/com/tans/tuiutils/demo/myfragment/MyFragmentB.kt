@@ -37,9 +37,4 @@ class MyFragmentB : BaseCoroutineStateFragment<Unit>(Unit) {
         super.onDestroy()
         println("${this::class.java.simpleName}: onDestroy()")
     }
-
-    override fun onViewModelCleared() {
-        super.onViewModelCleared()
-        println("${this::class.java.simpleName} onViewModelCleared()")
-    }
 }

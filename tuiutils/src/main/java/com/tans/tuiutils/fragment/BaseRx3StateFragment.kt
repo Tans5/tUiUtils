@@ -10,14 +10,16 @@ abstract class BaseRx3StateFragment<State : Any>(defaultState: State) : BaseFrag
     protected var uiRxLife: Rx3Life? = null
         private set
 
-    protected val dataRxLife: Rx3Life by lazyViewModelField("dataRxLife") {
-        Rx3Life()
-    }
+    protected var dataRxLife: Rx3Life? = null
+        private set
 
     abstract fun Rx3Life.firstLaunchInitDataRx()
 
     final override fun firstLaunchInitData() {
-        dataRxLife.firstLaunchInitDataRx()
+        dataRxLife?.lifeCompositeDisposable?.clear()
+        val newDataRxLife = Rx3Life()
+        newDataRxLife.firstLaunchInitDataRx()
+        dataRxLife = newDataRxLife
     }
 
     abstract fun Rx3Life.bindContentViewCoroutine(contentView: View)
@@ -32,9 +34,6 @@ abstract class BaseRx3StateFragment<State : Any>(defaultState: State) : BaseFrag
     override fun onDestroy() {
         super.onDestroy()
         uiRxLife?.lifeCompositeDisposable?.clear()
-    }
-
-    override fun onViewModelCleared() {
-        dataRxLife.lifeCompositeDisposable.clear()
+        dataRxLife?.lifeCompositeDisposable?.clear()
     }
 }

@@ -15,6 +15,8 @@ import android.provider.MediaStore.Video.VideoColumns
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
+import androidx.fragment.app.Fragment
+import com.tans.tuiutils.actresult.startActivityResult
 
 @WorkerThread
 fun Context.copyAndroidUriToLocalFile(inputUri: Uri, outputFile: File) {
@@ -33,12 +35,25 @@ fun Context.copyAndroidUriToLocalFile(inputUri: Uri, outputFile: File) {
     } ?: error("Can't open $inputUri.")
 }
 
+@WorkerThread
+fun Fragment.copyAndroidUriToLocalFile(inputUri: Uri, outputFile: File) {
+    val act = this.activity
+    com.tans.tuiutils.assert(act != null) { "Fragment's parent activity is null." }
+    act!!.copyAndroidUriToLocalFile(inputUri, outputFile)
+}
+
 fun Context.insertMediaFilesToMediaStore(filesToMimeType: Map<File, String>) {
     if (filesToMimeType.isEmpty()) {
         return
     }
     val keyValues = filesToMimeType.entries.toList()
     MediaScannerConnection.scanFile(this, keyValues.map { it.key.canonicalPath }.toTypedArray(), keyValues.map { it.value }.toTypedArray(), null)
+}
+
+fun Fragment.insertMediaFilesToMediaStore(filesToMimeType: Map<File, String>) {
+    val act = this.activity
+    com.tans.tuiutils.assert(act != null) { "Fragment's parent activity is null." }
+    act!!.insertMediaFilesToMediaStore(filesToMimeType)
 }
 
 /**
@@ -130,6 +145,13 @@ fun Context.queryAudioFromMediaStore(): List<MediaStoreAudio> {
     }
 }
 
+@WorkerThread
+fun Fragment.queryAudioFromMediaStore(): List<MediaStoreAudio> {
+    val act = this.activity
+    com.tans.tuiutils.assert(act != null) { "Fragment's parent activity is null." }
+    return act!!.queryAudioFromMediaStore()
+}
+
 /**
  * Android SDK 32 need permission [Manifest.permission.READ_EXTERNAL_STORAGE],
  * Android SDK 33 need permission [Manifest.permission.READ_MEDIA_AUDIO]
@@ -207,6 +229,13 @@ fun Context.queryVideoFromMediaStore(): List<MediaStoreVideo> {
     }
 }
 
+@WorkerThread
+fun Fragment.queryVideoFromMediaStore(): List<MediaStoreVideo> {
+    val act = this.activity
+    com.tans.tuiutils.assert(act != null) { "Fragment's parent activity is null." }
+    return act!!.queryVideoFromMediaStore()
+}
+
 /**
  * Android SDK 32 need permission [Manifest.permission.READ_EXTERNAL_STORAGE],
  * Android SDK 33 need permission [Manifest.permission.READ_MEDIA_AUDIO]
@@ -279,6 +308,13 @@ fun Context.queryImageFromMediaStore(): List<MediaStoreImage> {
     } else {
         emptyList()
     }
+}
+
+@WorkerThread
+fun Fragment.queryImageFromMediaStore(): List<MediaStoreImage> {
+    val act = this.activity
+    com.tans.tuiutils.assert(act != null) { "Fragment's parent activity is null." }
+    return act!!.queryImageFromMediaStore()
 }
 
 private fun Cursor.getLong(colName: String): Long {
