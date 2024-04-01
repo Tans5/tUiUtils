@@ -40,6 +40,10 @@ data class ClickTask(
     val clickChannel: Channel<Unit>
 )
 
+/**
+ * Each clicks interval must great than [minInterval].
+ * If last click task don't finish, the new click will be ignore.
+ */
 fun View.clicks(
     coroutineScope: CoroutineScope,
     minInterval: Long = 300,

@@ -8,6 +8,9 @@ import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import com.tans.tuiutils.tUiUtilsLog
 
+/**
+ * This fragment will be store in Activity's ViewModelStore, when configure change cause restart won't create new fragment.
+ */
 @Suppress("DEPRECATION")
 abstract class BaseFragment : Fragment() {
 
