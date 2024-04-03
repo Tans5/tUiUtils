@@ -15,6 +15,7 @@ import com.tans.tuiutils.demo.myfragment.MyFragmentActivity
 import com.tans.tuiutils.multimedia.pickImageSuspend
 import com.tans.tuiutils.multimedia.takeAPhotoSuspend
 import com.tans.tuiutils.permission.permissionsRequestSuspend
+import com.tans.tuiutils.systembar.annotation.ContentViewFitSystemWindow
 import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +24,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 
 @SystemBarStyle
+@ContentViewFitSystemWindow
 class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
 
     override val layoutId: Int = R.layout.activity_main

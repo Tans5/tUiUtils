@@ -7,12 +7,12 @@ import com.tans.tuiutils.activity.BaseCoroutineStateActivity
 import com.tans.tuiutils.clicks.clicks
 import com.tans.tuiutils.demo.R
 import com.tans.tuiutils.demo.databinding.ActivityMyFragmentBinding
-import com.tans.tuiutils.systembar.annotation.FitSystemWindow
+import com.tans.tuiutils.systembar.annotation.ContentViewFitSystemWindow
 import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import kotlinx.coroutines.CoroutineScope
 
 @SystemBarStyle
-@FitSystemWindow
+@ContentViewFitSystemWindow
 class MyFragmentActivity : BaseCoroutineStateActivity<MyFragmentActivity.Companion.State>(State()) {
 
     override val layoutId: Int = R.layout.activity_my_fragment

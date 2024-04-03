@@ -6,7 +6,7 @@ import android.app.Application.ActivityLifecycleCallbacks
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import com.tans.tuiutils.systembar.annotation.FitSystemWindow
+import com.tans.tuiutils.systembar.annotation.ContentViewFitSystemWindow
 import com.tans.tuiutils.systembar.annotation.FullScreenStyle
 import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import com.tans.tuiutils.tUiUtilsLog
@@ -52,10 +52,10 @@ object AutoApplySystemBarAnnotation : ActivityLifecycleCallbacks {
             activity.fullScreenStyle(sticky = fullScreenStyle.sticky, ignoreCutoutArea = fullScreenStyle.ignoreCutoutArea)
         }
 
-        val fitSystemWindowStyle = allAnnotations.filterIsInstance<FitSystemWindow>().getOrNull(0)
-        if (fitSystemWindowStyle != null) {
+        val contentViewFitSystemWindowStyle = allAnnotations.filterIsInstance<ContentViewFitSystemWindow>().getOrNull(0)
+        if (contentViewFitSystemWindowStyle != null) {
             tUiUtilsLog.d(msg = "${activity::class.java} found FitSystemWindow annotation.")
-            activity.fitSystemWindow(fitSystemWindow = fitSystemWindowStyle.fitSystemWindow)
+            activity.contentViewFitSystemWindow()
         }
     }
 
