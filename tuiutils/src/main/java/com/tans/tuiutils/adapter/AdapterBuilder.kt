@@ -3,7 +3,7 @@ package com.tans.tuiutils.adapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 
-interface AdapterBuilder<Data : Any> : AdapterLifecycle {
+interface AdapterBuilder<Data : Any> : AdapterLifecycle<Data>, DataSourceParent<Data> {
 
     var isBuilderConsumed: Boolean
 
@@ -13,18 +13,31 @@ interface AdapterBuilder<Data : Any> : AdapterLifecycle {
 
     val dataBinder: DataBinder<Data>
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView, dataSourceParent: DataSourceParent<Data>) {
+        super.onAttachedToRecyclerView(recyclerView, dataSourceParent)
         itemViewCreator.onAttachToBuilder(recyclerView, this)
         dataSource.onAttachToBuilder(recyclerView, this)
         dataBinder.onAttachToBuilder(recyclerView, this)
     }
 
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        super.onDetachedFromRecyclerView(recyclerView)
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView, dataSourceParent: DataSourceParent<Data>) {
+        super.onDetachedFromRecyclerView(recyclerView, dataSourceParent)
         itemViewCreator.onDetachedFromBuilder(recyclerView, this)
         dataSource.onDetachedFromBuilder(recyclerView, this)
         dataBinder.onDetachedFromBuilder(recyclerView, this)
+    }
+
+    override fun requestSubmitDataList(
+        child: DataSource<Data>,
+        data: List<Data>,
+        callback: Runnable?
+    ) {
+        val parent = dataSourceParent
+        if (parent == null) {
+            error("Parent DataSource is null.")
+        } else {
+            parent.requestSubmitDataList(child, data, callback)
+        }
     }
 
     fun consumeBuilder() {

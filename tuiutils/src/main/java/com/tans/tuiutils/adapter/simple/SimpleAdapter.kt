@@ -6,10 +6,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.tans.tuiutils.adapter.AdapterBuilder
+import com.tans.tuiutils.adapter.DataSource
+import com.tans.tuiutils.adapter.DataSourceParent
 
 internal class SimpleAdapter<Data : Any>(
     private val adapterBuilder: AdapterBuilder<Data>
-) : ListAdapter<Data, ViewHolder>(
+) : ListAdapter<Data, ViewHolder> (
     object : DiffUtil.ItemCallback<Data>() {
         override fun areItemsTheSame(oldItem: Data, newItem: Data): Boolean {
             TODO("Not yet implemented")
@@ -23,7 +25,11 @@ internal class SimpleAdapter<Data : Any>(
             return super.getChangePayload(oldItem, newItem)
         }
     }
-) {
+), DataSourceParent<Data> {
+
+    init {
+        adapterBuilder.consumeBuilder()
+    }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -47,5 +53,13 @@ internal class SimpleAdapter<Data : Any>(
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
+    }
+
+    override fun requestSubmitDataList(child: DataSource<Data>, data: List<Data>, callback: Runnable?) {
+        if (callback == null) {
+            submitList(data)
+        } else {
+            submitList(data, callback)
+        }
     }
 }
