@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.ItemViewCreator
 
-class SingleItemViewCreator<Data : Any>(
+class SingleItemViewCreatorImpl<Data : Any>(
     @LayoutRes
     private val itemViewLayoutRes: Int
 ) : ItemViewCreator<Data> {

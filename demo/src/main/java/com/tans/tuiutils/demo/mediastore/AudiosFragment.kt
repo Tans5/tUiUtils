@@ -2,10 +2,12 @@ package com.tans.tuiutils.demo.mediastore
 
 import android.os.Bundle
 import android.view.View
-import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilder
+import android.widget.Toast
+import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
 import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
-import com.tans.tuiutils.adapter.impl.datasources.DataSourceImpl
-import com.tans.tuiutils.adapter.impl.viewcreatators.SingleItemViewCreator
+import com.tans.tuiutils.adapter.impl.datasources.FlowDataSourceImpl
+import com.tans.tuiutils.adapter.impl.viewcreatators.SingleItemViewCreatorImpl
+import com.tans.tuiutils.clicks.clicks
 import com.tans.tuiutils.demo.R
 import com.tans.tuiutils.demo.databinding.AudioItemLayoutBinding
 import com.tans.tuiutils.demo.databinding.FragmentAudiosBinding
@@ -13,6 +15,7 @@ import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreAudio
 import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State>(State()) {
@@ -35,19 +38,18 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
     override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
         println("${this@AudiosFragment::class.java.simpleName} bindContentViewCoroutine()")
         val viewBinding = FragmentAudiosBinding.bind(contentView)
-        val dataSource = DataSourceImpl<MediaStoreAudio>()
-        val adapter = SimpleAdapterBuilder<MediaStoreAudio>(
-            itemViewCreator = SingleItemViewCreator(R.layout.audio_item_layout),
+        val adapter = SimpleAdapterBuilderImpl<MediaStoreAudio>(
+            itemViewCreator = SingleItemViewCreatorImpl(R.layout.audio_item_layout),
+            dataSource = FlowDataSourceImpl(stateFlow.map { it.audios }),
             dataBinder = DataBinderImpl { data, view, _ ->
                 val itemViewBinding = AudioItemLayoutBinding.bind(view)
                 itemViewBinding.musicTitleTv.text = "${data.title}-${data.artist}"
-            },
-            dataSource = dataSource
+                view.clicks(this) {
+                    Toast.makeText(this@AudiosFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
+                }
+            }
         ).build()
         viewBinding.audiosRv.adapter = adapter
-        renderStateNewCoroutine({ it.audios }) {
-            dataSource.submitDataList(it)
-        }
     }
 
     override fun onResume() {

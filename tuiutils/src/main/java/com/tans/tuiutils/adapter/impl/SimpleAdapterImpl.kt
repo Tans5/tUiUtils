@@ -9,7 +9,7 @@ import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.DataSource
 import com.tans.tuiutils.adapter.DataSourceParent
 
-internal class SimpleAdapter<Data : Any>(
+internal class SimpleAdapterImpl<Data : Any>(
     private val adapterBuilder: AdapterBuilder<Data>
 ) : ListAdapter<Data, ViewHolder> (
     object : DiffUtil.ItemCallback<Data>() {
