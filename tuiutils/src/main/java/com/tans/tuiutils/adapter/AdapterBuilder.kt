@@ -2,6 +2,7 @@ package com.tans.tuiutils.adapter
 
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
+import com.tans.tuiutils.assertMainThread
 
 interface AdapterBuilder<Data : Any> : AdapterLifecycle<Data>, DataSourceParent<Data> {
 
@@ -32,6 +33,7 @@ interface AdapterBuilder<Data : Any> : AdapterLifecycle<Data>, DataSourceParent<
         data: List<Data>,
         callback: Runnable?
     ) {
+        super.requestSubmitDataList(child, data, callback)
         val parent = dataSourceParent
         if (parent == null) {
             error("Parent DataSource is null.")

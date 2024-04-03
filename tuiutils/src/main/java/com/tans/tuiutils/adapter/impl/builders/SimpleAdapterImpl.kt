@@ -1,4 +1,4 @@
-package com.tans.tuiutils.adapter.impl
+package com.tans.tuiutils.adapter.impl.builders
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -69,6 +69,7 @@ internal class SimpleAdapterImpl<Data : Any>(
     }
 
     override fun requestSubmitDataList(child: DataSource<Data>, data: List<Data>, callback: Runnable?) {
+        super.requestSubmitDataList(child, data, callback)
         if (callback == null) {
             submitList(data)
         } else {

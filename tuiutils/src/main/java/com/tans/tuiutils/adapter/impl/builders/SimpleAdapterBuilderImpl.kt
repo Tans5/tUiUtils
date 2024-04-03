@@ -6,7 +6,6 @@ import com.tans.tuiutils.adapter.DataBinder
 import com.tans.tuiutils.adapter.DataSource
 import com.tans.tuiutils.adapter.DataSourceParent
 import com.tans.tuiutils.adapter.ItemViewCreator
-import com.tans.tuiutils.adapter.impl.SimpleAdapterImpl
 
 class SimpleAdapterBuilderImpl<Data : Any>(
     override val itemViewCreator: ItemViewCreator<Data>,
