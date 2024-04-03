@@ -33,11 +33,9 @@ android {
 
 dependencies {
 
-//    implementation(libs.androidx.core.ktx)
-//    implementation(libs.material)
-
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.recyclerview)
 
     compileOnly(libs.rxjava3)
     compileOnly(libs.rxandroid3)
