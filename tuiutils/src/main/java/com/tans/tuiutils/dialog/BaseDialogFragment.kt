@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.os.Looper
 import android.view.*
 import android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND
 import androidx.annotation.FloatRange
@@ -17,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 abstract class BaseDialogFragment : AppCompatDialogFragment() {
 
     open val dimAmount: Float = 0.4f
+    open val isCancelable: Boolean = true
     open val isCanceledOnTouchOutside: Boolean = true
     open val gravity = Gravity.CENTER
     open val windowWith: Int = WindowManager.LayoutParams.WRAP_CONTENT
@@ -42,8 +44,9 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // if restart, because configure change, force dismiss
         if (savedInstanceState != null) {
-            dismiss()
+            dismissSafe()
             return
         }
     }
@@ -137,5 +140,17 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
 
     }
 
+    fun dismissSafe() {
+        val r = Runnable {
+            dismiss()
+        }
+        if (Looper.myLooper() === Looper.getMainLooper()) {
+            r.run()
+        } else {
+            activity?.runOnUiThread {
+                r.run()
+            }
+        }
+    }
 
 }
