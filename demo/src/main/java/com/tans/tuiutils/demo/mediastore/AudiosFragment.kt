@@ -2,7 +2,12 @@ package com.tans.tuiutils.demo.mediastore
 
 import android.os.Bundle
 import android.view.View
+import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilder
+import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
+import com.tans.tuiutils.adapter.impl.datasources.DataSourceImpl
+import com.tans.tuiutils.adapter.impl.viewcreatators.SingleItemViewCreator
 import com.tans.tuiutils.demo.R
+import com.tans.tuiutils.demo.databinding.AudioItemLayoutBinding
 import com.tans.tuiutils.demo.databinding.FragmentAudiosBinding
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreAudio
@@ -30,8 +35,18 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
     override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
         println("${this@AudiosFragment::class.java.simpleName} bindContentViewCoroutine()")
         val viewBinding = FragmentAudiosBinding.bind(contentView)
+        val dataSource = DataSourceImpl<MediaStoreAudio>()
+        val adapter = SimpleAdapterBuilder<MediaStoreAudio>(
+            itemViewCreator = SingleItemViewCreator(R.layout.audio_item_layout),
+            dataBinder = DataBinderImpl { data, view, _ ->
+                val itemViewBinding = AudioItemLayoutBinding.bind(view)
+                itemViewBinding.musicTitleTv.text = "${data.title}-${data.artist}"
+            },
+            dataSource = dataSource
+        ).build()
+        viewBinding.audiosRv.adapter = adapter
         renderStateNewCoroutine({ it.audios }) {
-            viewBinding.audioCountTv.text = "Audio Count: ${it.size}"
+            dataSource.submitDataList(it)
         }
     }
 
