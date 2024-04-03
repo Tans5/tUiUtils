@@ -41,9 +41,10 @@ object AutoApplySystemBarAnnotation : ActivityLifecycleCallbacks {
             } else {
                 tUiUtilsLog.w(msg = "${activity::class.java} is not ComponentActivity, can't set system bar color.")
             }
-            activity.lightSystemBar(
-                lightStatusBar = systemBarStyle.lightStatusBar,
-                lightNavigationBar = systemBarStyle.lightNavigationBar)
+            activity.systemBarThemeStyle(
+                statusBarThemeStyle = SystemBarThemeStyle.entries.getOrNull(systemBarStyle.statusBarThemeStyle) ?: SystemBarThemeStyle.BySystem,
+                navigationThemeStyle = SystemBarThemeStyle.entries.getOrNull(systemBarStyle.navigationBarThemeStyle) ?: SystemBarThemeStyle.BySystem
+            )
         }
         val fullScreenStyle = allAnnotations.filterIsInstance<FullScreenStyle>().getOrNull(0)
         if (fullScreenStyle != null) {

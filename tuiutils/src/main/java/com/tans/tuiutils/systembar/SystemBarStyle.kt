@@ -1,6 +1,7 @@
 package com.tans.tuiutils.systembar
 
 import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.view.Window
@@ -13,18 +14,33 @@ import androidx.core.view.WindowCompat
 import com.tans.tuiutils.assertMainThread
 import com.tans.tuiutils.tUiUtilsLog
 
+enum class SystemBarThemeStyle { BySystem, Light, Dark }
+
 @MainThread
-fun Activity.lightSystemBar(lightStatusBar: Boolean, lightNavigationBar: Boolean) {
-    window.lightSystemBar(lightStatusBar, lightNavigationBar)
-    tUiUtilsLog.d(msg = "${this::class.java} lightSystemBar success, lightStatusBar=$lightStatusBar, lightNavigationBar=$lightNavigationBar")
+fun Activity.systemBarThemeStyle(statusBarThemeStyle: SystemBarThemeStyle, navigationThemeStyle: SystemBarThemeStyle) {
+    window.systemBarThemeStyle(this, statusBarThemeStyle, navigationThemeStyle)
+    tUiUtilsLog.d(msg = "${this::class.java} systemBarThemeStyle success, statusThemeStyle=$statusBarThemeStyle, navigationThemeStyle=$navigationThemeStyle")
 }
 
 @MainThread
-fun Window.lightSystemBar(lightStatusBar: Boolean, lightNavigationBar: Boolean) {
-    assertMainThread { "lightSystemBar() need invoke in main thread." }
+fun Window.systemBarThemeStyle(context: Context, statusBarThemeStyle: SystemBarThemeStyle, navigationThemeStyle: SystemBarThemeStyle) {
+    assertMainThread { "systemBarThemeStyle() need invoke in main thread." }
+    val isSystemDarkMode = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+    val lightStatus = when (statusBarThemeStyle) {
+        SystemBarThemeStyle.BySystem -> !isSystemDarkMode
+        SystemBarThemeStyle.Light -> true
+        SystemBarThemeStyle.Dark -> false
+    }
+
+    val lightNavigation = when (navigationThemeStyle) {
+        SystemBarThemeStyle.BySystem -> !isSystemDarkMode
+        SystemBarThemeStyle.Light -> true
+        SystemBarThemeStyle.Dark -> false
+    }
     val controller =  WindowCompat.getInsetsController(this, decorView)
-    controller.isAppearanceLightStatusBars = lightStatusBar
-    controller.isAppearanceLightNavigationBars = lightNavigationBar
+    controller.isAppearanceLightStatusBars = lightStatus
+    controller.isAppearanceLightNavigationBars = lightNavigation
 }
 
 @MainThread
