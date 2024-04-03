@@ -40,11 +40,11 @@
             android:text="FitSystemWindowAct"/>
 
         <Button
-            android:id="@+id/center_dialog_bt"
+            android:id="@+id/yes_or_no_dialog_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="CenterDialog"/>
+            android:text="YesOrNoDialog"/>
 
         <Button
             android:id="@+id/bottom_dialog_bt"

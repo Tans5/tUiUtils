@@ -5,6 +5,7 @@ import com.tans.tuiutils.tUiUtilsLog
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlin.coroutines.CoroutineContext
 
@@ -22,7 +23,7 @@ abstract class BaseCoroutineStateDialogFragment<State : Any>(defaultState: State
     }
 
     override val coroutineContext: CoroutineContext by lazy {
-        Dispatchers.Main.immediate + coroutineExceptionHandler
+        Dispatchers.Main.immediate + coroutineExceptionHandler + Job()
     }
 
     open fun onCoroutineScopeException(context: CoroutineContext, exception: Throwable) {
@@ -36,4 +37,4 @@ abstract class BaseCoroutineStateDialogFragment<State : Any>(defaultState: State
 
 }
 
-private const val COROUTINE_TAG= "BaseCoroutineStateDialogFragment"
+private const val COROUTINE_TAG = "BaseCoroutineStateDialogFragment"

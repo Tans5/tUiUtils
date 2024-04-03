@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 abstract class BaseDialogFragment : AppCompatDialogFragment() {
 
     open val dimAmount: Float = 0.4f
-    open val isCancelable: Boolean = true
+    open val isCancelableBaseDialog: Boolean = true
     open val isCanceledOnTouchOutside: Boolean = true
     open val gravity = Gravity.CENTER
     open val windowWith: Int = WindowManager.LayoutParams.WRAP_CONTENT
@@ -87,7 +87,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
             requestWindowFeature(Window.FEATURE_NO_TITLE)
             setContentView(contentView)
             setCanceledOnTouchOutside(isCanceledOnTouchOutside)
-            setCancelable(isCancelable)
+            setCancelable(isCancelableBaseDialog)
         }
 
         dialog.window?.apply {
@@ -139,6 +139,12 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
     open fun onBindContentView(view: View) {
 
     }
+
+    final override fun isCancelable(): Boolean {
+        return isCancelableBaseDialog
+    }
+
+    final override fun setCancelable(cancelable: Boolean) {}
 
     fun dismissSafe() {
         val r = Runnable {

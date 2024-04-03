@@ -11,7 +11,7 @@ abstract class BaseRx3StateForceResultDialogFragment<State : Any, Result : Any>(
     private val hasInvokeCallback: AtomicBoolean = AtomicBoolean(false)
 
     final override val isCanceledOnTouchOutside: Boolean = false
-    final override val isCancelable: Boolean = false
+    final override val isCancelableBaseDialog: Boolean = false
     protected fun onResult(t: Result): Boolean {
         return if (hasInvokeCallback.compareAndSet(false, true)) {
             callback?.onResult(t)

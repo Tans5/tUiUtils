@@ -46,8 +46,14 @@ class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
             startActivity(Intent(this@MainActivity, FullScreenActivity::class.java))
         }
 
-        viewBinding.centerDialogBt.clicks(this) {
-            CenterDialog().show(supportFragmentManager, "CenterDialog${System.currentTimeMillis()}")
+        viewBinding.yesOrNoDialogBt.clicks(this) {
+           runCatching {
+                this@MainActivity.supportFragmentManager.showYesOrNoDialogSuspend()
+           }.onSuccess {
+               Toast.makeText(this@MainActivity, if (it) "Yes" else "No", Toast.LENGTH_SHORT).show()
+           }.onFailure {
+               Toast.makeText(this@MainActivity, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
+           }
         }
 
         viewBinding.bottomDialogBt.clicks(this) {
@@ -125,7 +131,7 @@ class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
             }
             val permissionResult = runCatching { permissionsRequestSuspend(*mediaStorePermissions) }
             if (permissionResult.isSuccess) {
-                val (granted, denied) = permissionResult.getOrThrow()
+                val (granted, _) = permissionResult.getOrThrow()
                 if (granted.isNotEmpty()) {
                     startActivity(Intent(this@MainActivity, MediaStoreActivity::class.java))
                 } else {
