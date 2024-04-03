@@ -10,7 +10,9 @@ open class DataSourceImpl<Data : Any>(
     private val getDataItemsChangePayloadParam: (d1: Data, d2: Data) -> Any? = { _, _ ->  null }
 ) : DataSource<Data> {
 
-    final override var lastSubmitDataList: List<Data> = emptyList()
+    final override var lastSubmittedDataList: List<Data>? = null
+
+    final override var submittingDataList: List<Data>? = null
 
     final override fun areDataItemsTheSame(d1: Data, d2: Data): Boolean = areDataItemsTheSameParam(d1, d2)
 
@@ -18,8 +20,8 @@ open class DataSourceImpl<Data : Any>(
 
     override fun getDataItemsChangePayload(d1: Data, d2: Data): Any? = getDataItemsChangePayloadParam(d1, d2)
 
-    override fun getData(positionInDataSource: Int): Data? {
-        return lastSubmitDataList.getOrNull(positionInDataSource)
+    override fun getLastSubmittedData(positionInDataSource: Int): Data? {
+        return lastSubmittedDataList?.getOrNull(positionInDataSource)
     }
 
     override var attachedBuilder: AdapterBuilder<Data>? = null

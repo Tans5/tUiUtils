@@ -37,7 +37,7 @@ internal class SimpleAdapter<Data : Any>(
     }
 
     override fun getItemViewType(position: Int): Int {
-        val data = adapterBuilder.dataSource.getData(position) ?: error("Wrong data position: $position")
+        val data = adapterBuilder.dataSource.getLastSubmittedData(position) ?: error("Wrong data position: $position")
         return adapterBuilder.itemViewCreator.getItemViewType(
             positionInDataSource = position,
             data = data
@@ -53,13 +53,13 @@ internal class SimpleAdapter<Data : Any>(
         if (payloads.isEmpty()) {
             onBindViewHolder(holder, position)
         } else {
-            val data = adapterBuilder.dataSource.getData(position) ?: error("Wrong data position: $position")
+            val data = adapterBuilder.dataSource.getLastSubmittedData(position) ?: error("Wrong data position: $position")
             adapterBuilder.dataBinder.bindPayloadData(data = data, view = holder.itemView, positionInDataSource = position, payloads = payloads)
         }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val data = adapterBuilder.dataSource.getData(position) ?: error("Wrong data position: $position")
+        val data = adapterBuilder.dataSource.getLastSubmittedData(position) ?: error("Wrong data position: $position")
         adapterBuilder.dataBinder.bindData(data = data, view = holder.itemView, positionInDataSource = position)
     }
 

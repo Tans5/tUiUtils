@@ -4,7 +4,9 @@ import androidx.annotation.MainThread
 
 interface DataSource<Data : Any> : AdapterBuilderLife<Data> {
 
-    var lastSubmitDataList: List<Data>
+    var lastSubmittedDataList: List<Data>?
+
+    var submittingDataList: List<Data>?
 
     @MainThread
     fun submitDataList(data: List<Data>, callback: Runnable? = null) {
@@ -12,8 +14,10 @@ interface DataSource<Data : Any> : AdapterBuilderLife<Data> {
         if (builder == null) {
             error("Attached builder is null.")
         } else {
+            submittingDataList = data
             builder.requestSubmitDataList(this, data) {
-                lastSubmitDataList = data
+                lastSubmittedDataList = data
+                submittingDataList = null
                 callback?.run()
             }
         }
@@ -25,9 +29,9 @@ interface DataSource<Data : Any> : AdapterBuilderLife<Data> {
 
     fun getDataItemsChangePayload(d1: Data, d2: Data): Any?
 
-    fun getData(positionInDataSource: Int): Data?
+    fun getLastSubmittedData(positionInDataSource: Int): Data?
 
-    fun getDataSourceSize(): Int = lastSubmitDataList.size
+    fun getLastSubmittedDataSize(): Int = lastSubmittedDataList?.size ?: 0
 
-    fun tryGetDataClass(): Class<Data>? = lastSubmitDataList.getOrNull(0)?.javaClass
+    fun tryGetDataClass(): Class<Data>? = submittingDataList?.getOrNull(0)?.javaClass ?: lastSubmittedDataList?.getOrNull(0)?.javaClass
 }
