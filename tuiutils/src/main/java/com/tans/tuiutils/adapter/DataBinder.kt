@@ -4,7 +4,15 @@ import android.view.View
 
 interface DataBinder<Data : Any> : AdapterBuilderLife<Data> {
 
-    fun bindData(data: Data, view: View, position: Int)
+    val payloadDataBinders: MutableMap<Any, ((data: Data, view: View, positionInDataSource: Int) -> Unit)?>
 
-    fun bindPayloadData(data: Data, view: View, position: Int)
+    fun bindData(data: Data, view: View, positionInDataSource: Int)
+
+    fun bindPayloadData(data: Data, view: View, positionInDataSource: Int, payloads: List<Any>)
+
+    fun addPayloadDataBinder(payload: Any, binder: (data: Data, view: View, positionInDataSource: Int) -> Unit): DataBinder<Data> {
+        payloadDataBinders[payload] = binder
+        return this
+    }
+
 }

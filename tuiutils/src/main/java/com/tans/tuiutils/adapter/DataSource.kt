@@ -8,12 +8,14 @@ interface DataSource<Data : Any> : AdapterBuilderLife<Data> {
 
     @MainThread
     fun submitDataList(data: List<Data>, callback: Runnable? = null) {
-        lastSubmitDataList = data
         val builder = attachedBuilder
         if (builder == null) {
             error("Attached builder is null.")
         } else {
-            builder.requestSubmitDataList(this, data, callback)
+            builder.requestSubmitDataList(this, data) {
+                lastSubmitDataList = data
+                callback?.run()
+            }
         }
     }
 
@@ -22,6 +24,8 @@ interface DataSource<Data : Any> : AdapterBuilderLife<Data> {
     fun areDataItemsContentTheSame(d1: Data, d2: Data): Boolean
 
     fun getDataItemsChangePayload(d1: Data, d2: Data): Any?
+
+    fun getData(positionInDataSource: Int): Data?
 
     fun getDataSourceSize(): Int = lastSubmitDataList.size
 

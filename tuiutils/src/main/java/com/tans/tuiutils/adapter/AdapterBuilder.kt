@@ -42,7 +42,7 @@ interface AdapterBuilder<Data : Any> : AdapterLifecycle<Data>, DataSourceParent<
 
     fun consumeBuilder() {
         if (isBuilderConsumed) {
-            error("Adapter builder already consumed, please create new AdapterBuilder")
+            error("Adapter builder already consumed, please create new AdapterBuilder.")
         } else {
             isBuilderConsumed = true
         }

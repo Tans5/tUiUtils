@@ -1,4 +1,4 @@
-package com.tans.tuiutils.adapter.simple
+package com.tans.tuiutils.adapter.impl
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -14,15 +14,15 @@ internal class SimpleAdapter<Data : Any>(
 ) : ListAdapter<Data, ViewHolder> (
     object : DiffUtil.ItemCallback<Data>() {
         override fun areItemsTheSame(oldItem: Data, newItem: Data): Boolean {
-            TODO("Not yet implemented")
+            return adapterBuilder.dataSource.areDataItemsTheSame(oldItem, newItem)
         }
 
         override fun areContentsTheSame(oldItem: Data, newItem: Data): Boolean {
-            TODO("Not yet implemented")
+            return adapterBuilder.dataSource.areDataItemsContentTheSame(oldItem, newItem)
         }
 
         override fun getChangePayload(oldItem: Data, newItem: Data): Any? {
-            return super.getChangePayload(oldItem, newItem)
+            return adapterBuilder.dataSource.getDataItemsChangePayload(oldItem, newItem)
         }
     }
 ), DataSourceParent<Data> {
@@ -33,26 +33,39 @@ internal class SimpleAdapter<Data : Any>(
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
+        adapterBuilder.onAttachedToRecyclerView(recyclerView, this)
     }
 
     override fun getItemViewType(position: Int): Int {
-        return super.getItemViewType(position)
+        val data = adapterBuilder.dataSource.getData(position) ?: error("Wrong data position: $position")
+        return adapterBuilder.itemViewCreator.getItemViewType(
+            positionInDataSource = position,
+            data = data
+        ) ?: super.getItemViewType(position)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        TODO("Not yet implemented")
+        val view = adapterBuilder.itemViewCreator.createItemView(parent, viewType)
+        return object : ViewHolder(view) {}
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
-        super.onBindViewHolder(holder, position, payloads)
+        if (payloads.isEmpty()) {
+            onBindViewHolder(holder, position)
+        } else {
+            val data = adapterBuilder.dataSource.getData(position) ?: error("Wrong data position: $position")
+            adapterBuilder.dataBinder.bindPayloadData(data = data, view = holder.itemView, positionInDataSource = position, payloads = payloads)
+        }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        TODO("Not yet implemented")
+        val data = adapterBuilder.dataSource.getData(position) ?: error("Wrong data position: $position")
+        adapterBuilder.dataBinder.bindData(data = data, view = holder.itemView, positionInDataSource = position)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
+        adapterBuilder.onDetachedFromRecyclerView(recyclerView, this)
     }
 
     override fun requestSubmitDataList(child: DataSource<Data>, data: List<Data>, callback: Runnable?) {

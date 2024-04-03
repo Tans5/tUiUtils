@@ -18,6 +18,10 @@ open class DataSourceImpl<Data : Any>(
 
     override fun getDataItemsChangePayload(d1: Data, d2: Data): Any? = getDataItemsChangePayloadParam(d1, d2)
 
+    override fun getData(positionInDataSource: Int): Data? {
+        return lastSubmitDataList.getOrNull(positionInDataSource)
+    }
+
     override var attachedBuilder: AdapterBuilder<Data>? = null
 
     override var attachedRecyclerView: RecyclerView? = null
