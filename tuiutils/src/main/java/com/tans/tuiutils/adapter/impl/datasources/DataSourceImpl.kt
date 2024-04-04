@@ -7,12 +7,13 @@ import com.tans.tuiutils.adapter.DataSource
 open class DataSourceImpl<Data : Any>(
     private val areDataItemsTheSameParam: (d1: Data, d2: Data) -> Boolean = { d1, d2 -> d1 == d2 },
     private val areDataItemsContentTheSameParam: (d1: Data, d2: Data) -> Boolean = { d1, d2 -> d1 == d2 },
-    private val getDataItemsChangePayloadParam: (d1: Data, d2: Data) -> Any? = { _, _ ->  null }
+    private val getDataItemsChangePayloadParam: (d1: Data, d2: Data) -> Any? = { _, _ ->  null },
+    private val getDataItemIdParam: (data: Data, positionInDataSource: Int) -> Long = { _, _ -> RecyclerView.NO_ID }
 ) : DataSource<Data> {
 
     final override var lastSubmittedDataList: List<Data>? = null
 
-    final override var submittingDataList: List<Data>? = null
+    override fun getDataItemId(data: Data, positionInDataSource: Int): Long = getDataItemIdParam(data, positionInDataSource)
 
     final override fun areDataItemsTheSame(d1: Data, d2: Data): Boolean = areDataItemsTheSameParam(d1, d2)
 

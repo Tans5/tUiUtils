@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.DataSource
 import com.tans.tuiutils.adapter.DataSourceParent
+import org.jetbrains.annotations.ApiStatus.Internal
 
 internal class SimpleAdapterImpl<Data : Any>(
     private val adapterBuilder: AdapterBuilder<Data>
@@ -31,9 +32,15 @@ internal class SimpleAdapterImpl<Data : Any>(
         adapterBuilder.consumeBuilder()
     }
 
+
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         adapterBuilder.onAttachedToRecyclerView(recyclerView, this)
+    }
+
+    override fun getItemId(position: Int): Long {
+        val data = adapterBuilder.dataSource.getLastSubmittedData(position) ?: error("Wrong data position: $position")
+        return adapterBuilder.dataSource.getDataItemId(data = data, positionInDataSource = position)
     }
 
     override fun getItemViewType(position: Int): Int {
