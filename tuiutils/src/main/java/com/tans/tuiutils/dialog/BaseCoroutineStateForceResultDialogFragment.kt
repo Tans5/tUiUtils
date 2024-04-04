@@ -1,5 +1,7 @@
 package com.tans.tuiutils.dialog
 
+import android.app.Dialog
+import android.view.View
 import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("MemberVisibilityCanBePrivate", "SameParameterValue")
@@ -10,8 +12,6 @@ abstract class BaseCoroutineStateForceResultDialogFragment<State : Any, Result :
 
     private val hasInvokeCallback: AtomicBoolean = AtomicBoolean(false)
 
-    final override val isCanceledOnTouchOutside: Boolean = false
-    final override val isCancelableBaseDialog: Boolean = false
     protected fun onResult(t: Result): Boolean {
         return if (hasInvokeCallback.compareAndSet(false, true)) {
             callback?.onResult(t)
@@ -29,6 +29,10 @@ abstract class BaseCoroutineStateForceResultDialogFragment<State : Any, Result :
         } else {
             false
         }
+    }
+
+    override fun createDialog(contentView: View): Dialog {
+        return requireActivity().createDefaultDialog(contentView = contentView, isCancelable = false)
     }
 
     override fun onDestroy() {
