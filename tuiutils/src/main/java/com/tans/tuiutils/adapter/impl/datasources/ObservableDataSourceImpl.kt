@@ -2,17 +2,12 @@ package com.tans.tuiutils.adapter.impl.datasources
 
 import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
-import org.jetbrains.annotations.ApiStatus.Internal
+import com.tans.tuiutils.state.Rx3Life
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 
-class FlowDataSourceImpl<Data : Any>(
-    private val dataFlow: Flow<List<Data>>,
+class ObservableDataSourceImpl<Data : Any>(
+    private val dataObservable: Observable<List<Data>>,
     areDataItemsTheSameParam: (d1: Data, d2: Data) -> Boolean = { d1, d2 -> d1 == d2 },
     areDataItemsContentTheSameParam: (d1: Data, d2: Data) -> Boolean = { d1, d2 -> d1 == d2 },
     getDataItemsChangePayloadParam: (d1: Data, d2: Data) -> Any? = { _, _ -> null },
@@ -23,28 +18,26 @@ class FlowDataSourceImpl<Data : Any>(
     getDataItemsChangePayloadParam = getDataItemsChangePayloadParam,
     getDataItemIdParam = getDataItemIdParam
 ) {
-    @Internal
-    private var coroutineScope: CoroutineScope? = null
+    private var rx3Life: Rx3Life? = null
 
-    @Internal
     override fun onAttachToBuilder(recyclerView: RecyclerView, builder: AdapterBuilder<Data>) {
         super.onAttachToBuilder(recyclerView, builder)
-        val newCoroutineScope = CoroutineScope(Dispatchers.Main.immediate)
-        newCoroutineScope.launch {
-            dataFlow
+        val newRx3Life = Rx3Life()
+        with(newRx3Life) {
+            dataObservable
                 .distinctUntilChanged()
-                .flowOn(Dispatchers.Main.immediate)
-                .collect {
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext {
                     submitDataList(it)
                 }
+                .bindLife()
         }
-        coroutineScope = newCoroutineScope
+        rx3Life = newRx3Life
     }
 
-    @Internal
     override fun onDetachedFromBuilder(recyclerView: RecyclerView, builder: AdapterBuilder<Data>) {
         super.onDetachedFromBuilder(recyclerView, builder)
-        coroutineScope?.cancel("onAttachToBuilder")
-        coroutineScope = null
+        rx3Life?.lifeCompositeDisposable?.clear()
+        rx3Life = null
     }
 }
