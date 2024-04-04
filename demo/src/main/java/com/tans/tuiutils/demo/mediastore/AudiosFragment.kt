@@ -49,8 +49,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
         val viewBinding = FragmentAudiosBinding.bind(contentView)
 
         val headerFooterDataFlow = stateFlow
-            .map { it.audios }
-            .map { if (it.isEmpty()) emptyList() else listOf(Unit) }
+            .map { if (it.audios.isEmpty()) emptyList() else listOf(Unit) }
 
         val emptyDataFlow = headerFooterDataFlow
             .map { if (it.isEmpty()) listOf(Unit) else emptyList() }

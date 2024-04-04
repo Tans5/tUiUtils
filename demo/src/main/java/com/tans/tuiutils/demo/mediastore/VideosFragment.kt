@@ -2,12 +2,20 @@ package com.tans.tuiutils.demo.mediastore
 
 import android.os.Bundle
 import android.view.View
+import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
+import com.tans.tuiutils.adapter.impl.builders.plus
+import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
+import com.tans.tuiutils.adapter.impl.datasources.FlowDataSourceImpl
+import com.tans.tuiutils.adapter.impl.viewcreatators.SingleItemViewCreatorImpl
 import com.tans.tuiutils.demo.R
+import com.tans.tuiutils.demo.databinding.EmptyContentLayoutBinding
 import com.tans.tuiutils.demo.databinding.FragmentVideosBinding
+import com.tans.tuiutils.demo.databinding.VideoItemLayoutBinding
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreVideo
 import com.tans.tuiutils.mediastore.queryVideoFromMediaStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State>(State()) {
@@ -30,9 +38,23 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
     override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
         val viewBinding = FragmentVideosBinding.bind(contentView)
         println("${this@VideosFragment::class.java.simpleName} bindContentViewCoroutine()")
-        renderStateNewCoroutine({ it.videos }) {
-            viewBinding.videosCountTv.text = "Video Count: ${it.size}"
-        }
+        val videosAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreVideo>(
+            itemViewCreator = SingleItemViewCreatorImpl(R.layout.video_item_layout),
+            dataSource = FlowDataSourceImpl(stateFlow.map { it.videos }),
+            dataBinder = DataBinderImpl { data, view, _ ->
+                val itemViewBinding = VideoItemLayoutBinding.bind(view)
+                itemViewBinding.videoTitleTv.text = data.title
+            }
+        )
+        val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
+            itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
+            dataSource = FlowDataSourceImpl(stateFlow.map { if (it.videos.isEmpty()) listOf(Unit) else emptyList() }),
+            dataBinder = DataBinderImpl { _, view, _ ->
+                val itemViewBinding = EmptyContentLayoutBinding.bind(view)
+                itemViewBinding.msgTv.text = "No Video."
+            }
+        )
+        viewBinding.videosRv.adapter = (videosAdapterBuilder + emptyAdapterBuilder).build()
     }
 
     override fun onResume() {
