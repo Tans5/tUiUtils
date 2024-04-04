@@ -41,4 +41,7 @@ open class DataSourceImpl<Data : Any>(
 
     @Internal
     override var attachedRecyclerView: RecyclerView? = null
+
+    @Internal
+    override var dataClass: Class<Data>? = null
 }

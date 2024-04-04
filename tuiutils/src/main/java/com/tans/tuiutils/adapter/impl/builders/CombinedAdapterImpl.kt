@@ -8,17 +8,31 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.DataSource
 import com.tans.tuiutils.adapter.DataSourceParent
+import com.tans.tuiutils.tUiUtilsLog
 
 internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedAdapterBuilderImpl) : ListAdapter<Any, RecyclerView.ViewHolder>(
     object : DiffUtil.ItemCallback<Any>() {
+
+        private fun printDataTypeAndSize() {
+            for (c in combinedAdapterBuilder.childrenBuilders) {
+                tUiUtilsLog.e(TAG, "DataClass=${c.dataSource.tryGetDataClass()}, DataCount=${c.dataSource.getLastSubmittedDataSize()}")
+            }
+        }
+
         override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
             val classA = oldItem::class.java
             val classB = newItem::class.java
             return if (classA !== classB) {
                 false
             } else {
-                val builder = combinedAdapterBuilder.childrenBuilders.find { it.dataSource.tryGetDataClass() === classA } ?: error("Can't find datasource contain data class: $classA")
-                builder.dataSource.areDataItemsTheSame(oldItem, newItem)
+                val builder = combinedAdapterBuilder.childrenBuilders.find { it.dataSource.tryGetDataClass() === classA }
+                if (builder == null) {
+                    tUiUtilsLog.e(TAG, "Can't find datasource contain data class: $classA")
+                    printDataTypeAndSize()
+                    oldItem == newItem
+                } else {
+                    builder.dataSource.areDataItemsTheSame(oldItem, newItem)
+                }
             }
         }
 
@@ -29,8 +43,14 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
             return if (classA !== classB) {
                 false
             } else {
-                val builder = combinedAdapterBuilder.childrenBuilders.find { it.dataSource.tryGetDataClass() === classA } ?: error("Can't find datasource contain data class: $classA")
-                builder.dataSource.areDataItemsContentTheSame(oldItem, newItem)
+                val builder = combinedAdapterBuilder.childrenBuilders.find { it.dataSource.tryGetDataClass() === classA }
+                if (builder == null) {
+                    tUiUtilsLog.e(TAG, "Can't find datasource contain data class: $classA")
+                    printDataTypeAndSize()
+                    oldItem == newItem
+                } else {
+                    builder.dataSource.areDataItemsContentTheSame(oldItem, newItem)
+                }
             }
         }
 
@@ -40,8 +60,14 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
             return if (classA !== classB) {
                 null
             } else {
-                val builder = combinedAdapterBuilder.childrenBuilders.find { it.dataSource.tryGetDataClass() === classA } ?: error("Can't find datasource contain data class: $classA")
-                builder.dataSource.getDataItemsChangePayload(oldItem, newItem)
+                val builder = combinedAdapterBuilder.childrenBuilders.find { it.dataSource.tryGetDataClass() === classA }
+                if (builder == null) {
+                    tUiUtilsLog.e(TAG, "Can't find datasource contain data class: $classA")
+                    printDataTypeAndSize()
+                    null
+                } else {
+                    builder.dataSource.getDataItemsChangePayload(oldItem, newItem)
+                }
             }
         }
     }
@@ -198,5 +224,6 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
         private const val BUILDER_INDEX_MASK_OFFSET_BIT = 16
         private const val MAX_BUILDER_INDEX = 65535
         private const val MAX_ITEM_VIEW_TYPE = 65535
+        private const val TAG = "CombinedAdapterImpl"
     }
 }

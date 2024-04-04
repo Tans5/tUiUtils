@@ -8,6 +8,7 @@ interface DataSource<Data : Any> : AdapterBuilderLife<Data> {
 
     var lastSubmittedDataList: List<Data>?
 
+    var dataClass: Class<Data>?
 
     @MainThread
     fun submitDataList(data: List<Data>, callback: Runnable? = null) {
@@ -15,6 +16,9 @@ interface DataSource<Data : Any> : AdapterBuilderLife<Data> {
         if (builder == null) {
             error("Attached builder is null.")
         } else {
+            if (dataClass == null) {
+                dataClass = data.getOrNull(0)?.javaClass
+            }
             lastSubmittedDataList = data
             builder.requestSubmitDataList(this, data, callback)
         }
@@ -32,5 +36,5 @@ interface DataSource<Data : Any> : AdapterBuilderLife<Data> {
 
     fun getLastSubmittedDataSize(): Int = lastSubmittedDataList?.size ?: 0
 
-    fun tryGetDataClass(): Class<Data>? = lastSubmittedDataList?.getOrNull(0)?.javaClass
+    fun tryGetDataClass(): Class<Data>? = dataClass
 }
