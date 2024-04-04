@@ -2,12 +2,21 @@ package com.tans.tuiutils.demo.mediastore
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
+import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
+import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
+import com.tans.tuiutils.adapter.impl.datasources.FlowDataSourceImpl
+import com.tans.tuiutils.adapter.impl.viewcreatators.SingleItemViewCreatorImpl
 import com.tans.tuiutils.demo.R
 import com.tans.tuiutils.demo.databinding.FragmentImagesBinding
+import com.tans.tuiutils.demo.databinding.ImageItemLayoutBinding
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreImage
 import com.tans.tuiutils.mediastore.queryImageFromMediaStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State>(State()) {
@@ -32,8 +41,21 @@ class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State
     override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
         println("${this@ImagesFragment::class.java.simpleName} bindContentViewCoroutine()")
         val viewBinding = FragmentImagesBinding.bind(contentView)
-        renderStateNewCoroutine({ it.images }) {
-            viewBinding.imageCountTv.text = "Image Count: ${it.size}"
+        val adapterBuilder = SimpleAdapterBuilderImpl<MediaStoreImage>(
+            itemViewCreator = SingleItemViewCreatorImpl(R.layout.image_item_layout),
+            dataSource = FlowDataSourceImpl(stateFlow.map { it.images }),
+            dataBinder = DataBinderImpl { data, view, _ ->
+                val itemViewBinding = ImageItemLayoutBinding.bind(view)
+                Glide.with(view)
+                    .load(data.uri)
+                    .into(itemViewBinding.imageIv)
+            }
+        )
+        viewBinding.imagesRv.adapter = adapterBuilder.build()
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.imagesRv) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, 0, 0, systemBars.bottom)
+            insets
         }
     }
 

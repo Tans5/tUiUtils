@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.coroutines.core.jvm)
     implementation(libs.coroutines.android)
     implementation(libs.coroutines.rx3)
+    implementation(libs.glide)
 
     implementation(project(":tuiutils"))
 

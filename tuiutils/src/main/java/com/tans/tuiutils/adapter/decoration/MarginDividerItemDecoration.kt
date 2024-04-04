@@ -6,11 +6,6 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.RecyclerView
 
-/**
- *
- * author: pengcheng.tan
- * date: 2019-12-23
- */
 
 typealias DividerController = (child: View, parent: RecyclerView, state: RecyclerView.State) -> Boolean
 
