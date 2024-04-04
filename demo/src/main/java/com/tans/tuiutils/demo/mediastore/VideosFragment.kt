@@ -2,6 +2,8 @@ package com.tans.tuiutils.demo.mediastore
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
 import com.tans.tuiutils.adapter.impl.builders.plus
 import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
@@ -55,6 +57,12 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
             }
         )
         viewBinding.videosRv.adapter = (videosAdapterBuilder + emptyAdapterBuilder).build()
+
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.videosRv) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, 0, 0, systemBars.bottom)
+            insets
+        }
     }
 
     override fun onResume() {
