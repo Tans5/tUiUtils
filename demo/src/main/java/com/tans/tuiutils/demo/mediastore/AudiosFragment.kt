@@ -11,11 +11,14 @@ import com.tans.tuiutils.adapter.impl.viewcreatators.SingleItemViewCreatorImpl
 import com.tans.tuiutils.clicks.clicks
 import com.tans.tuiutils.demo.R
 import com.tans.tuiutils.demo.databinding.AudioItemLayoutBinding
+import com.tans.tuiutils.demo.databinding.EmptyContentLayoutBinding
 import com.tans.tuiutils.demo.databinding.FragmentAudiosBinding
+import com.tans.tuiutils.demo.databinding.HeaderFooterItemLayoutBinding
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreAudio
 import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -40,31 +43,61 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
     override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
         println("${this@AudiosFragment::class.java.simpleName} bindContentViewCoroutine()")
         val viewBinding = FragmentAudiosBinding.bind(contentView)
+
+        val headerFooterDataFlow = stateFlow
+            .map { it.audios }
+            .map { if (it.isEmpty()) emptyList() else listOf(Unit) }
+
+        val emptyDataFlow = headerFooterDataFlow
+            .map { if (it.isEmpty()) listOf(Unit) else emptyList() }
+
+        // Header
+        val headerAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
+            itemViewCreator = SingleItemViewCreatorImpl(R.layout.header_footer_item_layout),
+            dataSource = FlowDataSourceImpl(headerFooterDataFlow),
+            dataBinder = DataBinderImpl { _, view, _ ->
+                HeaderFooterItemLayoutBinding.bind(view).let { binding ->
+                    binding.msgTv.text = "Header"
+                }
+            }
+        )
+
+        // Audios Content
         val audiosAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreAudio>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.audio_item_layout),
             dataSource = FlowDataSourceImpl(stateFlow.map { it.audios }),
             dataBinder = DataBinderImpl { data, view, _ ->
                 val itemViewBinding = AudioItemLayoutBinding.bind(view)
-                itemViewBinding.musicTitleTv.text = "${data.title}-${data.artist}"
+                itemViewBinding.musicTitleTv.text = data.title
+                itemViewBinding.artistAlbumTv.text = "${data.artist}-${data.album}"
                 view.clicks(this) {
                     Toast.makeText(this@AudiosFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
                 }
             }
         )
-        val endingAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
-            itemViewCreator = SingleItemViewCreatorImpl(R.layout.audio_item_layout),
-            dataSource = FlowDataSourceImpl(
-                stateFlow
-                    .map { it.audios }
-                    .map { if (it.isEmpty()) emptyList() else listOf(Unit) }
-            ),
+
+        // Footer
+        val footerAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
+            itemViewCreator = SingleItemViewCreatorImpl(R.layout.header_footer_item_layout),
+            dataSource = FlowDataSourceImpl(headerFooterDataFlow),
             dataBinder = DataBinderImpl { _, view, _ ->
-                AudioItemLayoutBinding.bind(view).let { binding ->
-                    binding.musicTitleTv.text = "End"
+                HeaderFooterItemLayoutBinding.bind(view).let { binding ->
+                    binding.msgTv.text = "Footer"
                 }
             }
         )
-        viewBinding.audiosRv.adapter = (audiosAdapterBuilder + endingAdapterBuilder).build()
+
+        // Empty
+        val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
+            itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
+            dataSource = FlowDataSourceImpl(emptyDataFlow),
+            dataBinder = DataBinderImpl { _, view, _ ->
+                EmptyContentLayoutBinding.bind(view).let { binding ->
+                    binding.msgTv.text = "No Audio."
+                }
+            }
+        )
+        viewBinding.audiosRv.adapter = (headerAdapterBuilder + audiosAdapterBuilder + footerAdapterBuilder + emptyAdapterBuilder).build()
     }
 
     override fun onResume() {

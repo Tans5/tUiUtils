@@ -88,6 +88,9 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
             data = builder.dataSource.getLastSubmittedData(positionInDataSource)
                 ?: error("Wrong data position: $positionInDataSource")
         ) ?: super.getItemViewType(position)
+        if (builderItemViewType > MAX_ITEM_VIEW_TYPE) {
+            error("ItemViewType($builderItemViewType) great than MaxItemViewType($MAX_ITEM_VIEW_TYPE)")
+        }
         val viewTypeFix = builderItemViewType and BUILDER_ITEM_VIEW_MASK
         val builderIndexFix = builderIndex.shl(BUILDER_INDEX_MASK_OFFSET_BIT)
         return builderIndexFix or viewTypeFix
@@ -190,9 +193,10 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
     }
 
     companion object {
-        private const val BUILDER_ITEM_VIEW_MASK: Int = 0x00_FF_FF_FF
-        private const val BUILDER_INDEX_MASK: Int = 0xFF_00_00_00.toInt()
-        private const val BUILDER_INDEX_MASK_OFFSET_BIT = 24
-        private const val MAX_BUILDER_INDEX = 255
+        private const val BUILDER_ITEM_VIEW_MASK: Int = 0x00_00_FF_FF
+        private const val BUILDER_INDEX_MASK: Int = 0xFF_FF_00_00.toInt()
+        private const val BUILDER_INDEX_MASK_OFFSET_BIT = 16
+        private const val MAX_BUILDER_INDEX = 65535
+        private const val MAX_ITEM_VIEW_TYPE = 65535
     }
 }
