@@ -4,13 +4,23 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.DataBinder
+import org.jetbrains.annotations.ApiStatus.Internal
 
 open class DataBinderImpl<Data : Any>(
     private val bindDataNoPayload: (data: Data, view: View, positionInDataSource: Int) -> Unit
 ) : DataBinder<Data> {
 
+    override fun addPayloadDataBinder(
+        payload: Any,
+        binder: (data: Data, view: View, positionInDataSource: Int) -> Unit
+    ): DataBinder<Data> {
+        return super.addPayloadDataBinder(payload, binder)
+    }
+
+    @Internal
     override val payloadDataBinders: MutableMap<Any,  ((data: Data, view: View, positionInDataSource: Int) -> Unit)?> = mutableMapOf()
 
+    @Internal
     override fun bindData(data: Data, view: View, positionInDataSource: Int) {
         bindDataNoPayload(data, view, positionInDataSource)
         for ((_, payloadBinder) in payloadDataBinders) {
@@ -20,6 +30,7 @@ open class DataBinderImpl<Data : Any>(
         }
     }
 
+    @Internal
     override fun bindPayloadData(data: Data, view: View, positionInDataSource: Int, payloads: List<Any>) {
         for (payload in payloads) {
             val binder = payloadDataBinders[payload]
@@ -31,7 +42,9 @@ open class DataBinderImpl<Data : Any>(
         }
     }
 
+    @Internal
     override var attachedBuilder: AdapterBuilder<Data>? = null
+    @Internal
     override var attachedRecyclerView: RecyclerView? = null
 
 }

@@ -1,7 +1,9 @@
 package com.tans.tuiutils.adapter
 
 import androidx.annotation.MainThread
+import org.jetbrains.annotations.ApiStatus.Internal
 
+@Internal
 interface DataSource<Data : Any> : AdapterBuilderLife<Data> {
 
     var lastSubmittedDataList: List<Data>?

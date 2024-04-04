@@ -7,26 +7,25 @@ import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.ItemViewCreator
+import org.jetbrains.annotations.ApiStatus.Internal
 
 class SingleItemViewCreatorImpl<Data : Any>(
     @LayoutRes
     private val itemViewLayoutRes: Int
 ) : ItemViewCreator<Data> {
 
-    override var canHandleItemViewTypes: MutableSet<Int> = mutableSetOf()
-
+    @Internal
     override fun getItemViewType(positionInDataSource: Int, data: Data): Int? = null
 
-    override fun canHandleViewType(itemViewType: Int): Boolean {
-        return true
-    }
-
+    @Internal
     override fun createItemView(parent: ViewGroup, itemViewType: Int): View {
       return LayoutInflater.from(parent.context).inflate(itemViewLayoutRes, parent, false)
     }
 
+    @Internal
     override var attachedBuilder: AdapterBuilder<Data>? = null
 
+    @Internal
     override var attachedRecyclerView: RecyclerView? = null
 
 }

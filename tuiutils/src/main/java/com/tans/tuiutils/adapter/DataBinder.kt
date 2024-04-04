@@ -1,7 +1,9 @@
 package com.tans.tuiutils.adapter
 
 import android.view.View
+import org.jetbrains.annotations.ApiStatus.Internal
 
+@Internal
 interface DataBinder<Data : Any> : AdapterBuilderLife<Data> {
 
     val payloadDataBinders: MutableMap<Any, ((data: Data, view: View, positionInDataSource: Int) -> Unit)?>

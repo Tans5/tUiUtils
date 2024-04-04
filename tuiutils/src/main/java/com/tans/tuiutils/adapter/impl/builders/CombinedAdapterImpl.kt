@@ -9,7 +9,7 @@ import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.DataSource
 import com.tans.tuiutils.adapter.DataSourceParent
 
-class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedAdapterBuilderImpl) : ListAdapter<Any, RecyclerView.ViewHolder>(
+internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedAdapterBuilderImpl) : ListAdapter<Any, RecyclerView.ViewHolder>(
     object : DiffUtil.ItemCallback<Any>() {
         override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
             val classA = oldItem::class.java

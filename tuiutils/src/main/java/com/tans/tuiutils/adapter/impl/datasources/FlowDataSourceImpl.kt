@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.ApiStatus.Internal
 
 class FlowDataSourceImpl<Data : Any>(
     private val dataFlow: Flow<List<Data>>,
@@ -20,8 +21,10 @@ class FlowDataSourceImpl<Data : Any>(
     areDataItemsContentTheSameParam = areDataItemsContentTheSameParam,
     getDataItemsChangePayloadParam = getDataItemsChangePayloadParam
 ) {
+    @Internal
     private var coroutineScope: CoroutineScope? = null
 
+    @Internal
     override fun onAttachToBuilder(recyclerView: RecyclerView, builder: AdapterBuilder<Data>) {
         super.onAttachToBuilder(recyclerView, builder)
         val newCoroutineScope = CoroutineScope(Dispatchers.Main.immediate)
@@ -36,6 +39,7 @@ class FlowDataSourceImpl<Data : Any>(
         coroutineScope = newCoroutineScope
     }
 
+    @Internal
     override fun onDetachedFromBuilder(recyclerView: RecyclerView, builder: AdapterBuilder<Data>) {
         super.onDetachedFromBuilder(recyclerView, builder)
         coroutineScope?.cancel("onAttachToBuilder")

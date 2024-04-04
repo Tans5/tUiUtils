@@ -2,10 +2,16 @@
 
 package com.tans.tuiutils.adapter.impl.builders
 
+import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
 
 
-class CombinedAdapterBuilderImpl(internal val childrenBuilders: List<AdapterBuilder<Any>>)
+class CombinedAdapterBuilderImpl(internal val childrenBuilders: List<AdapterBuilder<Any>>) {
+
+    fun build(): RecyclerView.Adapter<*> {
+        return CombinedAdapterImpl(this)
+    }
+}
 
 infix operator fun <A : Any, B : Any> AdapterBuilder<A>.plus(b: AdapterBuilder<B>): CombinedAdapterBuilderImpl {
     return if (this == b) {

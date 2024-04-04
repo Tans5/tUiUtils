@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.DataSource
 import com.tans.tuiutils.adapter.DataSourceParent
-import org.jetbrains.annotations.ApiStatus.Internal
 
 internal class SimpleAdapterImpl<Data : Any>(
     private val adapterBuilder: AdapterBuilder<Data>
