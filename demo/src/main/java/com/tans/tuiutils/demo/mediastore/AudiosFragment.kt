@@ -1,8 +1,13 @@
 package com.tans.tuiutils.demo.mediastore
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.tans.tuiutils.adapter.decoration.MarginDividerItemDecoration
+import com.tans.tuiutils.adapter.decoration.ignoreLastDividerController
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
 import com.tans.tuiutils.adapter.impl.builders.plus
 import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
@@ -14,12 +19,11 @@ import com.tans.tuiutils.demo.databinding.AudioItemLayoutBinding
 import com.tans.tuiutils.demo.databinding.EmptyContentLayoutBinding
 import com.tans.tuiutils.demo.databinding.FragmentAudiosBinding
 import com.tans.tuiutils.demo.databinding.HeaderFooterItemLayoutBinding
+import com.tans.tuiutils.dialog.dp2px
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreAudio
 import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -98,6 +102,20 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
             }
         )
         viewBinding.audiosRv.adapter = (headerAdapterBuilder + audiosAdapterBuilder + footerAdapterBuilder + emptyAdapterBuilder).build()
+
+        viewBinding.audiosRv.addItemDecoration(
+            MarginDividerItemDecoration.Companion.Builder()
+                .divider(MarginDividerItemDecoration.Companion.ColorDivider(color = Color.parseColor("#F2F2F2"), size = requireContext().dp2px(1)))
+                .dividerDirection(MarginDividerItemDecoration.Companion.DividerDirection.Horizontal)
+                .marginStart(requireContext().dp2px(16))
+                .dividerController(ignoreLastDividerController)
+                .build()
+        )
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.audiosRv) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, 0, 0, systemBars.bottom)
+            insets
+        }
     }
 
     override fun onResume() {
