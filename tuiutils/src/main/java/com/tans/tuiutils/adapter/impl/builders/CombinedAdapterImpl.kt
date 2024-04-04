@@ -174,7 +174,7 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
         var builderIndex = 0
         for (c in childrenBuilders) {
             val ds = c.dataSource.getLastSubmittedDataSize()
-            if (adapterPosition in startIndex until ds) {
+            if (adapterPosition in startIndex until (startIndex + ds)) {
                 targetBuilder = c
                 break
             } else {

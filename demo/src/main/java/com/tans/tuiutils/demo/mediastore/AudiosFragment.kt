@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
+import com.tans.tuiutils.adapter.impl.builders.plus
 import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
 import com.tans.tuiutils.adapter.impl.datasources.FlowDataSourceImpl
 import com.tans.tuiutils.adapter.impl.viewcreatators.SingleItemViewCreatorImpl
@@ -15,6 +16,7 @@ import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreAudio
 import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -38,7 +40,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
     override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
         println("${this@AudiosFragment::class.java.simpleName} bindContentViewCoroutine()")
         val viewBinding = FragmentAudiosBinding.bind(contentView)
-        val adapter = SimpleAdapterBuilderImpl<MediaStoreAudio>(
+        val audiosAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreAudio>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.audio_item_layout),
             dataSource = FlowDataSourceImpl(stateFlow.map { it.audios }),
             dataBinder = DataBinderImpl { data, view, _ ->
@@ -48,8 +50,21 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
                     Toast.makeText(this@AudiosFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
                 }
             }
-        ).build()
-        viewBinding.audiosRv.adapter = adapter
+        )
+        val endingAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
+            itemViewCreator = SingleItemViewCreatorImpl(R.layout.audio_item_layout),
+            dataSource = FlowDataSourceImpl(
+                stateFlow
+                    .map { it.audios }
+                    .map { if (it.isEmpty()) emptyList() else listOf(Unit) }
+            ),
+            dataBinder = DataBinderImpl { _, view, _ ->
+                AudioItemLayoutBinding.bind(view).let { binding ->
+                    binding.musicTitleTv.text = "End"
+                }
+            }
+        )
+        viewBinding.audiosRv.adapter = (audiosAdapterBuilder + endingAdapterBuilder).build()
     }
 
     override fun onResume() {
