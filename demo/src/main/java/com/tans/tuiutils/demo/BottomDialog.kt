@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.tans.tuiutils.demo.databinding.DialogBottomBinding
 import com.tans.tuiutils.dialog.BaseDialogFragment
+import com.tans.tuiutils.dialog.createBottomSheetDialog
 import com.tans.tuiutils.dialog.createDefaultDialog
 
 class BottomDialog : BaseDialogFragment() {
@@ -25,6 +26,8 @@ class BottomDialog : BaseDialogFragment() {
     }
 
     override fun createDialog(contentView: View): Dialog {
-        return requireActivity().createDefaultDialog(contentView = contentView, windowGravity = Gravity.BOTTOM)
+        return requireActivity().createBottomSheetDialog(contentView = contentView) { behavior ->
+
+        }
     }
 }

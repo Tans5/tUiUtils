@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_marginTop="2dp"
-    android:layout_gravity="bottom"
-    app:cardCornerRadius="10dp"
-    app:cardElevation="1dp">
+    android:layout_height="match_parent">
 
     <TextView
         android:layout_width="wrap_content"
@@ -14,4 +9,4 @@
         android:text="Bottom Dialog"
         android:layout_gravity="center"/>
 
-</androidx.cardview.widget.CardView>
+</FrameLayout>

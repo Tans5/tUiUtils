@@ -32,6 +32,7 @@ abstract class BaseCoroutineStateForceResultDialogFragment<State : Any, Result :
     }
 
     override fun createDialog(contentView: View): Dialog {
+        isCancelable = false
         return requireActivity().createDefaultDialog(contentView = contentView, isCancelable = false)
     }
 
