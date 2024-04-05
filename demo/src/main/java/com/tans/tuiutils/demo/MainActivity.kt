@@ -14,6 +14,7 @@ import com.tans.tuiutils.demo.mediastore.MediaStoreActivity
 import com.tans.tuiutils.demo.myfragment.MyFragmentActivity
 import com.tans.tuiutils.multimedia.pickImageSuspend
 import com.tans.tuiutils.multimedia.takeAPhotoSuspend
+import com.tans.tuiutils.permission.permissionsRequestSimplifySuspend
 import com.tans.tuiutils.permission.permissionsRequestSuspend
 import com.tans.tuiutils.systembar.annotation.ContentViewFitSystemWindow
 import com.tans.tuiutils.systembar.annotation.SystemBarStyle
@@ -56,8 +57,25 @@ class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
            }
         }
 
-        viewBinding.bottomDialogBt.clicks(this) {
-            BottomDialog().show(supportFragmentManager, "BottomDialog${System.currentTimeMillis()}")
+        viewBinding.selectAudiosBt.clicks(this) {
+            val audioReadPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
+            } else {
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            runCatching { this@MainActivity.permissionsRequestSimplifySuspend(*audioReadPermission) }
+                .onSuccess {
+                    if (it) {
+                        val selectedAudios = this@MainActivity.supportFragmentManager.showAudioSelectDialogSuspend()
+                        if (selectedAudios != null) {
+                            Toast.makeText(this@MainActivity, "Select audio count: ${selectedAudios.size}", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@MainActivity, "Select audio canceled", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(this@MainActivity, "No audios read permission.", Toast.LENGTH_SHORT).show()
+                    }
+                }
         }
 
         viewBinding.takeAPhotoBt.clicks(this) {

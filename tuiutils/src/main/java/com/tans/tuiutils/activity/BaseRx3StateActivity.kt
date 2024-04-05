@@ -34,10 +34,10 @@ abstract class BaseRx3StateActivity<State : Any>(defaultState: State) :
         dataRxLife.firstLaunchInitDataRx()
     }
 
-    abstract fun Rx3Life.bindContentViewCoroutine(contentView: View)
+    abstract fun Rx3Life.bindContentViewRx(contentView: View)
 
     final override fun bindContentView(contentView: View) {
-        uiRxLife.bindContentViewCoroutine(contentView)
+        uiRxLife.bindContentViewRx(contentView)
     }
 
     override fun onDestroy() {

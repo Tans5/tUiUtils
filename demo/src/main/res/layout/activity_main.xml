@@ -46,11 +46,11 @@
             android:text="YesOrNoDialog"/>
 
         <Button
-            android:id="@+id/bottom_dialog_bt"
+            android:id="@+id/select_audios_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="BottomDialog"/>
+            android:text="SelectAudios"/>
 
         <Button
             android:id="@+id/take_a_photo_bt"

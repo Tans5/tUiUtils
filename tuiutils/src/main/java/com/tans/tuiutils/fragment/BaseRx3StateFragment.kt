@@ -22,12 +22,12 @@ abstract class BaseRx3StateFragment<State : Any>(defaultState: State) : BaseFrag
         dataRxLife = newDataRxLife
     }
 
-    abstract fun Rx3Life.bindContentViewCoroutine(contentView: View)
+    abstract fun Rx3Life.bindContentViewRx(contentView: View)
 
     final override fun bindContentView(contentView: View) {
         uiRxLife?.lifeCompositeDisposable?.clear()
         val newRxUiLife = Rx3Life()
-        newRxUiLife.bindContentViewCoroutine(contentView)
+        newRxUiLife.bindContentViewRx(contentView)
         uiRxLife = newRxUiLife
     }
 

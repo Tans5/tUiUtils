@@ -23,8 +23,10 @@ class YesOrNoDialog : BaseCoroutineStateForceResultDialogFragment<Unit, Boolean>
         return LayoutInflater.from(context).inflate(R.layout.dialog_yes_or_no, parent, false)
     }
 
-    override fun onBindContentView(view: View) {
-        super.onBindContentView(view)
+    override fun firstLaunchInitData() {
+    }
+
+    override fun bindContentView(view: View) {
         val viewBinding = DialogYesOrNoBinding.bind(view)
 
         viewBinding.yesBt.clicks(this) {

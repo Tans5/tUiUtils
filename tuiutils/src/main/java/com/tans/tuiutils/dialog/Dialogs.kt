@@ -15,8 +15,6 @@ import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatDialog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.sidesheet.SideSheetBehavior
-import com.google.android.material.sidesheet.SideSheetDialog
 import com.tans.tuiutils.R
 import com.tans.tuiutils.systembar.SystemBarThemeStyle
 import com.tans.tuiutils.systembar.systemBarThemeStyle
@@ -100,38 +98,6 @@ fun Activity.createBottomSheetDialog(
         }
         this.navigationBarColor = navigationBarColor
         this.systemBarThemeStyle(this@createBottomSheetDialog, statusBarThemeStyle, navigationThemeStyle)
-    }
-    return d
-}
-
-fun Activity.createSideSheetDialog(
-    contentView: View,
-    isCancelable: Boolean = true,
-    dimAmount: Float = 0.6f,
-    statusBarThemeStyle: SystemBarThemeStyle = SystemBarThemeStyle.BySystem,
-    navigationThemeStyle: SystemBarThemeStyle = SystemBarThemeStyle.BySystem,
-    @ColorInt
-    navigationBarColor: Int = Color.TRANSPARENT,
-    direction: Int = SideSheetBehavior.EDGE_LEFT,
-    behaviorCallback: (behavior: SideSheetBehavior<*>) -> Unit = {}): Dialog {
-    val d = SideSheetDialog(this)
-    d.apply {
-        setContentView(contentView)
-        setCancelable(isCancelable)
-        setCanceledOnTouchOutside(isCancelable)
-        setSheetEdge(direction)
-        behaviorCallback(d.behavior)
-    }
-    d.window?.apply {
-        if (dimAmount < 0.01f) {
-            clearFlags(LayoutParams.FLAG_DIM_BEHIND)
-            setDimAmount(0.0f)
-        } else {
-            addFlags(LayoutParams.FLAG_DIM_BEHIND)
-            setDimAmount(dimAmount)
-        }
-        this.navigationBarColor = navigationBarColor
-        this.systemBarThemeStyle(this@createSideSheetDialog, statusBarThemeStyle, navigationThemeStyle)
     }
     return d
 }

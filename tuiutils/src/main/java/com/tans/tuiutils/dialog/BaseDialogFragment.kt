@@ -2,17 +2,11 @@ package com.tans.tuiutils.dialog
 
 import android.app.Dialog
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Looper
 import android.view.*
-import android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND
 import androidx.annotation.FloatRange
-import androidx.annotation.StyleRes
-import androidx.appcompat.app.AppCompatDialog
 import androidx.appcompat.app.AppCompatDialogFragment
-import com.tans.tuiutils.R
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseDialogFragment : AppCompatDialogFragment() {
@@ -69,7 +63,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
         val layoutInflater =  super.onGetLayoutInflater(savedInstanceState)
         if (dialog != null && isDialogCreatedInvoked.compareAndSet(false , true)) {
             contentView?.let {
-                onBindContentView(it)
+                bindContentView(it)
             }
         }
         return layoutInflater
@@ -82,16 +76,12 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
     /**
      * Do data load
      */
-    open fun firstLaunchInitData() {
-
-    }
+    abstract fun firstLaunchInitData()
 
     /**
      * Do UI update.
      */
-    open fun onBindContentView(view: View) {
-
-    }
+    abstract fun bindContentView(view: View)
 
     open fun createDialog(contentView: View): Dialog {
         return requireActivity().createDefaultDialog(contentView = contentView)
