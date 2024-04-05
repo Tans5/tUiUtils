@@ -28,9 +28,13 @@ import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import kotlin.coroutines.resume
 
-class AudioSelectDialog(callback: DialogCancelableResultCallback<List<MediaStoreAudio>>) : BaseCoroutineStateCancelableResultDialogFragment<AudioSelectDialog.Companion.State, List<MediaStoreAudio>>(State(), callback) {
+class AudioSelectDialog : BaseCoroutineStateCancelableResultDialogFragment<AudioSelectDialog.Companion.State, List<MediaStoreAudio>> {
 
     override val contentViewHeightInScreenRatio: Float = 0.7f
+
+    constructor() : super(State(), null)
+
+    constructor(callback: DialogCancelableResultCallback<List<MediaStoreAudio>>) : super(State(), callback)
 
     override fun createContentView(context: Context, parent: ViewGroup): View {
         return LayoutInflater.from(context).inflate(R.layout.dialog_select_audio, parent, false)
