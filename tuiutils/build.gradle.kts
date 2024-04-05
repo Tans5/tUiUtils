@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity)
     implementation(libs.material)
+    implementation(libs.androidx.recyclerview)
 
     compileOnly(libs.rxjava3)
     compileOnly(libs.rxandroid3)
