@@ -72,11 +72,10 @@ class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
                 }
                 FileProvider.getUriForFile(this@MainActivity, "${packageName}.provider", photoFile) to photoFile
             }
-            val result = runCatching {
+            runCatching {
                 takeAPhotoSuspend(outputUri)
-            }
-            if (result.isSuccess) {
-                if (result.getOrThrow()) {
+            }.onSuccess {
+                if (it) {
                     val bitmap = withContext(Dispatchers.IO) {
                         BitmapFactory.decodeFile(outputFile.canonicalPath)
                     }
@@ -85,36 +84,36 @@ class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
                     outputFile.delete()
                     Toast.makeText(this@MainActivity, "Take photo cancel", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this@MainActivity, "Take photo error: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
+            }.onFailure {
+                Toast.makeText(this@MainActivity, "Take photo error: ${it.message}", Toast.LENGTH_SHORT).show()
             }
         }
 
         viewBinding.pickAPictureBt.clicks(this) {
-            val result = runCatching { pickImageSuspend() }
-            if (result.isSuccess) {
-                val pickedUri = result.getOrThrow()
-                if (pickedUri == null) {
-                    Toast.makeText(this@MainActivity, "Pick image canceled.", Toast.LENGTH_SHORT).show()
-                } else {
-                    val bitmap = withContext(Dispatchers.IO) {
-                        val bytes = contentResolver.openInputStream(pickedUri)?.use { inputStream ->
-                            ByteArrayOutputStream().use { outputStream ->
-                                inputStream.copyTo(outputStream)
-                                outputStream.toByteArray()
+            runCatching { pickImageSuspend() }
+                .onSuccess {
+                    if (it == null) {
+                        Toast.makeText(this@MainActivity, "Pick image canceled.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val bitmap = withContext(Dispatchers.IO) {
+                            val bytes = contentResolver.openInputStream(it)?.use { inputStream ->
+                                ByteArrayOutputStream().use { outputStream ->
+                                    inputStream.copyTo(outputStream)
+                                    outputStream.toByteArray()
+                                }
+                            }
+                            if (bytes != null) {
+                                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                            } else {
+                                null
                             }
                         }
-                        if (bytes != null) {
-                            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                        } else {
-                            null
-                        }
+                        viewBinding.displayIv.setImageBitmap(bitmap)
                     }
-                    viewBinding.displayIv.setImageBitmap(bitmap)
                 }
-            } else {
-                Toast.makeText(this@MainActivity, "Pick image error: ${result.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
-            }
+                .onFailure {
+                    Toast.makeText(this@MainActivity, "Pick image error: ${it.message}", Toast.LENGTH_SHORT).show()
+                }
         }
 
         viewBinding.fragmentActBt.clicks(this) {
@@ -129,16 +128,14 @@ class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
             } else {
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
-            val permissionResult = runCatching { permissionsRequestSuspend(*mediaStorePermissions) }
-            if (permissionResult.isSuccess) {
-                val (granted, _) = permissionResult.getOrThrow()
-                if (granted.isNotEmpty()) {
-                    startActivity(Intent(this@MainActivity, MediaStoreActivity::class.java))
-                } else {
-                    Toast.makeText(this@MainActivity, "No MediaStore read permission.", Toast.LENGTH_SHORT).show()
+            runCatching { permissionsRequestSuspend(*mediaStorePermissions) }
+                .onSuccess { (granted, deny) ->
+                    if (granted.isNotEmpty()) {
+                        startActivity(Intent(this@MainActivity, MediaStoreActivity::class.java))
+                    } else {
+                        Toast.makeText(this@MainActivity, "No MediaStore read permission.", Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }
-
         }
     }
 }

@@ -53,7 +53,13 @@ internal class ActivityResultFragment : Fragment {
 
         val requestCode = Random(System.currentTimeMillis()).nextInt(0, 65535)
         lastRequestCode = requestCode
-        startActivityForResult(targetActivityIntent, requestCode)
+        try {
+            startActivityForResult(targetActivityIntent, requestCode)
+        } catch (e: Throwable) {
+            if (hasInvokeCallback.compareAndSet(false, true)) {
+                error?.invoke("StartActivityResultError: ${e.message}")
+            }
+        }
     }
 
     @Deprecated("Deprecated in Java")
