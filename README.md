@@ -315,7 +315,7 @@ val adapterBuilder = SimpleAdapterBuilderImpl<MediaStoreImage>(
 viewBinding.imagesRv.adapter = adapterBuilder.build()
 ```
 
-#### 1.5.1 Combine Multiple Adapter Builder
+#### 1.5.1 Combine Multiple Adapter Builders
 
 ```Kotlin
 // Header
