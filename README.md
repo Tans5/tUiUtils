@@ -11,7 +11,7 @@ To use the TUIUtils library, add the following dependency to your `build.gradle`
 ```Groovy
 // ...
 dependencies {
-    implementation "io.github.tans5:tuiutils:1.0.0"
+    implementation "io.github.tans5:tuiutils:1.0.1"
 }
 ```
 
@@ -169,7 +169,7 @@ startActivityResult(
 #### 1.3.2 Use RxJava3
 
 ```Kotlin
-startActivityResultRx(Intent(this@MainActivity, MainActivity::class.java))
+startActivityResultRx3(Intent(this@MainActivity, MainActivity::class.java))
     .subscribe({ (resultCode, resultData) ->
         // TODO:
     }, { e: Throwable ->
@@ -219,7 +219,7 @@ runCatching {
 ##### 1.3.1.2 Use RxJava3
 
 ```Kotlin
- takeAPhotoRx(outputUri)
+ takeAPhotoRx3(outputUri)
      .subscribe(
          { isSuccess ->
              // TODO:
@@ -261,7 +261,7 @@ launch {
 ##### 1.3.2.2 Use RxJava3
 
 ```Kotlin
-pickImageRx()
+pickImageRx3()
     .subscribe(
         { uri -> 
             // TODO:

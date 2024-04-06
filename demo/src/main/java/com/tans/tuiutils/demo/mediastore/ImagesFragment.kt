@@ -22,7 +22,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@Suppress("UnstableApiUsage")
 class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State>(State()) {
 
     override val layoutId: Int = R.layout.fragment_images

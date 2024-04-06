@@ -23,7 +23,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@Suppress("UnstableApiUsage")
 class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State>(State()) {
 
     override val layoutId: Int = R.layout.fragment_videos
