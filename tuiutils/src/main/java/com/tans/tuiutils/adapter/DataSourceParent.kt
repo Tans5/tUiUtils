@@ -2,7 +2,7 @@ package com.tans.tuiutils.adapter
 
 import androidx.annotation.MainThread
 import com.tans.tuiutils.assertMainThread
-import org.jetbrains.annotations.ApiStatus.Internal
+import com.tans.tuiutils.Internal
 
 @Internal
 interface DataSourceParent<Data : Any> {

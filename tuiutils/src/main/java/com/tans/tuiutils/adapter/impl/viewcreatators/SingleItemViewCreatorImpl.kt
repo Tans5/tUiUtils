@@ -7,7 +7,7 @@ import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.ItemViewCreator
-import org.jetbrains.annotations.ApiStatus.Internal
+import com.tans.tuiutils.Internal
 
 class SingleItemViewCreatorImpl<Data : Any>(
     @LayoutRes

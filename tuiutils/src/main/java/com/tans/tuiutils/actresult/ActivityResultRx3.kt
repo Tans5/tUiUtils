@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import io.reactivex.rxjava3.core.Single
 
-fun FragmentActivity.startActivityResultRx(targetActivityIntent: Intent): Single<Pair<Int, Intent?>> {
+fun FragmentActivity.startActivityResultRx3(targetActivityIntent: Intent): Single<Pair<Int, Intent?>> {
     return Single.create { emitter ->
         val r = Runnable {
             startActivityResult(
@@ -31,6 +31,6 @@ fun FragmentActivity.startActivityResultRx(targetActivityIntent: Intent): Single
     }
 }
 
-fun Fragment.startActivityResultRx(targetActivityIntent: Intent): Single<Pair<Int, Intent?>> {
-    return activity?.startActivityResultRx(targetActivityIntent) ?: Single.error(Throwable("Fragment's parent activity is null."))
+fun Fragment.startActivityResultRx3(targetActivityIntent: Intent): Single<Pair<Int, Intent?>> {
+    return activity?.startActivityResultRx3(targetActivityIntent) ?: Single.error(Throwable("Fragment's parent activity is null."))
 }

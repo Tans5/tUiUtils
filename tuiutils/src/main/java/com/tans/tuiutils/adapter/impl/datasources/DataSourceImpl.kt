@@ -3,7 +3,7 @@ package com.tans.tuiutils.adapter.impl.datasources
 import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.DataSource
-import org.jetbrains.annotations.ApiStatus.Internal
+import com.tans.tuiutils.Internal
 
 open class DataSourceImpl<Data : Any>(
     private val areDataItemsTheSameParam: (d1: Data, d2: Data) -> Boolean = { d1, d2 -> d1 == d2 },

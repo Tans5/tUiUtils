@@ -1,7 +1,7 @@
 package com.tans.tuiutils.adapter
 
 import android.view.View
-import org.jetbrains.annotations.ApiStatus.Internal
+import com.tans.tuiutils.Internal
 
 @Internal
 interface DataBinder<Data : Any> : AdapterBuilderLife<Data> {

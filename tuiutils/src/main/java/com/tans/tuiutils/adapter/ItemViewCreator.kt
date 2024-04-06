@@ -2,7 +2,7 @@ package com.tans.tuiutils.adapter
 
 import android.view.View
 import android.view.ViewGroup
-import org.jetbrains.annotations.ApiStatus.Internal
+import com.tans.tuiutils.Internal
 
 @Internal
 interface ItemViewCreator<Data : Any> : AdapterBuilderLife<Data> {

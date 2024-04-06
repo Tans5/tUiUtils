@@ -1,7 +1,7 @@
 package com.tans.tuiutils.adapter
 
 import androidx.recyclerview.widget.RecyclerView
-import org.jetbrains.annotations.ApiStatus.Internal
+import com.tans.tuiutils.Internal
 
 @Internal
 interface AdapterLifecycle<Data : Any> {

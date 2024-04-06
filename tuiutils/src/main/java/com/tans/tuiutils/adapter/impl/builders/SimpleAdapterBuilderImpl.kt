@@ -6,7 +6,7 @@ import com.tans.tuiutils.adapter.DataBinder
 import com.tans.tuiutils.adapter.DataSource
 import com.tans.tuiutils.adapter.DataSourceParent
 import com.tans.tuiutils.adapter.ItemViewCreator
-import org.jetbrains.annotations.ApiStatus.Internal
+import com.tans.tuiutils.Internal
 
 class SimpleAdapterBuilderImpl<Data : Any>(
     override val itemViewCreator: ItemViewCreator<Data>,

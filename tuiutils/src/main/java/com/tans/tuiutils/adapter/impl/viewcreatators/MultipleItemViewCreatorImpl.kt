@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.ItemViewCreator
-import org.jetbrains.annotations.ApiStatus.Internal
+import com.tans.tuiutils.Internal
 
 class MultipleItemViewCreatorImpl<Data : Any>(
     private val itemViewTypeToLayoutResId: Map<Int, Int>,

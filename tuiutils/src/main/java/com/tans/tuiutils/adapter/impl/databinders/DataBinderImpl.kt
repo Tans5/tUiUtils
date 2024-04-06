@@ -4,7 +4,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.DataBinder
-import org.jetbrains.annotations.ApiStatus.Internal
+import com.tans.tuiutils.Internal
 
 open class DataBinderImpl<Data : Any>(
     private val bindDataNoPayload: (data: Data, view: View, positionInDataSource: Int) -> Unit

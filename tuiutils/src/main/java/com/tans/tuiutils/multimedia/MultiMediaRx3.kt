@@ -7,7 +7,7 @@ import androidx.fragment.app.FragmentActivity
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Single
 
-fun FragmentActivity.pickVisualMediaRx(mimeType: String): Maybe<Uri> {
+fun FragmentActivity.pickVisualMediaRx3(mimeType: String): Maybe<Uri> {
     return Maybe.create { emit ->
         val r = Runnable {
             pickVisualMedia(
@@ -36,27 +36,27 @@ fun FragmentActivity.pickVisualMediaRx(mimeType: String): Maybe<Uri> {
     }
 }
 
-fun Fragment.pickVisualMediaRx(mimeType: String): Maybe<Uri> {
-    return activity?.pickVisualMediaRx(mimeType) ?: Maybe.error(Throwable("Fragment's parent activity is null."))
+fun Fragment.pickVisualMediaRx3(mimeType: String): Maybe<Uri> {
+    return activity?.pickVisualMediaRx3(mimeType) ?: Maybe.error(Throwable("Fragment's parent activity is null."))
 }
 
-fun FragmentActivity.pickImageRx(): Maybe<Uri> {
-    return pickVisualMediaRx(mimeType = "image/*")
+fun FragmentActivity.pickImageRx3(): Maybe<Uri> {
+    return pickVisualMediaRx3(mimeType = "image/*")
 }
 
-fun Fragment.pickImageRx(): Maybe<Uri> {
-    return activity?.pickImageRx() ?: Maybe.error(Throwable("Fragment's parent activity is null."))
+fun Fragment.pickImageRx3(): Maybe<Uri> {
+    return activity?.pickImageRx3() ?: Maybe.error(Throwable("Fragment's parent activity is null."))
 }
 
-fun FragmentActivity.pickVideoRx(): Maybe<Uri> {
-    return pickVisualMediaRx(mimeType = "video/*")
+fun FragmentActivity.pickVideoRx3(): Maybe<Uri> {
+    return pickVisualMediaRx3(mimeType = "video/*")
 }
 
-fun Fragment.pickVideoRx(): Maybe<Uri> {
-    return activity?.pickVideoRx() ?: Maybe.error(Throwable("Fragment's parent activity is null."))
+fun Fragment.pickVideoRx3(): Maybe<Uri> {
+    return activity?.pickVideoRx3() ?: Maybe.error(Throwable("Fragment's parent activity is null."))
 }
 
-fun FragmentActivity.takeAPhotoRx(outputUri: Uri): Single<Boolean> {
+fun FragmentActivity.takeAPhotoRx3(outputUri: Uri): Single<Boolean> {
     return Single.create { emit ->
         val r = Runnable {
             takeAPhoto(
@@ -80,6 +80,6 @@ fun FragmentActivity.takeAPhotoRx(outputUri: Uri): Single<Boolean> {
     }
 }
 
-fun Fragment.takeAPhotoRx(outputUri: Uri): Single<Boolean> {
-    return activity?.takeAPhotoRx(outputUri) ?: Single.error(Throwable("Fragment's parent activity is null."))
+fun Fragment.takeAPhotoRx3(outputUri: Uri): Single<Boolean> {
+    return activity?.takeAPhotoRx3(outputUri) ?: Single.error(Throwable("Fragment's parent activity is null."))
 }
