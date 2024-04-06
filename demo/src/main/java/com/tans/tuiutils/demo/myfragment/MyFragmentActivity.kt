@@ -4,7 +4,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import com.tans.tuiutils.activity.BaseCoroutineStateActivity
-import com.tans.tuiutils.clicks.clicks
+import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.demo.R
 import com.tans.tuiutils.demo.databinding.ActivityMyFragmentBinding
 import com.tans.tuiutils.systembar.annotation.ContentViewFitSystemWindow

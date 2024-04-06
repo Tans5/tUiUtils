@@ -8,7 +8,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.tans.tuiutils.activity.BaseCoroutineStateActivity
-import com.tans.tuiutils.clicks.clicks
+import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.demo.databinding.ActivityMainBinding
 import com.tans.tuiutils.demo.mediastore.MediaStoreActivity
 import com.tans.tuiutils.demo.myfragment.MyFragmentActivity

@@ -11,7 +11,7 @@ import com.tans.tuiutils.adapter.impl.builders.plus
 import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
 import com.tans.tuiutils.adapter.impl.datasources.FlowDataSourceImpl
 import com.tans.tuiutils.adapter.impl.viewcreatators.SingleItemViewCreatorImpl
-import com.tans.tuiutils.clicks.clicks
+import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.demo.databinding.AudioSelectItemLayoutBinding
 import com.tans.tuiutils.demo.databinding.DialogSelectAudioBinding
 import com.tans.tuiutils.demo.databinding.EmptyContentLayoutBinding

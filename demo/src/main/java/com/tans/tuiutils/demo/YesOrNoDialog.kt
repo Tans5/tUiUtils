@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
-import com.tans.tuiutils.clicks.clicks
+import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.demo.databinding.DialogYesOrNoBinding
 import com.tans.tuiutils.dialog.BaseCoroutineStateForceResultDialogFragment
 import com.tans.tuiutils.dialog.DialogForceResultCallback

@@ -1,4 +1,4 @@
-package com.tans.tuiutils.clicks
+package com.tans.tuiutils.view
 
 import android.os.SystemClock
 import android.view.View
@@ -81,7 +81,7 @@ fun View.clicks(
                     isOk
                 }
                 .collect {
-                    if (lastClickJob?.isCompleted == false) {
+                    if (lastClickJob?.isActive == true) {
                         tUiUtilsLog.w(tag = TAG, msg = "Last click don't completed, skip current job.")
                     } else {
                         lastClickJob = launch(clickWorkOn) {
