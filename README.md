@@ -179,7 +179,7 @@ startActivityResultRx(Intent(this@MainActivity, MainActivity::class.java))
 
 ### 1.3 Get Media Data
 
-### 1.3.0 Query MediaData From MediaStore
+#### 1.3.0 Query MediaData From MediaStore
 
 After `Android 13` need permissions `READ_MEDIA_AUDIO`, `READ_MEDIA_VIDEO` and `READ_MEDIA_IMAGE`, Before `Android 13`, need permission `READ_EXTERNAL_STORAGE`.  
 
@@ -189,9 +189,9 @@ val images = queryImageFromMediaStore()
 val videos = queryVideoFromMediaStore()
 ```
 
-### 1.3.1 Take a Photo
+#### 1.3.1 Take a Photo
 
-#### 1.3.1.0 Use Callback
+##### 1.3.1.0 Use Callback
 
 ```Kotlin
 takeAPhoto(
@@ -204,7 +204,7 @@ takeAPhoto(
     })
 ```
 
-#### 1.3.1.1 Use Coroutines
+##### 1.3.1.1 Use Coroutines
 
 ```Kotlin
 runCatching {
@@ -216,7 +216,7 @@ runCatching {
 }
 ```
 
-#### 1.3.1.2 Use RxJava3
+##### 1.3.1.2 Use RxJava3
 
 ```Kotlin
  takeAPhotoRx(outputUri)
@@ -229,9 +229,9 @@ runCatching {
          })
 ```
 
-### 1.3.2 Pick a Image
+#### 1.3.2 Pick a Image
 
-#### 1.3.2.0 Use Callback
+##### 1.3.2.0 Use Callback
 
 ```Kotlin
 pickImage(
@@ -244,7 +244,7 @@ pickImage(
     })
 ```
 
-#### 1.3.2.1 Use Coroutines
+##### 1.3.2.1 Use Coroutines
 
 ```Kotlin
 launch {
@@ -258,7 +258,7 @@ launch {
 }
 ```
 
-#### 1.3.2.2 Use RxJava3
+##### 1.3.2.2 Use RxJava3
 
 ```Kotlin
 pickImageRx()

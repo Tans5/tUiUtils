@@ -28,6 +28,7 @@ import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import kotlin.coroutines.resume
 
+@Suppress("UnstableApiUsage")
 class AudioSelectDialog : BaseCoroutineStateCancelableResultDialogFragment<AudioSelectDialog.Companion.State, List<MediaStoreAudio>> {
 
     override val contentViewHeightInScreenRatio: Float = 0.7f
