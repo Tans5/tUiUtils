@@ -12,6 +12,7 @@ import com.tans.tuiutils.demo.databinding.ActivityMediaStoreBinding
 import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import kotlinx.coroutines.CoroutineScope
 
+@SystemBarStyle
 class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Companion.State>(State()) {
 
     override val layoutId: Int = R.layout.activity_media_store
