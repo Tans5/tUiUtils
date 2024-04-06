@@ -80,7 +80,8 @@ dependencies {
     implementation(libs.coroutines.rx3)
     implementation(libs.glide)
 
-    implementation(project(":tuiutils"))
+    implementation(libs.tuiutils)
+    // implementation(project(":tuiutils"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

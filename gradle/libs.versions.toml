@@ -17,6 +17,7 @@ rxkotlin3 = "3.0.1"
 rxandroid3 = "3.0.2"
 corouines = "1.8.0"
 glide = "4.16.0"
+tuiutils = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,6 +39,7 @@ coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-corouti
 coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "corouines" }
 coroutines-rx3 = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-rx3", version.ref = "corouines" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide"}
+tuiutils = { group = "io.github.tans5", name = "tuiutils", version.ref = "tuiutils"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
