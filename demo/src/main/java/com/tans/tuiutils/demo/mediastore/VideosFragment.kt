@@ -16,7 +16,10 @@ import com.tans.tuiutils.demo.databinding.VideoItemLayoutBinding
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreVideo
 import com.tans.tuiutils.mediastore.queryVideoFromMediaStore
+import com.tans.tuiutils.view.refreshes
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -33,7 +36,7 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
         println("${this@VideosFragment::class.java.simpleName} firstLaunchInitDataCoroutine()")
         launch {
             val videos = this@VideosFragment.queryVideoFromMediaStore()
-            updateState { it.copy(videos = videos) }
+            updateState { it.copy(videos = videos, hasLoadFirstData = true) }
         }
     }
 
@@ -50,7 +53,7 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
         )
         val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
-            dataSource = FlowDataSourceImpl(stateFlow.map { if (it.videos.isEmpty()) listOf(Unit) else emptyList() }),
+            dataSource = FlowDataSourceImpl(stateFlow.map { if (it.videos.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
             dataBinder = DataBinderImpl { _, view, _ ->
                 val itemViewBinding = EmptyContentLayoutBinding.bind(view)
                 itemViewBinding.msgTv.text = "No Video."
@@ -62,6 +65,11 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, 0, 0, systemBars.bottom)
             insets
+        }
+        viewBinding.swipeRefresh.refreshes(this, Dispatchers.IO) {
+            delay(500)
+            val videos = this@VideosFragment.queryVideoFromMediaStore()
+            updateState { it.copy(videos = videos) }
         }
     }
 
@@ -81,6 +89,6 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
     }
 
     companion object {
-        data class State(val videos: List<MediaStoreVideo> = emptyList())
+        data class State(val videos: List<MediaStoreVideo> = emptyList(), val hasLoadFirstData: Boolean = false)
     }
 }

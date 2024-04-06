@@ -15,7 +15,10 @@ import com.tans.tuiutils.demo.databinding.ImageItemLayoutBinding
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreImage
 import com.tans.tuiutils.mediastore.queryImageFromMediaStore
+import com.tans.tuiutils.view.refreshes
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -56,6 +59,11 @@ class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, 0, 0, systemBars.bottom)
             insets
+        }
+        viewBinding.swipeRefresh.refreshes(this, Dispatchers.IO) {
+            delay(500)
+            val images = this@ImagesFragment.queryImageFromMediaStore()
+            updateState { it.copy(images = images) }
         }
     }
 

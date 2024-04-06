@@ -23,7 +23,10 @@ import com.tans.tuiutils.dialog.dp2px
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreAudio
 import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
+import com.tans.tuiutils.view.refreshes
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -40,7 +43,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
         println("${this@AudiosFragment::class.java.simpleName} firstLaunchInitDataCoroutine()")
         launch {
             val audios = this@AudiosFragment.queryAudioFromMediaStore()
-            updateState { it.copy(audios = audios) }
+            updateState { it.copy(audios = audios, hasLoadFirstData = true) }
         }
     }
 
@@ -50,9 +53,6 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
 
         val headerFooterDataFlow = stateFlow
             .map { if (it.audios.isEmpty()) emptyList() else listOf(Unit) }
-
-        val emptyDataFlow = headerFooterDataFlow
-            .map { if (it.isEmpty()) listOf(Unit) else emptyList() }
 
         // Header
         val headerAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
@@ -93,7 +93,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
         // Empty
         val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
-            dataSource = FlowDataSourceImpl(emptyDataFlow),
+            dataSource = FlowDataSourceImpl(stateFlow.map { if (it.audios.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
             dataBinder = DataBinderImpl { _, view, _ ->
                 EmptyContentLayoutBinding.bind(view).let { binding ->
                     binding.msgTv.text = "No Audio."
@@ -115,6 +115,12 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
             v.setPadding(0, 0, 0, systemBars.bottom)
             insets
         }
+
+        viewBinding.swipeRefresh.refreshes(this, Dispatchers.IO) {
+            delay(500)
+            val audios = this@AudiosFragment.queryAudioFromMediaStore()
+            updateState { it.copy(audios = audios) }
+        }
     }
 
     override fun onResume() {
@@ -133,6 +139,6 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
     }
 
     companion object {
-        data class State(val audios: List<MediaStoreAudio> = emptyList())
+        data class State(val audios: List<MediaStoreAudio> = emptyList(), val hasLoadFirstData: Boolean = false)
     }
 }

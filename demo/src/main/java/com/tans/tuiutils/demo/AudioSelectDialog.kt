@@ -44,7 +44,7 @@ class AudioSelectDialog : BaseCoroutineStateCancelableResultDialogFragment<Audio
         launch(Dispatchers.IO) {
             val audios = this@AudioSelectDialog.queryAudioFromMediaStore()
             updateState {
-                it.copy(audiosWithSelected = audios.map { a -> AudioWithSelected(a, false) })
+                it.copy(audiosWithSelected = audios.map { a -> AudioWithSelected(a, false) }, hasLoadFirstData = true)
             }
         }
     }
@@ -86,7 +86,7 @@ class AudioSelectDialog : BaseCoroutineStateCancelableResultDialogFragment<Audio
         )
         val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
-            dataSource = FlowDataSourceImpl(stateFlow.map { if (it.audiosWithSelected.isEmpty()) listOf(Unit) else emptyList() }),
+            dataSource = FlowDataSourceImpl(stateFlow.map { if (it.audiosWithSelected.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
             dataBinder = DataBinderImpl{ _, itemView, _ ->
                 val itemViewBinding = EmptyContentLayoutBinding.bind(itemView)
                 itemViewBinding.msgTv.text = "No Audio."
@@ -118,7 +118,8 @@ class AudioSelectDialog : BaseCoroutineStateCancelableResultDialogFragment<Audio
             val isSelected: Boolean
         )
         data class State(
-            val audiosWithSelected: List<AudioWithSelected> = emptyList()
+            val audiosWithSelected: List<AudioWithSelected> = emptyList(),
+            val hasLoadFirstData: Boolean = false
         )
     }
 }
