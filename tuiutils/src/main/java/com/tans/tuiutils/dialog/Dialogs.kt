@@ -47,6 +47,7 @@ fun Activity.createDefaultDialog(
         wrapper.setOnClickListener {
             dialog.dismiss()
         }
+        contentView.setOnClickListener {  }
     }
     dialog.apply {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
