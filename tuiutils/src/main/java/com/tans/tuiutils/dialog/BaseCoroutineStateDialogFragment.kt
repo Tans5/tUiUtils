@@ -27,7 +27,7 @@ abstract class BaseCoroutineStateDialogFragment<State : Any>(defaultState: State
     }
 
     open fun onCoroutineScopeException(context: CoroutineContext, exception: Throwable) {
-
+        throw exception
     }
 
     override fun onDestroy() {

@@ -69,11 +69,11 @@ abstract class BaseCoroutineStateActivity<State : Any>(defaultState: State) :
     }
 
     open fun onUICoroutineScopeException(context: CoroutineContext, exception: Throwable) {
-
+        throw exception
     }
 
     open fun onDataCoroutineScopeException(context: CoroutineContext, exception: Throwable) {
-
+        throw exception
     }
 
 }

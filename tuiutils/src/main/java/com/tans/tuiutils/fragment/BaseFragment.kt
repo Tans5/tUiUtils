@@ -17,10 +17,14 @@ abstract class BaseFragment : Fragment() {
     @get:LayoutRes
     abstract val layoutId: Int
 
+    protected var configureChangeCreateNewContentView: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         retainInstance = true
-        firstLaunchInitData()
+        if (savedInstanceState == null) {
+            firstLaunchInitData()
+        }
         if (savedInstanceState != null) {
             val needRemoveFragments = parentFragmentManager.fragments.filter { it.tag == tag }
             if (needRemoveFragments.isNotEmpty()) {
@@ -49,7 +53,7 @@ abstract class BaseFragment : Fragment() {
             bindContentView(newContentView)
             newContentView
         } else {
-            if (savedInstanceState != null) {
+            if (savedInstanceState != null && configureChangeCreateNewContentView) {
                 tUiUtilsLog.d(BASE_FRAGMENT_TAG, "Config changed, create new ContentView")
                 val newContentView = inflater.inflate(layoutId, container, false)
                 this.lastContentView = newContentView

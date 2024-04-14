@@ -11,7 +11,7 @@ import kotlinx.coroutines.isActive
 import kotlin.coroutines.CoroutineContext
 
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class BaseCoroutineStateFragment<State : Any>(defaultState: State) : BaseFragment(),
+abstract class BaseCoroutineStateFragment<State : Any>(protected val defaultState: State) : BaseFragment(),
     CoroutineState<State> by CoroutineState(defaultState) {
 
     private val uiCoroutineExceptionHandler: CoroutineExceptionHandler by lazy {
@@ -69,11 +69,11 @@ abstract class BaseCoroutineStateFragment<State : Any>(defaultState: State) : Ba
     }
 
     open fun onUICoroutineScopeException(context: CoroutineContext, exception: Throwable) {
-
+        throw exception
     }
 
     open fun onDataCoroutineScopeException(context: CoroutineContext, exception: Throwable) {
-
+        throw exception
     }
 
     override fun onDestroy() {

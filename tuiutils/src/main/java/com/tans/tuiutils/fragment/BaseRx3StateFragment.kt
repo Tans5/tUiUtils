@@ -5,7 +5,7 @@ import com.tans.tuiutils.state.Rx3Life
 import com.tans.tuiutils.state.Rx3State
 
 @Suppress("MemberVisibilityCanBePrivate")
-abstract class BaseRx3StateFragment<State : Any>(defaultState: State) : BaseFragment(), Rx3State<State> by Rx3State(defaultState) {
+abstract class BaseRx3StateFragment<State : Any>(protected val defaultState: State) : BaseFragment(), Rx3State<State> by Rx3State(defaultState) {
 
     protected var uiRxLife: Rx3Life? = null
         private set
