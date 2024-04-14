@@ -17,14 +17,12 @@ abstract class BaseFragment : Fragment() {
     @get:LayoutRes
     abstract val layoutId: Int
 
-    protected var configureChangeCreateNewContentView: Boolean = false
+    open val configureChangeCreateNewContentView: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         retainInstance = true
-        if (savedInstanceState == null) {
-            firstLaunchInitData()
-        }
+        firstLaunchInitData()
         if (savedInstanceState != null) {
             val needRemoveFragments = parentFragmentManager.fragments.filter { it.tag == tag }
             if (needRemoveFragments.isNotEmpty()) {
@@ -40,6 +38,7 @@ abstract class BaseFragment : Fragment() {
     }
 
     private var lastContentView: View? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -50,28 +49,34 @@ abstract class BaseFragment : Fragment() {
             tUiUtilsLog.d(BASE_FRAGMENT_TAG, "LastContentView is null, create new ContentView")
             val newContentView = inflater.inflate(layoutId, container, false)
             this.lastContentView = newContentView
-            bindContentView(newContentView)
+            bindContentView(newContentView, false)
             newContentView
         } else {
-            if (savedInstanceState != null && configureChangeCreateNewContentView) {
+            val contentView = if (savedInstanceState != null && configureChangeCreateNewContentView) {
+                // Configure change and need create new view.
                 tUiUtilsLog.d(BASE_FRAGMENT_TAG, "Config changed, create new ContentView")
                 val newContentView = inflater.inflate(layoutId, container, false)
-                this.lastContentView = newContentView
-                bindContentView(newContentView)
+                bindContentView(newContentView, false)
                 newContentView
             } else {
+                // Use last content view.
+                bindContentView(lastContentView, true)
                 lastContentView
             }
+            this.lastContentView = contentView
+            contentView
         }
     }
 
     abstract fun firstLaunchInitData()
 
-    abstract fun bindContentView(contentView: View)
+    abstract fun bindContentView(contentView: View, useLastContentView: Boolean)
 
     override fun onDestroy() {
         super.onDestroy()
-        lastContentView = null
+        if (configureChangeCreateNewContentView) {
+            lastContentView = null
+        }
     }
 
 }

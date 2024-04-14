@@ -24,6 +24,8 @@ abstract class BaseCoroutineStateFragment<State : Any>(protected val defaultStat
         }
     }
 
+    open val firstLaunchCheckDefaultState: Boolean = true
+
     protected var uiCoroutineScope: CoroutineScope? = null
         private set
 
@@ -45,18 +47,24 @@ abstract class BaseCoroutineStateFragment<State : Any>(protected val defaultStat
 
     final override fun firstLaunchInitData() {
         val newDataCoroutineScope = CoroutineScope(Dispatchers.IO + dataCoroutineExceptionHandler)
-        newDataCoroutineScope.firstLaunchInitDataCoroutine()
         dataCoroutineScope?.let {
             if (it.isActive) {
                 it.cancel("FirstLaunchInitData re invoke.")
             }
         }
         dataCoroutineScope = newDataCoroutineScope
+        if (firstLaunchCheckDefaultState) {
+            if (defaultState == currentState()) {
+                newDataCoroutineScope.firstLaunchInitDataCoroutine()
+            }
+        } else {
+            newDataCoroutineScope.firstLaunchInitDataCoroutine()
+        }
     }
 
     abstract fun CoroutineScope.bindContentViewCoroutine(contentView: View)
 
-    final override fun bindContentView(contentView: View) {
+    final override fun bindContentView(contentView: View, useLastContentView: Boolean) {
         val newUiCoroutineScope =
             CoroutineScope(Dispatchers.Main.immediate + uiCoroutineExceptionHandler)
         newUiCoroutineScope.bindContentViewCoroutine(contentView)
@@ -76,10 +84,16 @@ abstract class BaseCoroutineStateFragment<State : Any>(protected val defaultStat
         throw exception
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        uiCoroutineScope?.cancel("Fragment content view destroyed.")
+        uiCoroutineScope = null
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        uiCoroutineScope?.cancel("Fragment destroyed.")
         dataCoroutineScope?.cancel("Fragment destroyed..")
+        dataCoroutineScope = null
     }
 
 }
