@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace = "com.tans.tuiutils.demo"
-    compileSdk = 34
+    compileSdk = properties["ANDROID_COMPILE_SDK"].toString().toInt()
 
     defaultConfig {
         applicationId = "com.tans.tuiutils.demo"
-        minSdk = 23
-        targetSdk = 34
+        minSdk = properties["ANDROID_MIN_SDK"].toString().toInt()
+        targetSdk = properties["ANDROID_TARGET_SDK"].toString().toInt()
         versionCode = 1
-        versionName = "1.0"
+        versionName = properties["VERSION_NAME"].toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

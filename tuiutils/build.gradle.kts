@@ -9,10 +9,11 @@ plugins {
 
 android {
     namespace = "com.tans.tuiutils"
-    compileSdk = 34
+    compileSdk = properties["ANDROID_COMPILE_SDK"].toString().toInt()
 
     defaultConfig {
-        minSdk = 23
+        minSdk = properties["ANDROID_MIN_SDK"].toString().toInt()
+        version = properties["VERSION_NAME"].toString()
 
         consumerProguardFiles("consumer-rules.pro")
     }
