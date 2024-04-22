@@ -1,6 +1,7 @@
 package com.tans.tuiutils.mediastore
 
 import android.net.Uri
+import java.io.File
 
 data class MediaStoreImage(
     val id: Long,
@@ -15,5 +16,7 @@ data class MediaStoreImage(
     val title: String,
     val width: Int,
     val height: Int,
-    val orientation: Int
+    val orientation: Int,
+
+    val file: File?
 )

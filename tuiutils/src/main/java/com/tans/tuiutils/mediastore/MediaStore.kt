@@ -7,6 +7,7 @@ import android.database.Cursor
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.WorkerThread
 import java.io.File
@@ -18,6 +19,10 @@ import androidx.core.database.getIntOrNull
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
 import androidx.fragment.app.Fragment
+
+private val androidRootDir: File by lazy {
+    Environment.getExternalStorageDirectory()
+}
 
 @WorkerThread
 fun Context.copyAndroidUriToLocalFile(inputUri: Uri, outputFile: File) {
@@ -129,6 +134,12 @@ fun Context.queryAudioFromMediaStore(): List<MediaStoreAudio> {
                 val track = cursor.getInt(AudioColumns.TRACK)
                 val isMusic = cursor.getInt(AudioColumns.IS_MUSIC) == 1
 
+                val file: File? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    File(File(androidRootDir, relativePath), displayName)
+                } else {
+                    uri2FileReal(this, uri)
+                }
+
                 audios.add(
                     MediaStoreAudio(
                         id = id,
@@ -147,7 +158,8 @@ fun Context.queryAudioFromMediaStore(): List<MediaStoreAudio> {
                         duration = duration,
                         bitrate = bitrate,
                         track = track,
-                        isMusic = isMusic
+                        isMusic = isMusic,
+                        file = if (file?.canRead() == true) file else null
                     )
                 )
             }
@@ -224,6 +236,12 @@ fun Context.queryVideoFromMediaStore(): List<MediaStoreVideo> {
                 val duration = cursor.getDurationCompat()
                 val bitrate = cursor.getBitrateCompat()
 
+                val file: File? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    File(File(androidRootDir, relativePath), displayName)
+                } else {
+                    uri2FileReal(this, uri)
+                }
+
                 videos.add(
                     MediaStoreVideo(
                         id = id,
@@ -238,7 +256,9 @@ fun Context.queryVideoFromMediaStore(): List<MediaStoreVideo> {
                         width = width,
                         height = height,
                         duration = duration,
-                        bitrate = bitrate
+                        bitrate = bitrate,
+
+                        file = if (file?.canRead() == true) file else null
                     )
                 )
             }
@@ -310,6 +330,11 @@ fun Context.queryImageFromMediaStore(): List<MediaStoreImage> {
                 val height = cursor.getInt(ImageColumns.HEIGHT)
                 val orientation = cursor.getOrientationCompat()
 
+                val file: File? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    File(File(androidRootDir, relativePath), displayName)
+                } else {
+                    uri2FileReal(this, uri)
+                }
                 images.add(
                     MediaStoreImage(
                         id = id,
@@ -323,7 +348,9 @@ fun Context.queryImageFromMediaStore(): List<MediaStoreImage> {
                         title = title,
                         width = width,
                         height = height,
-                        orientation = orientation
+                        orientation = orientation,
+
+                        file = if (file?.canRead() == true) file else null
                     )
                 )
             }
@@ -345,7 +372,6 @@ private fun Cursor.getRelativePathCompat(): String {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         this.getString(MediaColumns.RELATIVE_PATH)
     } else {
-        // TODO:
         ""
     }
 }

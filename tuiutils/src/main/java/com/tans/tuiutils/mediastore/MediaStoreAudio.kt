@@ -1,6 +1,7 @@
 package com.tans.tuiutils.mediastore
 
 import android.net.Uri
+import java.io.File
 
 data class MediaStoreAudio(
     val id: Long,
@@ -20,5 +21,7 @@ data class MediaStoreAudio(
     val duration: Long,
     val bitrate: Int,
     val track: Int,
-    val isMusic: Boolean
+    val isMusic: Boolean,
+
+    val file: File?
 )

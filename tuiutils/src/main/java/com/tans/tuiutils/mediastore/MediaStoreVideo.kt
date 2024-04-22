@@ -1,6 +1,7 @@
 package com.tans.tuiutils.mediastore
 
 import android.net.Uri
+import java.io.File
 
 data class MediaStoreVideo(
     val id: Long,
@@ -16,5 +17,7 @@ data class MediaStoreVideo(
     val width: Int,
     val height: Int,
     val duration: Long,
-    val bitrate: Int
+    val bitrate: Int,
+
+    val file: File?
 )
