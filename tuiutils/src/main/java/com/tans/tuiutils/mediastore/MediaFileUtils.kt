@@ -20,7 +20,7 @@ internal fun uri2FileReal(context: Context, uri: Uri): File? {
     val path = uri.path
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && path != null) {
         val externals = arrayOf("/external/", "/external_path/")
-        var file: File? = null
+        var file: File?
         for (external: String in externals) {
             if (path.startsWith(external)) {
                 file = File(
@@ -126,7 +126,7 @@ internal fun uri2FileReal(context: Context, uri: Uri): File? {
             } else if (id.startsWith("msf:")) {
                 id = id.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
             }
-            var availableId: Long = 0
+            val availableId: Long
             try {
                 availableId = id.toLong()
             } catch (e: Exception) {
@@ -141,7 +141,7 @@ internal fun uri2FileReal(context: Context, uri: Uri): File? {
                 val contentUri =
                     ContentUris.withAppendedId(Uri.parse(contentUriPrefix), availableId)
                 try {
-                    val file: File? = getFileFromUri(context, contentUri, "1_1")
+                    val file: File? = getFileFromUri(context, contentUri)
                     if (file != null) {
                         return file
                     }
@@ -166,33 +166,32 @@ internal fun uri2FileReal(context: Context, uri: Uri): File? {
             }
             val selection = "_id=?"
             val selectionArgs = arrayOf(split[1])
-            return getFileFromUri(context, contentUri, selection, selectionArgs, "1_2")
+            return getFileFromUri(context, contentUri, selection, selectionArgs)
         } // end 1_2
         else if ((ContentResolver.SCHEME_CONTENT == scheme)) {
-            return getFileFromUri(context, uri, "1_3")
+            return getFileFromUri(context, uri)
         } // end 1_3
         else {
             return null
         } // end 1_4
     } // end 1
     else if ((ContentResolver.SCHEME_CONTENT == scheme)) {
-        return getFileFromUri(context, uri, "2")
+        return getFileFromUri(context, uri)
     } // end 2
     else {
         return null
     } // end 3
 }
 
-private fun getFileFromUri(context: Context, uri: Uri, code: String): File? {
-    return getFileFromUri(context, uri, null, null, code)
+private fun getFileFromUri(context: Context, uri: Uri): File? {
+    return getFileFromUri(context, uri, null, null)
 }
 
 private fun getFileFromUri(
     context: Context,
     uri: Uri,
     selection: String?,
-    selectionArgs: Array<String>?,
-    code: String
+    selectionArgs: Array<String>?
 ): File? {
     if ("com.google.android.apps.photos.content" == uri.authority) {
         if (!TextUtils.isEmpty(uri.lastPathSegment)) {
@@ -211,7 +210,7 @@ private fun getFileFromUri(
         }
     }
     val cursor: Cursor = context.contentResolver?.query(
-        uri, arrayOf<String>("_data"), selection, selectionArgs, null
+        uri, arrayOf("_data"), selection, selectionArgs, null
     ) ?: return null
     return try {
         if (cursor.moveToFirst()) {
