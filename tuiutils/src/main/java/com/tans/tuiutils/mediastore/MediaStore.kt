@@ -6,17 +6,18 @@ import android.content.Context
 import android.database.Cursor
 import android.media.MediaScannerConnection
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import androidx.annotation.WorkerThread
 import java.io.File
 import android.provider.MediaStore.Audio.AudioColumns
 import android.provider.MediaStore.Images.ImageColumns
+import android.provider.MediaStore.MediaColumns
 import android.provider.MediaStore.Video.VideoColumns
 import androidx.core.database.getIntOrNull
 import androidx.core.database.getLongOrNull
 import androidx.core.database.getStringOrNull
 import androidx.fragment.app.Fragment
-import com.tans.tuiutils.actresult.startActivityResult
 
 @WorkerThread
 fun Context.copyAndroidUriToLocalFile(inputUri: Uri, outputFile: File) {
@@ -63,27 +64,39 @@ fun Fragment.insertMediaFilesToMediaStore(filesToMimeType: Map<File, String>) {
 @WorkerThread
 fun Context.queryAudioFromMediaStore(): List<MediaStoreAudio> {
     val queryUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-    val protection = arrayOf(
-        // Common Cols
-        AudioColumns._ID,
-        AudioColumns.DISPLAY_NAME,
-        AudioColumns.SIZE,
-        AudioColumns.RELATIVE_PATH,
-        AudioColumns.DATE_MODIFIED,
-        AudioColumns.MIME_TYPE,
-        AudioColumns.DATE_MODIFIED,
+    val protectionList = mutableListOf<String>()
+    // Common Cols
+    protectionList.add(AudioColumns._ID)
+    protectionList.add(AudioColumns.DISPLAY_NAME)
+    protectionList.add(AudioColumns.SIZE)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        protectionList.add(AudioColumns.RELATIVE_PATH)
+    }
+    protectionList.add(AudioColumns.DATE_MODIFIED)
+    protectionList.add(AudioColumns.MIME_TYPE)
 
-        // Audio Cols
-        AudioColumns.TITLE,
-        AudioColumns.ALBUM_ID,
-        AudioColumns.ALBUM,
-        AudioColumns.ARTIST_ID,
-        AudioColumns.ARTIST,
-        AudioColumns.DURATION,
-        AudioColumns.BITRATE,
-        AudioColumns.TRACK,
-        AudioColumns.IS_MUSIC
-    )
+
+    // Audio Cols
+    protectionList.add(AudioColumns.TITLE)
+    protectionList.add(AudioColumns.ALBUM_ID)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        protectionList.add(AudioColumns.ALBUM)
+    }
+    protectionList.add(AudioColumns.ARTIST_ID)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        protectionList.add(AudioColumns.ARTIST)
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        protectionList.add(AudioColumns.DURATION)
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        protectionList.add(AudioColumns.BITRATE)
+    }
+    protectionList.add(AudioColumns.TRACK)
+    protectionList.add(AudioColumns.IS_MUSIC)
+
+
+    val protection = protectionList.toTypedArray()
     val cursor = contentResolver.query(
         queryUri,
         protection,
@@ -101,18 +114,18 @@ fun Context.queryAudioFromMediaStore(): List<MediaStoreAudio> {
                 val id = cursor.getLong(cursor.getColumnIndexOrThrow(AudioColumns._ID))
                 val displayName = cursor.getString(AudioColumns.DISPLAY_NAME)
                 val size = cursor.getLong(AudioColumns.SIZE)
-                val relativePath = cursor.getString(AudioColumns.RELATIVE_PATH)
+                val relativePath = cursor.getRelativePathCompat()
                 val mimeType = cursor.getString(AudioColumns.MIME_TYPE)
                 val uri = ContentUris.withAppendedId(queryUri, id)
                 val dateModified = cursor.getLong(AudioColumns.DATE_MODIFIED)
 
                 val title = cursor.getString(AudioColumns.TITLE)
                 val albumId = cursor.getLong(AudioColumns.ALBUM_ID)
-                val album = cursor.getString(AudioColumns.ALBUM)
+                val album = cursor.getAlbumCompat()
                 val artistId = cursor.getLong(AudioColumns.ARTIST_ID)
-                val artist = cursor.getString(AudioColumns.ARTIST)
-                val duration = cursor.getLong(AudioColumns.DURATION)
-                val bitrate = cursor.getInt(AudioColumns.BITRATE)
+                val artist = cursor.getArtistCompat()
+                val duration = cursor.getDurationCompat()
+                val bitrate = cursor.getBitrateCompat()
                 val track = cursor.getInt(AudioColumns.TRACK)
                 val isMusic = cursor.getInt(AudioColumns.IS_MUSIC) == 1
 
@@ -159,23 +172,30 @@ fun Fragment.queryAudioFromMediaStore(): List<MediaStoreAudio> {
 @WorkerThread
 fun Context.queryVideoFromMediaStore(): List<MediaStoreVideo> {
     val queryUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-    val protection = arrayOf(
-        // Common Cols
-        VideoColumns._ID,
-        VideoColumns.DISPLAY_NAME,
-        VideoColumns.SIZE,
-        VideoColumns.RELATIVE_PATH,
-        VideoColumns.DATE_MODIFIED,
-        VideoColumns.MIME_TYPE,
-        VideoColumns.DATE_MODIFIED,
 
-        // Video Cols
-        VideoColumns.TITLE,
-        VideoColumns.DURATION,
-        VideoColumns.WIDTH,
-        VideoColumns.HEIGHT,
-        VideoColumns.BITRATE,
-    )
+    val protectionList = mutableListOf<String>()
+    // Common Cols
+    protectionList.add(VideoColumns._ID)
+    protectionList.add(VideoColumns.DISPLAY_NAME)
+    protectionList.add(VideoColumns.SIZE)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        protectionList.add(VideoColumns.RELATIVE_PATH)
+    }
+    protectionList.add(VideoColumns.DATE_MODIFIED)
+    protectionList.add(VideoColumns.MIME_TYPE)
+
+    // Video Cols
+    protectionList.add(VideoColumns.TITLE)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        protectionList.add(VideoColumns.DURATION)
+    }
+    protectionList.add(VideoColumns.WIDTH)
+    protectionList.add(VideoColumns.HEIGHT)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        protectionList.add(VideoColumns.BITRATE)
+    }
+
+    val protection = protectionList.toTypedArray()
     val cursor = contentResolver.query(
         queryUri,
         protection,
@@ -193,7 +213,7 @@ fun Context.queryVideoFromMediaStore(): List<MediaStoreVideo> {
                 val id = cursor.getLong(cursor.getColumnIndexOrThrow(VideoColumns._ID))
                 val displayName = cursor.getString(VideoColumns.DISPLAY_NAME)
                 val size = cursor.getLong(VideoColumns.SIZE)
-                val relativePath = cursor.getString(VideoColumns.RELATIVE_PATH)
+                val relativePath = cursor.getRelativePathCompat()
                 val mimeType = cursor.getString(VideoColumns.MIME_TYPE)
                 val uri = ContentUris.withAppendedId(queryUri, id)
                 val dateModified = cursor.getLong(VideoColumns.DATE_MODIFIED)
@@ -201,8 +221,8 @@ fun Context.queryVideoFromMediaStore(): List<MediaStoreVideo> {
                 val title = cursor.getString(VideoColumns.TITLE)
                 val width = cursor.getInt(VideoColumns.WIDTH)
                 val height = cursor.getInt(VideoColumns.HEIGHT)
-                val duration = cursor.getLong(VideoColumns.DURATION)
-                val bitrate = cursor.getInt(VideoColumns.BITRATE)
+                val duration = cursor.getDurationCompat()
+                val bitrate = cursor.getBitrateCompat()
 
                 videos.add(
                     MediaStoreVideo(
@@ -243,22 +263,26 @@ fun Fragment.queryVideoFromMediaStore(): List<MediaStoreVideo> {
 @WorkerThread
 fun Context.queryImageFromMediaStore(): List<MediaStoreImage> {
     val queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-    val protection = arrayOf(
-        // Common Cols
-        ImageColumns._ID,
-        ImageColumns.DISPLAY_NAME,
-        ImageColumns.SIZE,
-        ImageColumns.RELATIVE_PATH,
-        ImageColumns.DATE_MODIFIED,
-        ImageColumns.MIME_TYPE,
-        ImageColumns.DATE_MODIFIED,
+    val protectionList = mutableListOf<String>()
+    // Common Cols
+    protectionList.add(ImageColumns._ID)
+    protectionList.add(ImageColumns.DISPLAY_NAME)
+    protectionList.add(ImageColumns.SIZE)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        protectionList.add(ImageColumns.RELATIVE_PATH)
+    }
+    protectionList.add(ImageColumns.DATE_MODIFIED)
+    protectionList.add(ImageColumns.MIME_TYPE)
 
-        // Image Cols
-        ImageColumns.TITLE,
-        ImageColumns.WIDTH,
-        ImageColumns.HEIGHT,
-        ImageColumns.ORIENTATION
-    )
+    // Image Cols
+    protectionList.add(ImageColumns.TITLE)
+    protectionList.add(ImageColumns.WIDTH)
+    protectionList.add(ImageColumns.HEIGHT)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        protectionList.add(ImageColumns.ORIENTATION)
+    }
+
+    val protection = protectionList.toTypedArray()
     val cursor = contentResolver.query(
         queryUri,
         protection,
@@ -276,7 +300,7 @@ fun Context.queryImageFromMediaStore(): List<MediaStoreImage> {
                 val id = cursor.getLong(cursor.getColumnIndexOrThrow(ImageColumns._ID))
                 val displayName = cursor.getString(ImageColumns.DISPLAY_NAME)
                 val size = cursor.getLong(ImageColumns.SIZE)
-                val relativePath = cursor.getString(ImageColumns.RELATIVE_PATH)
+                val relativePath = cursor.getRelativePathCompat()
                 val mimeType = cursor.getString(ImageColumns.MIME_TYPE)
                 val uri = ContentUris.withAppendedId(queryUri, id)
                 val dateModified = cursor.getLong(ImageColumns.DATE_MODIFIED)
@@ -284,7 +308,7 @@ fun Context.queryImageFromMediaStore(): List<MediaStoreImage> {
                 val title = cursor.getString(ImageColumns.TITLE)
                 val width = cursor.getInt(ImageColumns.WIDTH)
                 val height = cursor.getInt(ImageColumns.HEIGHT)
-                val orientation = cursor.getInt(ImageColumns.ORIENTATION)
+                val orientation = cursor.getOrientationCompat()
 
                 images.add(
                     MediaStoreImage(
@@ -315,6 +339,55 @@ fun Fragment.queryImageFromMediaStore(): List<MediaStoreImage> {
     val act = this.activity
     com.tans.tuiutils.assert(act != null) { "Fragment's parent activity is null." }
     return act!!.queryImageFromMediaStore()
+}
+
+private fun Cursor.getRelativePathCompat(): String {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        this.getString(MediaColumns.RELATIVE_PATH)
+    } else {
+        // TODO:
+        ""
+    }
+}
+
+private fun Cursor.getAlbumCompat(): String {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        this.getString(AudioColumns.ALBUM)
+    } else {
+        "Unknown"
+    }
+}
+
+private fun Cursor.getArtistCompat(): String {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        this.getString(AudioColumns.ARTIST)
+    } else {
+        "Unknown"
+    }
+}
+
+private fun Cursor.getDurationCompat(): Long {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        getLong(MediaColumns.DURATION)
+    } else {
+        0L
+    }
+}
+
+private fun Cursor.getBitrateCompat(): Int {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        getInt(MediaColumns.BITRATE)
+    } else {
+        0
+    }
+}
+
+private fun Cursor.getOrientationCompat(): Int {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        getInt(MediaColumns.ORIENTATION)
+    } else {
+        0
+    }
 }
 
 private fun Cursor.getLong(colName: String): Long {
