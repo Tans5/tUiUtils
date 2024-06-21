@@ -6,6 +6,7 @@
         <item name="android:statusBarColor">@android:color/white</item>
         <item name="android:navigationBarColor">@android:color/white</item>
         <item name="android:windowBackground">@android:color/white</item>
+        <item name="enableEdgeToEdge">true</item>
     </style>
 
     <style name="Theme.TUiUtils" parent="Base.Theme.TUiUtils" />

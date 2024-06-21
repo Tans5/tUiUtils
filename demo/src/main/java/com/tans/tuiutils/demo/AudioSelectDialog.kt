@@ -5,6 +5,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentManager
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
 import com.tans.tuiutils.adapter.impl.builders.plus
@@ -18,6 +20,7 @@ import com.tans.tuiutils.demo.databinding.EmptyContentLayoutBinding
 import com.tans.tuiutils.dialog.BaseCoroutineStateCancelableResultDialogFragment
 import com.tans.tuiutils.dialog.DialogCancelableResultCallback
 import com.tans.tuiutils.dialog.createBottomSheetDialog
+import com.tans.tuiutils.dialog.getDisplaySize
 import com.tans.tuiutils.mediastore.MediaStoreAudio
 import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +33,7 @@ import kotlin.coroutines.resume
 
 class AudioSelectDialog : BaseCoroutineStateCancelableResultDialogFragment<AudioSelectDialog.Companion.State, List<MediaStoreAudio>> {
 
-    override val contentViewHeightInScreenRatio: Float = 0.7f
+    override val contentViewHeightInScreenRatio: Float = 1.0f
 
     constructor() : super(State(), null)
 
@@ -109,7 +112,15 @@ class AudioSelectDialog : BaseCoroutineStateCancelableResultDialogFragment<Audio
     }
 
     override fun createDialog(contentView: View): Dialog {
-        return requireActivity().createBottomSheetDialog(contentView = contentView)
+        ViewCompat.setOnApplyWindowInsetsListener(contentView) { v, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, 0, 0, systemInsets.bottom + systemInsets.top)
+            insets
+        }
+        return requireActivity().createBottomSheetDialog(contentView = contentView) { b ->
+            b.isDraggable = true
+            b.isHideable = true
+        }
     }
 
     companion object {
