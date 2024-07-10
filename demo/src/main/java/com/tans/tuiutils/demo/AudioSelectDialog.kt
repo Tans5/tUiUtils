@@ -153,7 +153,7 @@ suspend fun FragmentManager.showAudioSelectDialogSuspend(): List<MediaStoreAudio
 
             }
         )
-        d.show(this, "AudioSelectDialog#${System.currentTimeMillis()}")
+        d.showSafe(this, "AudioSelectDialog#${System.currentTimeMillis()}")
         val dw = WeakReference(d)
         cont.invokeOnCancellation {
             dw.get()?.dismissSafe()

@@ -3,10 +3,12 @@ package com.tans.tuiutils.dialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
 import android.os.Looper
 import android.view.*
 import androidx.annotation.FloatRange
 import androidx.appcompat.app.AppCompatDialogFragment
+import androidx.fragment.app.FragmentManager
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class BaseDialogFragment : AppCompatDialogFragment() {
@@ -36,6 +38,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
         val activity = activity ?: return super.onCreateDialog(null)
 
         val contentView = createContentView(context = activity, parent = activity.window.decorView as ViewGroup)
+        (contentView.parent as? ViewGroup)?.removeAllViews()
         val widthRatio = contentViewWidthInScreenRatio
         val heightRatio = contentViewHeightInScreenRatio
         if (widthRatio != null || heightRatio != null) {
@@ -87,14 +90,39 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
         return requireActivity().createDefaultDialog(contentView = contentView)
     }
 
-    fun dismissSafe() {
+    fun dismissSafe(callback: ((e: Throwable?) -> Unit)? = null) {
         val r = Runnable {
-            dismiss()
+            try {
+                dismissAllowingStateLoss()
+                callback?.invoke(null)
+            } catch (e: Throwable) {
+                e.printStackTrace()
+                callback?.invoke(e)
+            }
         }
         if (Looper.myLooper() === Looper.getMainLooper()) {
             r.run()
         } else {
-            activity?.runOnUiThread {
+            Handler(Looper.getMainLooper()).post {
+                r.run()
+            }
+        }
+    }
+
+    fun showSafe(fragmentManager: FragmentManager, tag: String, callback: ((e: Throwable?) -> Unit)? = null) {
+        val r = Runnable {
+            try {
+                showNow(fragmentManager, tag)
+                callback?.invoke(null)
+            } catch (e: Throwable) {
+                e.printStackTrace()
+                callback?.invoke(e)
+            }
+        }
+        if (Looper.myLooper() === Looper.getMainLooper()) {
+            r.run()
+        } else {
+            Handler(Looper.getMainLooper()).post {
                 r.run()
             }
         }

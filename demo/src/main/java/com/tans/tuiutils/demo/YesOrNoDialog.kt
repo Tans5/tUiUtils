@@ -54,7 +54,7 @@ suspend fun FragmentManager.showYesOrNoDialogSuspend(): Boolean {
                 }
             }
         })
-        dialog.show(this, "YesOrNoDialog#${System.currentTimeMillis()}")
+        dialog.showSafe(this, "YesOrNoDialog#${System.currentTimeMillis()}")
         val dialogWeak = WeakReference(dialog)
         cont.invokeOnCancellation {
             val d = dialogWeak.get()

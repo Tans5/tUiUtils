@@ -76,8 +76,8 @@ fun Activity.createBottomSheetDialog(
     contentView: View,
     isCancelable: Boolean = true,
     dimAmount: Float = 0.6f,
-    statusBarThemeStyle: SystemBarThemeStyle = SystemBarThemeStyle.BySystem,
-    navigationThemeStyle: SystemBarThemeStyle = SystemBarThemeStyle.BySystem,
+    statusBarThemeStyle: SystemBarThemeStyle = SystemBarThemeStyle.Light,
+    navigationThemeStyle: SystemBarThemeStyle = SystemBarThemeStyle.Light,
     @ColorInt
     navigationBarColor: Int = Color.TRANSPARENT,
     behaviorCallback: (behavior: BottomSheetBehavior<*>) -> Unit = {}
