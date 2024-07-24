@@ -41,6 +41,7 @@ internal class BaseActivityViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         clearObserver?.onViewModelCleared()
+        savedFields.clear()
     }
 
     companion object {
