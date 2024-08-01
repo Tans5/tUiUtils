@@ -37,12 +37,12 @@ open class DataSourceImpl<Data : Any>(
 
     @Internal
     override fun getLastSubmittedData(positionInDataSource: Int): Data? {
-        val lastRequestList = lastRequestSubmitDataList
-        val lastSubmittedList = lastSubmittedDataList
-        if (lastRequestList != lastSubmittedList) {
-            tUiUtilsLog.e("DataSource", "Last request list and last submitted list not same.")
-        }
-        return lastSubmittedList?.getOrNull(positionInDataSource) ?: lastRequestList?.getOrNull(positionInDataSource)
+        return lastSubmittedDataList?.getOrNull(positionInDataSource)
+    }
+
+    @Internal
+    override fun getLastRequestSubmitData(positionInDataSource: Int): Data? {
+        return lastRequestSubmitDataList?.getOrNull(positionInDataSource)
     }
 
     @Internal

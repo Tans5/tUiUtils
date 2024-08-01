@@ -39,7 +39,11 @@ interface DataSource<Data : Any> : AdapterBuilderLife<Data> {
 
     fun getLastSubmittedData(positionInDataSource: Int): Data?
 
-    fun getLastSubmittedDataSize(): Int = lastRequestSubmitDataList?.size ?: 0
+    fun getLastRequestSubmitData(positionInDataSource: Int): Data?
+
+    fun getLastSubmittedDataSize(): Int = lastSubmittedDataList?.size ?: 0
+
+    fun getLastRequestSubmitDataSize(): Int = lastRequestSubmitDataList?.size ?: 0
 
     fun tryGetDataClass(): Class<Data>? = dataClass
 }
