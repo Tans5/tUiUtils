@@ -31,7 +31,7 @@ class FlowDataSourceImpl<Data : Any>(
     override fun onAttachToBuilder(recyclerView: RecyclerView, builder: AdapterBuilder<Data>) {
         super.onAttachToBuilder(recyclerView, builder)
         val newCoroutineScope = CoroutineScope(Dispatchers.Main.immediate)
-        newCoroutineScope.launch(Dispatchers.Main) {
+        newCoroutineScope.launch {
             dataFlow
                 .debounce(20)
                 .distinctUntilChanged()
