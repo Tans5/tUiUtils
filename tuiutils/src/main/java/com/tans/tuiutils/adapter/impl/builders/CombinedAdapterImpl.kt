@@ -187,10 +187,10 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
                 }
             }
         }
-        if (callback == null) {
-            submitList(combinedList)
-        } else {
-            submitList(combinedList, callback)
+        tUiUtilsLog.d(TAG, "Request submit list count: ${combinedList.size}")
+        submitList(combinedList) {
+            tUiUtilsLog.d(TAG, "Submitted list count: ${combinedList.size}")
+            callback?.run()
         }
     }
 

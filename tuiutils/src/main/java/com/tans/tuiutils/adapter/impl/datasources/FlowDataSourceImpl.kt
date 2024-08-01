@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import com.tans.tuiutils.Internal
+import kotlinx.coroutines.flow.debounce
 
 class FlowDataSourceImpl<Data : Any>(
     private val dataFlow: Flow<List<Data>>,
@@ -30,10 +31,11 @@ class FlowDataSourceImpl<Data : Any>(
     override fun onAttachToBuilder(recyclerView: RecyclerView, builder: AdapterBuilder<Data>) {
         super.onAttachToBuilder(recyclerView, builder)
         val newCoroutineScope = CoroutineScope(Dispatchers.Main.immediate)
-        newCoroutineScope.launch {
+        newCoroutineScope.launch(Dispatchers.Main) {
             dataFlow
+                .debounce(20)
                 .distinctUntilChanged()
-                .flowOn(Dispatchers.Main.immediate)
+                .flowOn(Dispatchers.IO)
                 .collect {
                     submitDataList(it)
                 }

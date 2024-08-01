@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.adapter.DataSource
 import com.tans.tuiutils.adapter.DataSourceParent
+import com.tans.tuiutils.tUiUtilsLog
 
 internal class SimpleAdapterImpl<Data : Any>(
     private val adapterBuilder: AdapterBuilder<Data>
@@ -76,10 +77,14 @@ internal class SimpleAdapterImpl<Data : Any>(
 
     override fun requestSubmitDataList(child: DataSource<Data>, data: List<Data>, callback: Runnable?) {
         super.requestSubmitDataList(child, data, callback)
-        if (callback == null) {
-            submitList(data)
-        } else {
-            submitList(data, callback)
+        tUiUtilsLog.d(TAG, "Request submit list count: ${data.size}")
+        submitList(data) {
+            tUiUtilsLog.d(TAG, "Submitted list count: ${data.size}")
+            callback?.run()
         }
+    }
+
+    companion object {
+        private const val TAG = "SimpleAdapterImpl"
     }
 }
