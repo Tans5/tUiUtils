@@ -181,7 +181,7 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
             if (c.dataSource === child) {
                 combinedList.addAll(data)
             } else {
-                val append = c.dataSource.lastSubmittedDataList
+                val append = c.dataSource.lastRequestSubmitDataList
                 if (append != null) {
                     combinedList.addAll(append)
                 }
@@ -189,8 +189,12 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
         }
         tUiUtilsLog.d(TAG, "Request submit list count: ${combinedList.size}")
         submitList(combinedList) {
+            // Work on main thread.
             tUiUtilsLog.d(TAG, "Submitted list count: ${combinedList.size}")
             callback?.run()
+            for (c in childrenBuilders) {
+                c.dataSource.ifWaitingSubmitIt()
+            }
         }
     }
 
