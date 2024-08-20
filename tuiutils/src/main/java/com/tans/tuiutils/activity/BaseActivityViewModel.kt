@@ -14,6 +14,7 @@ internal class BaseActivityViewModel : ViewModel() {
 
     private var clearObserver: ViewModelClearObserver? = null
 
+    @Volatile private var isCleared: Boolean = false
 
     @MainThread
     fun setViewModelClearObserver(o: ViewModelClearObserver?) {
@@ -25,23 +26,21 @@ internal class BaseActivityViewModel : ViewModel() {
     fun getField(key: String): Any? = savedFields[key]
 
     fun saveField(key: String, field: Any): Boolean {
-        synchronized(savedFields) {
-            val lastValue = savedFields[key]
-            if (lastValue != null) {
-                tUiUtilsLog.w(TAG, "Skip save new field: $key")
-                return false
-            } else {
-                savedFields[key] = field
-                tUiUtilsLog.d(TAG, "Save new field: $key")
-                return true
-            }
+        if (isCleared()) {
+            return false
         }
+        savedFields[key] = field
+        tUiUtilsLog.d(TAG, "Save new field: $key")
+        return true
     }
+
+    fun isCleared(): Boolean = isCleared
 
     override fun onCleared() {
         super.onCleared()
         clearObserver?.onViewModelCleared()
         savedFields.clear()
+        isCleared = true
     }
 
     companion object {

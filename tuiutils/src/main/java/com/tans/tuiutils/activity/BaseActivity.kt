@@ -59,25 +59,38 @@ abstract class BaseActivity : AppCompatActivity(), BaseActivityViewModel.Compani
         override val value: T
             get() {
                 if (application == null) {
-                    error("Can't init view model lazy field, because activity is not attachted.")
+                    error("Can't init view model lazy field, because activity is not attached.")
                 }
                 val vm = this@BaseActivity.baseActivityViewModel
-                val result: T?
-                while (true) {
-                    val cacheField = vm.getField(key)
-                    if (cacheField != null) {
-                        try {
-                            cacheField as T
-                            result = cacheField
-                            break
-                        } catch (e: Throwable) {
-                            error("Wrong field type, maybe you use same key in different fields, key=$key, error=${e.message}")
-                        }
-                    } else {
-                        val newField = initializer()
-                        if (vm.saveField(key, newField)) {
-                            result = newField
-                            break
+                if (vm.isCleared()) {
+                    error("ViewModel was cleared.")
+                }
+                val firstCheckValue = vm.getField(key)
+                var result: T? = null
+                // First check.
+                if (firstCheckValue != null) {
+                    try {
+                        result = firstCheckValue as T
+                    } catch (e: Throwable) {
+                        error("Wrong field type, maybe you use same key in different fields, key=$key, error=${e.message}")
+                    }
+                } else {
+                    synchronized(this) {
+                        val secondCheckValue = vm.getField(key)
+                        // Second check.
+                        result = if (secondCheckValue != null) {
+                            try {
+                                secondCheckValue as T
+                            } catch (e: Throwable) {
+                                error("Wrong field type, maybe you use same key in different fields, key=$key, error=${e.message}")
+                            }
+                        } else {
+                            val newValue = initializer()
+                            if (vm.saveField(key, newValue)) {
+                                newValue
+                            } else {
+                                error("ViewModel was cleared.")
+                            }
                         }
                     }
                 }
