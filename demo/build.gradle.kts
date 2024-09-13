@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.coroutines.android)
     implementation(libs.coroutines.rx3)
     implementation(libs.glide)
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
 
     // implementation(libs.tuiutils)
     implementation(project(":tuiutils"))

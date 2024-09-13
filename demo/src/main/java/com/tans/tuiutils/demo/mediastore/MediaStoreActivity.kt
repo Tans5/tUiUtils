@@ -1,7 +1,9 @@
 package com.tans.tuiutils.demo.mediastore
 
 import android.view.View
+import androidx.collection.LongSparseArray
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
@@ -31,13 +33,18 @@ class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Compani
 
     override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
         val viewBinding = ActivityMediaStoreBinding.bind(contentView)
-        viewBinding.viewPager.adapter = object : FragmentStateAdapter(this@MediaStoreActivity) {
+        val fragmentAdapter = object : FragmentStateAdapter(this@MediaStoreActivity) {
             override fun getItemCount(): Int = mediaStoresFragments.size
             override fun createFragment(position: Int): Fragment {
                 val key = MediaTab.entries[position]
                 return mediaStoresFragments[key]!!
             }
         }
+        // Fix relaunch cause view pager crash.
+        fragmentAdapterPutFragments(fragmentAdapter)
+        viewBinding.viewPager.adapter = fragmentAdapter
+        viewBinding.viewPager.offscreenPageLimit = mediaStoresFragments.size
+        viewBinding.viewPager.isSaveEnabled = false
 
         TabLayoutMediator(viewBinding.tabLayout, viewBinding.viewPager) { tab, position ->
             tab.text = MediaTab.entries[position].name
@@ -57,6 +64,21 @@ class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Compani
             if (viewBinding.tabLayout.selectedTabPosition != selectedTab.ordinal) {
                 viewBinding.tabLayout.selectTab(viewBinding.tabLayout.getTabAt(selectedTab.ordinal))
             }
+        }
+    }
+
+    private fun fragmentAdapterPutFragments(adapter: FragmentStateAdapter) {
+        try {
+            val clazz = FragmentStateAdapter::class.java
+            val fragmentsField = clazz.getDeclaredField("mFragments")
+            fragmentsField.isAccessible = true
+            val fragments = fragmentsField.get(adapter) as LongSparseArray<Fragment>
+            fragments.clear()
+            for ((i, f) in this.mediaStoresFragments.map { it.value }.withIndex()) {
+                fragments.put(i.toLong(), f)
+            }
+        } catch (e: Throwable) {
+            e.printStackTrace()
         }
     }
 
