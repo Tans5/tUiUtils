@@ -6,7 +6,9 @@ import android.util.Log
 internal object tUiUtilsLog {
 
     fun d(tag: String = TAG, msg: String) {
-        Log.d(tag, msg)
+        if (BuildConfig.DEBUG) {
+            Log.d(tag, msg)
+        }
     }
 
     fun w(tag: String = TAG, msg: String, e: Throwable? = null) {

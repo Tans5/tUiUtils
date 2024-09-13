@@ -15,6 +15,8 @@ android {
         minSdk = properties["ANDROID_MIN_SDK"].toString().toInt()
         version = properties["VERSION_NAME"].toString()
 
+        buildConfigField("String", "VERSION", "\"${properties["VERSION_NAME"]}\"")
+
         consumerProguardFiles("consumer-rules.pro")
     }
 
@@ -33,6 +35,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 
