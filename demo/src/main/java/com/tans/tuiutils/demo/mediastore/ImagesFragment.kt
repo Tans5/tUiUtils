@@ -49,9 +49,11 @@ class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State
             dataSource = FlowDataSourceImpl(stateFlow.map { it.images }),
             dataBinder = DataBinderImpl { data, view, _ ->
                 val itemViewBinding = ImageItemLayoutBinding.bind(view)
-                Glide.with(view)
-                    .load(data.uri)
-                    .into(itemViewBinding.imageIv)
+                context?.let {
+                    Glide.with(it)
+                        .load(data.uri)
+                        .into(itemViewBinding.imageIv)
+                }
             }
         )
         viewBinding.imagesRv.adapter = adapterBuilder.build()
