@@ -1,7 +1,9 @@
 package com.tans.tuiutils.view
 
+import androidx.annotation.MainThread
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.tans.tuiutils.R
+import com.tans.tuiutils.assertMainThread
 import com.tans.tuiutils.tUiUtilsLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,10 +19,17 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 private const val TAG = "tUiUtilsRefresh"
-fun SwipeRefreshLayout.refreshes(coroutineScope: CoroutineScope, refreshWorkOn: CoroutineContext = EmptyCoroutineContext, refresh: suspend () -> Unit) {
 
+@MainThread
+fun SwipeRefreshLayout.refreshes(
+    coroutineScope: CoroutineScope,
+    refreshWorkOn: CoroutineContext = EmptyCoroutineContext,
+    parallelWork: Boolean = false,
+    refresh: suspend () -> Unit
+) {
+    assertMainThread { "Refresh must invoke on main thread." }
     val lastClickTask = this.getTag(R.id.tui_refresh_job_id)
-    if (lastClickTask != null && lastClickTask is ClickTask) {
+    if (lastClickTask != null && lastClickTask is ViewTask) {
         tUiUtilsLog.d(tag = TAG, msg = "Find last click task and cancel it.")
         lastClickTask.clickChannel.cancel()
         if (lastClickTask.clickJob.isActive) {
@@ -29,7 +38,10 @@ fun SwipeRefreshLayout.refreshes(coroutineScope: CoroutineScope, refreshWorkOn: 
         this.setTag(R.id.tui_refresh_job_id, null)
     }
 
-    val channel = Channel<Unit>(capacity = Channel.RENDEZVOUS, onBufferOverflow = BufferOverflow.DROP_OLDEST) {
+    val channel = Channel<Unit>(
+        capacity = Channel.RENDEZVOUS,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    ) {
         tUiUtilsLog.w(tag = TAG, msg = "Drop refresh event.")
     }
 
@@ -39,23 +51,51 @@ fun SwipeRefreshLayout.refreshes(coroutineScope: CoroutineScope, refreshWorkOn: 
         }
         val refreshFlow = flow { this.emitAll(channel) }
 
+        val refreshJobs = mutableListOf<Job>()
         try {
-            var lastJob: Job? = null
             refreshFlow.collect {
-                if (lastJob?.isActive == true) {
-                    tUiUtilsLog.w(tag = TAG, msg = "Last refresh don't completed, skip current job.")
-                } else {
-                    lastJob = launch(refreshWorkOn) {
-                        refresh()
-                        withContext(Dispatchers.Main.immediate) {
-                            if (this@refreshes.isRefreshing) {
-                                this@refreshes.isRefreshing = false
-                            }
+                // Remove finished jobs.
+                fun cleanFinishedJobs() {
+                    val jobIterator = refreshJobs.iterator()
+                    while (jobIterator.hasNext()) {
+                        if (!jobIterator.next().isActive) {
+                            jobIterator.remove()
                         }
                     }
                 }
+                cleanFinishedJobs()
+
+                if (!parallelWork) {
+                    if (refreshJobs.isNotEmpty()) {
+                        tUiUtilsLog.w(
+                            tag = TAG,
+                            msg = "Last refresh don't completed, skip current job."
+                        )
+                    } else {
+                        launch(refreshWorkOn) {
+                            refresh()
+                            withContext(Dispatchers.Main.immediate) {
+                                if (this@refreshes.isRefreshing) {
+                                    this@refreshes.isRefreshing = false
+                                }
+                            }
+                        }.apply { refreshJobs.add(this) }
+                    }
+                } else {
+                    launch(refreshWorkOn) {
+                        refresh()
+                        cleanFinishedJobs()
+                        if (refreshJobs.isEmpty()) {
+                            withContext(Dispatchers.Main.immediate) {
+                                if (this@refreshes.isRefreshing) {
+                                    this@refreshes.isRefreshing = false
+                                }
+                            }
+                        }
+                    }.apply { refreshJobs.add(this) }
+                }
             }
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
 
         }
     }

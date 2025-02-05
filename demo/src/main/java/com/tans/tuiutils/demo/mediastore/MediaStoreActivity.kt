@@ -19,7 +19,7 @@ class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Compani
 
     override val layoutId: Int = R.layout.activity_media_store
 
-    private val mediaStoresFragments: Map<MediaTab, Fragment> by lazyViewModelField("mediaStoresFragments") {
+    private val mediaStoresFragments: Map<MediaTab, Fragment> by lazyViewModelField {
         mapOf(
             MediaTab.Images to ImagesFragment(),
             MediaTab.Audios to AudiosFragment(),

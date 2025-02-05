@@ -2,7 +2,9 @@ package com.tans.tuiutils.view
 
 import android.os.SystemClock
 import android.view.View
+import androidx.annotation.MainThread
 import com.tans.tuiutils.R
+import com.tans.tuiutils.assertMainThread
 import com.tans.tuiutils.tUiUtilsLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -19,9 +21,9 @@ import kotlin.coroutines.EmptyCoroutineContext
 
 private const val TAG = "tUiUtilsClicks"
 
-data class TimeInterval<E>(val interval: Long, val element: E)
+data class TimeInterval<E : Any>(val interval: Long, val element: E)
 
-fun <T> Flow<T>.timeInterval(): Flow<TimeInterval<T>> = flow<TimeInterval<T>> {
+fun <T : Any> Flow<T>.timeInterval(): Flow<TimeInterval<T>> = flow<TimeInterval<T>> {
     var lastElementAndReceiveTime: Pair<T, Long>? = null
     collect { e ->
         val now = SystemClock.uptimeMillis()
@@ -35,7 +37,7 @@ fun <T> Flow<T>.timeInterval(): Flow<TimeInterval<T>> = flow<TimeInterval<T>> {
     }
 }
 
-data class ClickTask(
+internal data class ViewTask(
     val clickJob: Job,
     val clickChannel: Channel<Unit>
 )
@@ -44,14 +46,17 @@ data class ClickTask(
  * Each clicks interval must great than [minInterval].
  * If last click task don't finish, the new click will be ignore.
  */
+@MainThread
 fun View.clicks(
     coroutineScope: CoroutineScope,
     minInterval: Long = 300,
     clickWorkOn: CoroutineContext = EmptyCoroutineContext,
+    parallelWork: Boolean = false,
     click: suspend () -> Unit
 ) {
+    assertMainThread { "Click must invoke on main thread." }
     val lastClickTask = this.getTag(R.id.tui_clicks_job_id)
-    if (lastClickTask != null && lastClickTask is ClickTask) {
+    if (lastClickTask != null && lastClickTask is ViewTask) {
         tUiUtilsLog.d(tag = TAG, msg = "Find last click task and cancel it.")
         lastClickTask.clickChannel.cancel()
         if (lastClickTask.clickJob.isActive) {
@@ -81,10 +86,16 @@ fun View.clicks(
                     isOk
                 }
                 .collect {
-                    if (lastClickJob?.isActive == true) {
-                        tUiUtilsLog.w(tag = TAG, msg = "Last click don't completed, skip current job.")
+                    if (!parallelWork) {
+                        if (lastClickJob?.isActive == true) {
+                            tUiUtilsLog.w(tag = TAG, msg = "Last click don't completed, skip current job.")
+                        } else {
+                            lastClickJob = launch(clickWorkOn) {
+                                click()
+                            }
+                        }
                     } else {
-                        lastClickJob = launch(clickWorkOn) {
+                        launch(clickWorkOn) {
                             click()
                         }
                     }
@@ -94,5 +105,5 @@ fun View.clicks(
             // tUiUtilsLog.d(tag = TAG, msg = "Click job finished: ${e.message}")
         }
     }
-    this.setTag(R.id.tui_clicks_job_id, ClickTask(clickJob = job, clickChannel = channel))
+    this.setTag(R.id.tui_clicks_job_id, ViewTask(clickJob = job, clickChannel = channel))
 }

@@ -5,8 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.tans.tuiutils.tUiUtilsLog
 import java.util.concurrent.ConcurrentHashMap
 
-internal class BaseActivityViewModel : ViewModel() {
-
+internal class FieldsViewModel : ViewModel() {
 
     private val savedFields: ConcurrentHashMap<String, Any> by lazy {
         ConcurrentHashMap()
@@ -26,7 +25,7 @@ internal class BaseActivityViewModel : ViewModel() {
     fun getField(key: String): Any? = savedFields[key]
 
     fun saveField(key: String, field: Any): Boolean {
-        if (isCleared()) {
+        if (isCleared() || containField(key)) {
             return false
         }
         savedFields[key] = field
@@ -39,6 +38,7 @@ internal class BaseActivityViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         clearObserver?.onViewModelCleared()
+        clearObserver = null
         savedFields.clear()
         isCleared = true
     }
