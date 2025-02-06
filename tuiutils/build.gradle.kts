@@ -47,6 +47,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.material)
     implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.viewpager2)
     compileOnly(libs.androidx.swiperefreshlayout)
 
     compileOnly(libs.rxjava3)

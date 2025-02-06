@@ -20,9 +20,10 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val isFirstLaunch = lastNonConfigurationInstance == null
         super.onCreate(savedInstanceState)
         fieldsViewModel.setViewModelClearObserver(this)
-        if (savedInstanceState == null) {
+        if (isFirstLaunch) {
             firstLaunchInitData()
         }
         val contentView = tryCreateNewContentView(context = this, parentView = null)
