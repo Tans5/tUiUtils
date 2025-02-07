@@ -80,9 +80,11 @@ fun Activity.createBottomSheetDialog(
     navigationThemeStyle: SystemBarThemeStyle = SystemBarThemeStyle.Light,
     @ColorInt
     navigationBarColor: Int = Color.TRANSPARENT,
+    @StyleRes
+    defaultTheme: Int = 0,
     behaviorCallback: (behavior: BottomSheetBehavior<*>) -> Unit = {}
 ): Dialog {
-    val d = BottomSheetDialog(this)
+    val d = BottomSheetDialog(this, defaultTheme)
     d.apply {
         setContentView(contentView)
         setCancelable(isCancelable)

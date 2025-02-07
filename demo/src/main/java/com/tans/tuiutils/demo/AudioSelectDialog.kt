@@ -1,13 +1,9 @@
 package com.tans.tuiutils.demo
 
 import android.app.Dialog
-import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.FragmentManager
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
 import com.tans.tuiutils.adapter.impl.builders.plus
 import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
@@ -17,31 +13,20 @@ import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.demo.databinding.AudioSelectItemLayoutBinding
 import com.tans.tuiutils.demo.databinding.DialogSelectAudioBinding
 import com.tans.tuiutils.demo.databinding.EmptyContentLayoutBinding
-import com.tans.tuiutils.dialog.BaseCoroutineStateCancelableResultDialogFragment
-import com.tans.tuiutils.dialog.DialogCancelableResultCallback
+import com.tans.tuiutils.dialog.BaseSimpleCoroutineResultCancelableDialogFragment
 import com.tans.tuiutils.dialog.createBottomSheetDialog
-import com.tans.tuiutils.dialog.getDisplaySize
 import com.tans.tuiutils.mediastore.MediaStoreAudio
 import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import java.lang.ref.WeakReference
-import kotlin.coroutines.resume
 
-class AudioSelectDialog : BaseCoroutineStateCancelableResultDialogFragment<AudioSelectDialog.Companion.State, List<MediaStoreAudio>> {
+class AudioSelectDialog : BaseSimpleCoroutineResultCancelableDialogFragment<AudioSelectDialog.Companion.State, List<MediaStoreAudio>>(s = State()) {
 
     override val contentViewHeightInScreenRatio: Float = 1.0f
 
-    constructor() : super(State(), null)
-
-    constructor(callback: DialogCancelableResultCallback<List<MediaStoreAudio>>) : super(State(), callback)
-
-    override fun createContentView(context: Context, parent: ViewGroup): View {
-        return LayoutInflater.from(context).inflate(R.layout.dialog_select_audio, parent, false)
-    }
+    override val layoutId: Int = R.layout.dialog_select_audio
 
     override fun firstLaunchInitData() {
         launch(Dispatchers.IO) {
@@ -124,39 +109,15 @@ class AudioSelectDialog : BaseCoroutineStateCancelableResultDialogFragment<Audio
     }
 
     companion object {
+
         data class AudioWithSelected(
             val audio: MediaStoreAudio,
             val isSelected: Boolean
         )
+
         data class State(
             val audiosWithSelected: List<AudioWithSelected> = emptyList(),
             val hasLoadFirstData: Boolean = false
         )
-    }
-}
-
-suspend fun FragmentManager.showAudioSelectDialogSuspend(): List<MediaStoreAudio>? {
-    return suspendCancellableCoroutine { cont ->
-        val d = AudioSelectDialog(
-            callback = object : DialogCancelableResultCallback<List<MediaStoreAudio>> {
-                override fun onResult(t: List<MediaStoreAudio>) {
-                    if (cont.isActive) {
-                        cont.resume(t)
-                    }
-                }
-
-                override fun onCancel() {
-                    if (cont.isActive) {
-                        cont.resume(null)
-                    }
-                }
-
-            }
-        )
-        d.showSafe(this, "AudioSelectDialog#${System.currentTimeMillis()}")
-        val dw = WeakReference(d)
-        cont.invokeOnCancellation {
-            dw.get()?.dismissSafe()
-        }
     }
 }

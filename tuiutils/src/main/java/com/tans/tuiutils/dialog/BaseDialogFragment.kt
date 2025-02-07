@@ -1,7 +1,6 @@
 package com.tans.tuiutils.dialog
 
 import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -9,9 +8,12 @@ import android.view.*
 import androidx.annotation.FloatRange
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.FragmentManager
+import com.tans.tuiutils.activity.IContentViewCreator
+import com.tans.tuiutils.activity.tryCreateNewContentView
+import com.tans.tuiutils.tUiUtilsLog
 import java.util.concurrent.atomic.AtomicBoolean
 
-abstract class BaseDialogFragment : AppCompatDialogFragment() {
+abstract class BaseDialogFragment : AppCompatDialogFragment(), IContentViewCreator {
 
     @FloatRange(from = 0.0, to = 1.0)
     open val contentViewHeightInScreenRatio: Float? = null
@@ -20,7 +22,8 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
 
     private var contentView: View? = null
     private val isDialogCreatedInvoked: AtomicBoolean = AtomicBoolean(false)
-    abstract fun createContentView(context: Context, parent: ViewGroup): View
+
+    override val layoutId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,29 +40,30 @@ abstract class BaseDialogFragment : AppCompatDialogFragment() {
         }
         val activity = activity ?: return super.onCreateDialog(null)
 
-        val contentView = createContentView(context = activity, parent = activity.window.decorView as ViewGroup)
-        (contentView.parent as? ViewGroup)?.removeAllViews()
-        val widthRatio = contentViewWidthInScreenRatio
-        val heightRatio = contentViewHeightInScreenRatio
-        if (widthRatio != null || heightRatio != null) {
-            val (maxWidth, maxHeight) = activity.getDisplaySize()
-            val lp = contentView.layoutParams ?: ViewGroup.LayoutParams(0, 0)
-            if (widthRatio != null) {
-                lp.width = (widthRatio * maxWidth + 0.5f).toInt()
+        val contentView = tryCreateNewContentView(context = activity, parentView = activity.window.decorView as? ViewGroup)
+        val dialog = if (contentView != null) {
+            (contentView.parent as? ViewGroup)?.removeAllViews()
+            val widthRatio = contentViewWidthInScreenRatio
+            val heightRatio = contentViewHeightInScreenRatio
+            if (widthRatio != null || heightRatio != null) {
+                val (maxWidth, maxHeight) = activity.getDisplaySize()
+                val lp = contentView.layoutParams ?: ViewGroup.LayoutParams(0, 0)
+                if (widthRatio != null) {
+                    lp.width = (widthRatio * maxWidth + 0.5f).toInt()
+                }
+                if (heightRatio != null) {
+                    lp.height = (heightRatio * maxHeight + 0.5f).toInt()
+                }
+                contentView.layoutParams = lp
             }
-            if (heightRatio != null) {
-                lp.height = (heightRatio * maxHeight + 0.5f).toInt()
-            }
-            contentView.layoutParams = lp
+            this.contentView = contentView
+            createDialog(contentView)
+        } else {
+            tUiUtilsLog.w(this::class.java.name, "No content view.")
+            super.onCreateDialog(null)
         }
-        this.contentView = contentView
-        val dialog = createDialog(contentView)
         firstLaunchInitData()
         return dialog
-    }
-
-    open fun onTouchEvent(event: MotionEvent): Boolean {
-        return false
     }
 
     override fun onGetLayoutInflater(savedInstanceState: Bundle?): LayoutInflater {

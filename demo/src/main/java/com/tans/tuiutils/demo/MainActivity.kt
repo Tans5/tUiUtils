@@ -12,6 +12,8 @@ import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.demo.databinding.ActivityMainBinding
 import com.tans.tuiutils.demo.mediastore.MediaStoreActivity
 import com.tans.tuiutils.demo.myfragment.MyFragmentActivity
+import com.tans.tuiutils.dialog.showSimpleCancelableCoroutineResultDialogSuspend
+import com.tans.tuiutils.dialog.showSimpleForceCoroutineResultDialogSuspend
 import com.tans.tuiutils.multimedia.pickImageSuspend
 import com.tans.tuiutils.multimedia.takeAPhotoSuspend
 import com.tans.tuiutils.permission.permissionsRequestSimplifySuspend
@@ -49,9 +51,12 @@ class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
 
         viewBinding.yesOrNoDialogBt.clicks(this) {
            runCatching {
-                this@MainActivity.supportFragmentManager.showYesOrNoDialogSuspend()
+                this@MainActivity.supportFragmentManager.showSimpleForceCoroutineResultDialogSuspend(YesOrNoDialog())
            }.onSuccess {
-               Toast.makeText(this@MainActivity, if (it) "Yes" else "No", Toast.LENGTH_SHORT).show()
+               Toast.makeText(this@MainActivity, when (it) {
+                   true -> "Yes"
+                   false -> "False"
+               }, Toast.LENGTH_SHORT).show()
            }.onFailure {
                Toast.makeText(this@MainActivity, "Error: ${it.message}", Toast.LENGTH_SHORT).show()
            }
@@ -66,7 +71,7 @@ class MainActivity : BaseCoroutineStateActivity<Unit>(Unit) {
             runCatching { this@MainActivity.permissionsRequestSimplifySuspend(*audioReadPermission) }
                 .onSuccess {
                     if (it) {
-                        val selectedAudios = this@MainActivity.supportFragmentManager.showAudioSelectDialogSuspend()
+                        val selectedAudios = this@MainActivity.supportFragmentManager.showSimpleCancelableCoroutineResultDialogSuspend(AudioSelectDialog())
                         if (selectedAudios != null) {
                             Toast.makeText(this@MainActivity, "Select audio count: ${selectedAudios.size}", Toast.LENGTH_SHORT).show()
                         } else {
