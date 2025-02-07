@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import com.tans.tuiutils.Internal
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.isActive
 
 class FlowDataSourceImpl<Data : Any>(
     private val dataFlow: Flow<List<Data>>,
@@ -33,12 +33,15 @@ class FlowDataSourceImpl<Data : Any>(
         val newCoroutineScope = CoroutineScope(Dispatchers.Main.immediate)
         newCoroutineScope.launch {
             dataFlow
-                .debounce(20)
                 .distinctUntilChanged()
                 .flowOn(Dispatchers.IO)
                 .collect {
                     submitDataList(it)
                 }
+        }
+        val oldScope = coroutineScope
+        if (oldScope != null && oldScope.isActive) {
+            oldScope.cancel("Create new scope.")
         }
         coroutineScope = newCoroutineScope
     }

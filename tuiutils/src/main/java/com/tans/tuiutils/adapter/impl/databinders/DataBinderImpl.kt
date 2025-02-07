@@ -10,13 +10,6 @@ open class DataBinderImpl<Data : Any>(
     private val bindDataNoPayload: (data: Data, view: View, positionInDataSource: Int) -> Unit
 ) : DataBinder<Data> {
 
-    override fun addPayloadDataBinder(
-        payload: Any,
-        binder: (data: Data, view: View, positionInDataSource: Int) -> Unit
-    ): DataBinder<Data> {
-        return super.addPayloadDataBinder(payload, binder)
-    }
-
     @Internal
     override val payloadDataBinders: MutableMap<Any,  ((data: Data, view: View, positionInDataSource: Int) -> Unit)?> = mutableMapOf()
 
