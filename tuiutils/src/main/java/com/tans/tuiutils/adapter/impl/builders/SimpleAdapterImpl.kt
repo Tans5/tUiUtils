@@ -32,7 +32,6 @@ internal class SimpleAdapterImpl<Data : Any>(
         adapterBuilder.consumeBuilder()
     }
 
-
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         adapterBuilder.onAttachedToRecyclerView(recyclerView, this)

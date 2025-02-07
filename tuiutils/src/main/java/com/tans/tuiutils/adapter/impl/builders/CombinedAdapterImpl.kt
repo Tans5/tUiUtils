@@ -1,6 +1,8 @@
 package com.tans.tuiutils.adapter.impl.builders
 
 import android.annotation.SuppressLint
+import android.os.Handler
+import android.os.Looper
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -86,6 +88,8 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
     private val childrenBuilders by lazy {
         combinedAdapterBuilder.childrenBuilders
     }
+
+    private val childrenRequestSubmitDataTasks: MutableList<ChildRequestSubmitDataTask> = mutableListOf()
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -187,13 +191,15 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
                 }
             }
         }
+        childrenRequestSubmitDataTasks.add(ChildRequestSubmitDataTask(child, callback))
         tUiUtilsLog.d(TAG, "Request submit list count: ${combinedList.size}")
         submitList(combinedList) {
             // Work on main thread.
             tUiUtilsLog.d(TAG, "Submitted list count: ${combinedList.size}")
-            callback?.run()
-            for (c in childrenBuilders) {
-                c.dataSource.ifWaitingSubmitIt()
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                ifHasWaitingRequestUpdateChildrenSubmitTheme()
+            } else {
+                Handler(Looper.getMainLooper()).post { ifHasWaitingRequestUpdateChildrenSubmitTheme() }
             }
         }
     }
@@ -222,7 +228,21 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
         }
     }
 
+    private fun ifHasWaitingRequestUpdateChildrenSubmitTheme() {
+        val i = childrenRequestSubmitDataTasks.iterator()
+        while (i.hasNext()) {
+            i.next().callback?.run()
+            i.remove()
+        }
+    }
+
     companion object {
+
+        private data class ChildRequestSubmitDataTask(
+            val child: DataSource<Any>,
+            val callback: Runnable?
+        )
+
         private const val BUILDER_ITEM_VIEW_MASK: Int = 0x00_00_FF_FF
         private const val BUILDER_INDEX_MASK: Int = 0xFF_FF_00_00.toInt()
         private const val BUILDER_INDEX_MASK_OFFSET_BIT = 16

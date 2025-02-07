@@ -13,7 +13,7 @@ open class DataSourceImpl<Data : Any>(
 ) : DataSource<Data> {
 
     @Internal
-    final override var lastRequestSubmitDataListCallback: Runnable? = null
+    final override val requestSubmitDataListCallbacks: MutableList<Runnable> = mutableListOf()
 
     @Internal
     final override var lastRequestSubmitDataList: List<Data>? = null
