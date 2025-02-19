@@ -25,7 +25,7 @@ internal class FieldsViewModel : ViewModel() {
     fun getField(key: String): Any? = savedFields[key]
 
     fun saveField(key: String, field: Any): Boolean {
-        if (isCleared() || containField(key)) {
+        if (containField(key)) {
             return false
         }
         savedFields[key] = field
@@ -39,7 +39,6 @@ internal class FieldsViewModel : ViewModel() {
         super.onCleared()
         clearObserver?.onViewModelCleared()
         clearObserver = null
-        savedFields.clear()
         isCleared = true
     }
 
