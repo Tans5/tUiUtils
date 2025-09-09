@@ -24,8 +24,9 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (cleanSavedFragmentStates && savedInstanceState != null) {
-            if (savedInstanceState.containsKey(FRAGMENT_SAVED_STATE_TAG)) {
-                savedInstanceState.remove(FRAGMENT_SAVED_STATE_TAG)
+            val components = savedInstanceState.getBundle(SAVED_COMPONENTS_KEY)
+            if (components != null && components.containsKey(FRAGMENT_SAVED_STATE_KEY)) {
+                components.remove(FRAGMENT_SAVED_STATE_KEY)
                 tUiUtilsLog.w(TAG, "Remove fragment's states: onCreate()")
             }
         }
@@ -75,8 +76,9 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        if (cleanSavedFragmentStates && outState.containsKey(FRAGMENT_SAVED_STATE_TAG)) {
-            outState.remove(FRAGMENT_SAVED_STATE_TAG)
+        val components = outState.getBundle(SAVED_COMPONENTS_KEY)
+        if (components != null && components.containsKey(FRAGMENT_SAVED_STATE_KEY)) {
+            components.remove(FRAGMENT_SAVED_STATE_KEY)
             tUiUtilsLog.w(TAG, "Remove fragment's states: onSaveInstanceState()")
         }
     }
@@ -90,6 +92,8 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
 
 }
 
-private const val FRAGMENT_SAVED_STATE_TAG = "android:support:fragments"
+private const val FRAGMENT_SAVED_STATE_KEY = "android:support:fragments"
+
+private const val SAVED_COMPONENTS_KEY = "androidx.lifecycle.BundlableSavedStateRegistry.key"
 
 private const val TAG = "BaseActivity"
