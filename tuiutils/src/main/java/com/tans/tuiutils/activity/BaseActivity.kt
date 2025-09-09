@@ -26,7 +26,7 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
         if (cleanSavedFragmentStates && savedInstanceState != null) {
             if (savedInstanceState.containsKey(FRAGMENT_SAVED_STATE_TAG)) {
                 savedInstanceState.remove(FRAGMENT_SAVED_STATE_TAG)
-                tUiUtilsLog.w(TAG, "Remove fragment's states.")
+                tUiUtilsLog.w(TAG, "Remove fragment's states: onCreate()")
             }
         }
         val isFirstLaunch = lastNonConfigurationInstance == null
@@ -70,6 +70,15 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
             ownerActivityGetter = { this },
             initializer = initializer
         )
+    }
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (cleanSavedFragmentStates && outState.containsKey(FRAGMENT_SAVED_STATE_TAG)) {
+            outState.remove(FRAGMENT_SAVED_STATE_TAG)
+            tUiUtilsLog.w(TAG, "Remove fragment's states: onSaveInstanceState()")
+        }
     }
 
     override fun onViewModelCleared() {}
