@@ -12,6 +12,9 @@ import com.tans.tuiutils.tUiUtilsLog
  */
 abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.ViewModelClearObserver, IContentViewCreator {
 
+    open val cleanSavedFragmentStates: Boolean
+        get() = true
+
     override val layoutId: Int
         get() = 0
 
@@ -20,6 +23,12 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (cleanSavedFragmentStates && savedInstanceState != null) {
+            if (savedInstanceState.containsKey(FRAGMENT_SAVED_STATE_TAG)) {
+                savedInstanceState.remove(FRAGMENT_SAVED_STATE_TAG)
+                tUiUtilsLog.w(TAG, "Remove fragment's states.")
+            }
+        }
         val isFirstLaunch = lastNonConfigurationInstance == null
         super.onCreate(savedInstanceState)
         fieldsViewModel.setViewModelClearObserver(this)
@@ -31,7 +40,7 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
             setContentView(contentView)
             bindContentView(contentView)
         } else {
-            tUiUtilsLog.w(this::class.java.name, "No content view.")
+            tUiUtilsLog.w(TAG, "No content view.")
         }
     }
 
@@ -71,3 +80,7 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
     }
 
 }
+
+private const val FRAGMENT_SAVED_STATE_TAG = "android:support:fragments"
+
+private const val TAG = "BaseActivity"

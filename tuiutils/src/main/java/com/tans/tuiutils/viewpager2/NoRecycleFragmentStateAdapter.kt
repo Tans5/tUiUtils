@@ -681,6 +681,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
             mViewPager = null
         }
 
+        // 更新 Fragment 生命周期
         fun updateFragmentMaxLifecycle(dataSetChanged: Boolean) {
             if (shouldDelayFragmentTransactions()) {
                 return  /* recovery step via {@link #mLifecycleObserver} */
