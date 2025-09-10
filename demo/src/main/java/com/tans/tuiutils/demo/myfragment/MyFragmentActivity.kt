@@ -17,7 +17,7 @@ class MyFragmentActivity : BaseCoroutineStateActivity<MyFragmentActivity.Compani
 
     override val layoutId: Int = R.layout.activity_my_fragment
 
-    private val myFragments: Map<FragmentType, Fragment> by lazyViewModelField {
+    private val myFragments: Map<FragmentType, Fragment> by lazyViewModelField("fragments") {
         mapOf(FragmentType.A to MyFragmentA(), FragmentType.B to MyFragmentB())
     }
 

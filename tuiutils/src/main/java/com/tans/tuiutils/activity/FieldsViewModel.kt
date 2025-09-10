@@ -37,6 +37,7 @@ internal class FieldsViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
+        tUiUtilsLog.d(TAG, "View model cleared")
         clearObserver?.onViewModelCleared()
         clearObserver = null
         isCleared = true

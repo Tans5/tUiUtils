@@ -32,7 +32,7 @@ class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State
     }
 
     override fun CoroutineScope.firstLaunchInitDataCoroutine() {
-        println("${this@ImagesFragment::class.java.simpleName} firstLaunchInitDataCoroutine()")
+        println("${this@ImagesFragment::class.java.simpleName} firstLaunchInitDataCoroutine(): ${this.hashCode()}")
         launch {
             val images = this@ImagesFragment.queryImageFromMediaStore()
             updateState {

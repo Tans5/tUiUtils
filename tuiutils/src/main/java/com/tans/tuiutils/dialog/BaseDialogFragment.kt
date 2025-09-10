@@ -25,17 +25,24 @@ abstract class BaseDialogFragment : AppCompatDialogFragment(), IContentViewCreat
 
     override val layoutId: Int = 0
 
+    private var isInvokeOnCreate = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // if restart, because configure change, force dismiss
-        if (savedInstanceState != null) {
+        if (!isInvokeOnCreate) {
+            isInvokeOnCreate = true
+        } else {
             dismissSafe()
-            return
         }
     }
 
+    private var isInvokeOnCreateDialog = false
+
     final override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        if (savedInstanceState != null) {
+        if (!isInvokeOnCreateDialog) {
+            isInvokeOnCreateDialog = true
+        } else {
             return super.onCreateDialog(savedInstanceState)
         }
         val activity = activity ?: return super.onCreateDialog(null)

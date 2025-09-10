@@ -1,41 +1,27 @@
 package com.tans.tuiutils.activity
 
 import com.tans.tuiutils.tUiUtilsLog
-import java.util.concurrent.atomic.AtomicLong
 
 internal class ViewModelFieldLazy<T : Any>: Lazy<T> {
 
     private val key: String
-    private val ownerActivityGetter: () -> BaseActivity
+    private val ownerViewModelGetter: () -> FieldsViewModel
     private val initializer: () -> T
 
     constructor(
         key: String,
-        ownerActivityGetter: () -> BaseActivity,
+        ownerViewModelGetter: () -> FieldsViewModel,
         initializer: () -> T
     ) {
         this.key = key
-        this.ownerActivityGetter = ownerActivityGetter
-        this.initializer = initializer
-    }
-
-    constructor(
-        ownerActivityGetter: () -> BaseActivity,
-        initializer: () -> T
-    ) {
-        this.key = "AnonymousViewModelField#${anonymousViewModelFieldIndex.getAndIncrement()}"
-        this.ownerActivityGetter = ownerActivityGetter
+        this.ownerViewModelGetter = ownerViewModelGetter
         this.initializer = initializer
     }
 
     @Suppress("UNCHECKED_CAST")
     override val value: T
         get() {
-            val ownerActivity = ownerActivityGetter()
-            if (ownerActivity.application == null) {
-                tUiUtilsLog.e(TAG, "Activity is not attached.")
-            }
-            val viewModel = ownerActivity.fieldsViewModel
+            val viewModel = ownerViewModelGetter()
             if (viewModel.isCleared()) {
                 tUiUtilsLog.e(TAG, "ViewModel was cleared.")
             }
@@ -72,12 +58,10 @@ internal class ViewModelFieldLazy<T : Any>: Lazy<T> {
         }
 
     override fun isInitialized(): Boolean {
-        val ownerActivity = ownerActivityGetter()
-        return ownerActivity.fieldsViewModel.containField(key)
+        return ownerViewModelGetter().containField(key)
     }
 
     companion object {
-        private val anonymousViewModelFieldIndex = AtomicLong(0)
         private const val TAG = "ViewModelFieldLazy"
     }
 

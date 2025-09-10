@@ -61,14 +61,7 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
     fun <T : Any> lazyViewModelField(key: String, initializer: () -> T): Lazy<T> {
         return ViewModelFieldLazy(
             key = key,
-            ownerActivityGetter = { this },
-            initializer = initializer
-        )
-    }
-
-    fun <T : Any> lazyViewModelField(initializer: () -> T): Lazy<T> {
-        return ViewModelFieldLazy(
-            ownerActivityGetter = { this },
+            ownerViewModelGetter = { fieldsViewModel },
             initializer = initializer
         )
     }
@@ -83,10 +76,13 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
         }
     }
 
-    override fun onViewModelCleared() {}
+    override fun onViewModelCleared() {
+        tUiUtilsLog.d(TAG, "ViewModel cleared")
+    }
 
     override fun onDestroy() {
         super.onDestroy()
+        tUiUtilsLog.d(TAG, "Destroyed")
         fieldsViewModel.setViewModelClearObserver(null)
     }
 

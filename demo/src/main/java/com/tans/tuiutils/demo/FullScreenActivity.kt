@@ -1,14 +1,17 @@
 package com.tans.tuiutils.demo
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.view.View
+import com.tans.tuiutils.activity.BaseActivity
 import com.tans.tuiutils.systembar.annotation.FullScreenStyle
 
 @FullScreenStyle
-class FullScreenActivity : AppCompatActivity() {
+class FullScreenActivity : BaseActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fit_system_window)
+    override val layoutId: Int = R.layout.activity_fit_system_window
+
+    override fun firstLaunchInitData() {
+    }
+
+    override fun bindContentView(contentView: View) {
     }
 }

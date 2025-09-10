@@ -20,7 +20,7 @@ class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Compani
 
     override val layoutId: Int = R.layout.activity_media_store
 
-    private val mediaStoresFragments: Map<MediaTab, Fragment> by lazyViewModelField {
+    private val mediaStoresFragments: Map<MediaTab, Fragment> by lazyViewModelField("fragments") {
         mapOf(
             MediaTab.Images to ImagesFragment(),
             MediaTab.Audios to AudiosFragment(),
@@ -34,6 +34,7 @@ class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Compani
 
     override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
         val viewBinding = ActivityMediaStoreBinding.bind(contentView)
+        println("Fragments: ${mediaStoresFragments.hashCode()}")
         val fragmentAdapter = object : NoRecycleFragmentStateAdapter(this@MediaStoreActivity) {
             override fun getItemCount(): Int = mediaStoresFragments.size
             override fun createFragment(position: Int): Fragment {
@@ -62,6 +63,11 @@ class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Compani
                 viewBinding.tabLayout.selectTab(viewBinding.tabLayout.getTabAt(selectedTab.ordinal))
             }
         }
+    }
+
+    override fun onViewModelCleared() {
+        super.onViewModelCleared()
+        println("View model cleared.")
     }
 
     companion object {

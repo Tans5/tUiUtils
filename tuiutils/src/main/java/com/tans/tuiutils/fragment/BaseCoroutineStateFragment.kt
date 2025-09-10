@@ -39,26 +39,19 @@ abstract class BaseCoroutineStateFragment<State : Any>(protected val defaultStat
         }
     }
 
-    protected var dataCoroutineScope: CoroutineScope? = null
-       private set
-
+    protected val dataCoroutineScope: CoroutineScope by lazyViewModelField("dataCoroutineScope") {
+        CoroutineScope(Dispatchers.IO + dataCoroutineExceptionHandler)
+    }
 
     abstract fun CoroutineScope.firstLaunchInitDataCoroutine()
 
     final override fun firstLaunchInitData() {
-        val newDataCoroutineScope = CoroutineScope(Dispatchers.IO + dataCoroutineExceptionHandler)
-        dataCoroutineScope?.let {
-            if (it.isActive) {
-                it.cancel("FirstLaunchInitData re invoke.")
-            }
-        }
-        dataCoroutineScope = newDataCoroutineScope
         if (firstLaunchCheckDefaultState) {
             if (defaultState == currentState()) {
-                newDataCoroutineScope.firstLaunchInitDataCoroutine()
+                dataCoroutineScope.firstLaunchInitDataCoroutine()
             }
         } else {
-            newDataCoroutineScope.firstLaunchInitDataCoroutine()
+            dataCoroutineScope.firstLaunchInitDataCoroutine()
         }
     }
 
@@ -90,10 +83,9 @@ abstract class BaseCoroutineStateFragment<State : Any>(protected val defaultStat
         uiCoroutineScope = null
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        dataCoroutineScope?.cancel("Fragment destroyed..")
-        dataCoroutineScope = null
+    override fun onViewModelCleared() {
+        super.onViewModelCleared()
+        dataCoroutineScope.cancel("Fragment ViewModel cleared..")
     }
 
 }

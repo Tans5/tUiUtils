@@ -9,24 +9,22 @@ abstract class BaseRx3StateFragment<State : Any>(protected val defaultState: Sta
 
     open val firstLaunchCheckDefaultState: Boolean = true
 
-    protected var uiRxLife: Rx3Life? = null
-        private set
+    protected val dataRxLife: Rx3Life by lazyViewModelField("dataRxLife") {
+        Rx3Life()
+    }
 
-    protected var dataRxLife: Rx3Life? = null
+    protected var uiRxLife: Rx3Life? = null
         private set
 
     abstract fun Rx3Life.firstLaunchInitDataRx()
 
     final override fun firstLaunchInitData() {
-        dataRxLife?.lifeCompositeDisposable?.clear()
-        val newDataRxLife = Rx3Life()
-        dataRxLife = newDataRxLife
         if (firstLaunchCheckDefaultState) {
             if (defaultState == bindState().firstOrError().blockingGet()) {
-                newDataRxLife.firstLaunchInitDataRx()
+                dataRxLife.firstLaunchInitDataRx()
             }
         } else {
-            newDataRxLife.firstLaunchInitDataRx()
+            dataRxLife.firstLaunchInitDataRx()
         }
     }
 
@@ -45,9 +43,8 @@ abstract class BaseRx3StateFragment<State : Any>(protected val defaultState: Sta
         uiRxLife = null
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        dataRxLife?.lifeCompositeDisposable?.clear()
-        dataRxLife = null
+    override fun onViewModelCleared() {
+        super.onViewModelCleared()
+        dataRxLife.lifeCompositeDisposable.clear()
     }
 }
