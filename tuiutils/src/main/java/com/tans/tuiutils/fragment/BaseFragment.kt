@@ -32,6 +32,7 @@ abstract class BaseFragment : Fragment(), IContentViewCreator, FieldsViewModel.C
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        fieldsViewModel.setViewModelClearObserver(this)
         if (!isInvokeInitData) {
             isInvokeInitData = true
             firstLaunchInitData()
@@ -95,6 +96,7 @@ abstract class BaseFragment : Fragment(), IContentViewCreator, FieldsViewModel.C
 
     override fun onDestroy() {
         super.onDestroy()
+        fieldsViewModel.setViewModelClearObserver(null)
         tUiUtilsLog.d(BASE_FRAGMENT_TAG, "Fragment destroyed")
     }
 
