@@ -2,6 +2,7 @@ package com.tans.tuiutils.demo.mediastore
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
@@ -16,6 +17,7 @@ import com.tans.tuiutils.demo.databinding.VideoItemLayoutBinding
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreVideo
 import com.tans.tuiutils.mediastore.queryVideoFromMediaStore
+import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.view.refreshes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +51,9 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
             dataBinder = DataBinderImpl { data, view, _ ->
                 val itemViewBinding = VideoItemLayoutBinding.bind(view)
                 itemViewBinding.videoTitleTv.text = data.title
+                itemViewBinding.root.clicks(this) {
+                    Toast.makeText(this@VideosFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
+                }
             }
         )
         val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(

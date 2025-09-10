@@ -34,7 +34,6 @@ class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Compani
 
     override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
         val viewBinding = ActivityMediaStoreBinding.bind(contentView)
-        println("Fragments: ${mediaStoresFragments.hashCode()}")
         val fragmentAdapter = object : NoRecycleFragmentStateAdapter(this@MediaStoreActivity) {
             override fun getItemCount(): Int = mediaStoresFragments.size
             override fun createFragment(position: Int): Fragment {

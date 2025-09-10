@@ -2,6 +2,7 @@ package com.tans.tuiutils.demo.mediastore
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
@@ -15,6 +16,7 @@ import com.tans.tuiutils.demo.databinding.ImageItemLayoutBinding
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreImage
 import com.tans.tuiutils.mediastore.queryImageFromMediaStore
+import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.view.refreshes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +55,9 @@ class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State
                     Glide.with(it)
                         .load(data.uri)
                         .into(itemViewBinding.imageIv)
+                }
+                itemViewBinding.root.clicks(this) {
+                    Toast.makeText(this@ImagesFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
                 }
             }
         )
