@@ -234,7 +234,35 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
             val newFragment = createFragment(position)
             // 移除保存的状态代码
             // newFragment.setInitialSavedState(mSavedStates.get(itemId));
-            newFragment.setInitialSavedState(null)
+
+            if (newFragment.isAdded) { // 如果当前 fragment 已经添加，移除它
+                val tag = newFragment.tag
+                val id = newFragment.id
+                val idFragment = mFragmentManager.findFragmentById(id)
+                val tagFragment = mFragmentManager.findFragmentByTag(tag)
+                if (idFragment != null || tagFragment != null) { // 如果在当前的 fragment manager 中，先移除它
+                    val tc = mFragmentManager.beginTransaction()
+                    if (idFragment != null) {
+                        tc.remove(idFragment)
+                    }
+                    if (tagFragment != null && tagFragment !== idFragment) {
+                        tc.remove(tagFragment)
+                    }
+                    tc.commitNowAllowingStateLoss()
+                }
+
+                // 重新初始化状态
+                try {
+                    val initMethod = Fragment::class.java.getDeclaredMethod("initState")
+                    if (initMethod != null) {
+                        initMethod.isAccessible = true
+                        initMethod.invoke(newFragment)
+                    }
+                } catch (_: Throwable) {
+
+                }
+            }
+
             mFragments.put(itemId, newFragment)
         }
     }
@@ -308,7 +336,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
                 mFragmentManager.beginTransaction()
                     .add(fragment, "f" + holder.itemId)
                     .setMaxLifecycle(fragment, Lifecycle.State.STARTED)
-                    .commitNow()
+                    .commitNowAllowingStateLoss()
                 mFragmentMaxLifecycleEnforcer!!.updateFragmentMaxLifecycle(false)
             } finally {
                 mFragmentEventDispatcher.dispatchPostEvents(onPost)
@@ -446,7 +474,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
 
         // 移除 Fragment.
         try {
-            mFragmentManager.beginTransaction().remove(fragment).commitNow()
+            mFragmentManager.beginTransaction().remove(fragment).commitNowAllowingStateLoss()
             mFragments.remove(itemId)
         } finally {
             mFragmentEventDispatcher.dispatchPostEvents(onPost)
@@ -475,7 +503,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
 
         mFragmentManager.beginTransaction()
             .setMaxLifecycle(fragment, Lifecycle.State.CREATED)
-            .commitNow()
+            .commitNowAllowingStateLoss()
     }
 
     fun shouldDelayFragmentTransactions(): Boolean {
@@ -752,7 +780,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
             }
 
             if (!transaction.isEmpty) {
-                transaction.commitNow()
+                transaction.commitNowAllowingStateLoss()
                 Collections.reverse(onPost) // to assure 'nesting' of events
                 for (event in onPost) {
                     mFragmentEventDispatcher.dispatchPostEvents(event)

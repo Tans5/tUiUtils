@@ -13,7 +13,6 @@ import com.tans.tuiutils.tUiUtilsLog
 /**
  * This fragment will be store in Activity's ViewModelStore, when configure change cause restart won't create new fragment.
  */
-@Suppress("DEPRECATION")
 abstract class BaseFragment : Fragment(), IContentViewCreator {
 
     @get:LayoutRes
@@ -21,21 +20,13 @@ abstract class BaseFragment : Fragment(), IContentViewCreator {
 
     open val configureChangeCreateNewContentView: Boolean = false
 
+    private var isInvokeInitData = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        retainInstance = true
-        firstLaunchInitData()
-        if (savedInstanceState != null) {
-            val needRemoveFragments = parentFragmentManager.fragments.filter { it.tag == tag }
-            if (needRemoveFragments.isNotEmpty()) {
-                parentFragmentManager.beginTransaction().apply {
-                    for (f in needRemoveFragments) {
-                        remove(f)
-                    }
-                    commitAllowingStateLoss()
-                }
-                tUiUtilsLog.d(BASE_FRAGMENT_TAG, "Remove restore fragments: $needRemoveFragments")
-            }
+        if (!isInvokeInitData) {
+            isInvokeInitData = true
+            firstLaunchInitData()
         }
     }
 
