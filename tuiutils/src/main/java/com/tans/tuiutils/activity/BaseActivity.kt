@@ -22,6 +22,8 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
         ViewModelProvider(this).get<FieldsViewModel>()
     }
 
+    open val viewModelFiledKeyPrefix: String = "activity"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         if (cleanSavedFragmentStates && savedInstanceState != null) {
             val components = savedInstanceState.getBundle(SAVED_COMPONENTS_KEY)
@@ -32,7 +34,7 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
         }
         val isFirstLaunch = lastNonConfigurationInstance == null
         super.onCreate(savedInstanceState)
-        fieldsViewModel.setViewModelClearObserver(this)
+        fieldsViewModel.addViewModelClearObserver(this)
         if (isFirstLaunch) {
             firstLaunchInitData()
         }
@@ -60,7 +62,7 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
      */
     fun <T : Any> lazyViewModelField(key: String, initializer: () -> T): Lazy<T> {
         return ViewModelFieldLazy(
-            key = key,
+            key = "${viewModelFiledKeyPrefix}_$key",
             ownerViewModelGetter = { fieldsViewModel },
             initializer = initializer
         )
@@ -83,7 +85,7 @@ abstract class BaseActivity : AppCompatActivity(), FieldsViewModel.Companion.Vie
     override fun onDestroy() {
         super.onDestroy()
         tUiUtilsLog.d(TAG, "Destroyed")
-        fieldsViewModel.setViewModelClearObserver(null)
+        fieldsViewModel.removeViewModelClearObserver(this)
     }
 
 }

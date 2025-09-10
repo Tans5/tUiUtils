@@ -11,13 +11,22 @@ internal class FieldsViewModel : ViewModel() {
         ConcurrentHashMap()
     }
 
-    private var clearObserver: ViewModelClearObserver? = null
+    private val clearObservers: ArrayDeque<ViewModelClearObserver> = ArrayDeque()
 
     @Volatile private var isCleared: Boolean = false
 
     @MainThread
-    fun setViewModelClearObserver(o: ViewModelClearObserver?) {
-        clearObserver = o
+    fun addViewModelClearObserver(o: ViewModelClearObserver) {
+        if (isCleared) {
+            o.onViewModelCleared()
+        } else {
+            clearObservers.add(o)
+        }
+    }
+
+    @MainThread
+    fun removeViewModelClearObserver(o: ViewModelClearObserver) {
+        clearObservers.remove(o)
     }
 
     fun containField(key: String): Boolean = savedFields.containsKey(key)
@@ -38,8 +47,10 @@ internal class FieldsViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         tUiUtilsLog.d(TAG, "View model cleared")
-        clearObserver?.onViewModelCleared()
-        clearObserver = null
+        for (o in clearObservers) {
+            o.onViewModelCleared()
+        }
+        clearObservers.clear()
         isCleared = true
     }
 

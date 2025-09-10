@@ -23,8 +23,10 @@ abstract class BaseFragment : Fragment(), IContentViewCreator, FieldsViewModel.C
     override val layoutId: Int = 0
 
     internal val fieldsViewModel : FieldsViewModel by lazy {
-        ViewModelProvider(this).get<FieldsViewModel>()
+        ViewModelProvider(this.requireActivity()).get<FieldsViewModel>()
     }
+
+    open val viewModelFiledKeyPrefix: String = "fragment@${hashCode()}"
 
     open val configureChangeCreateNewContentView: Boolean = false
 
@@ -32,7 +34,7 @@ abstract class BaseFragment : Fragment(), IContentViewCreator, FieldsViewModel.C
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        fieldsViewModel.setViewModelClearObserver(this)
+        fieldsViewModel.addViewModelClearObserver(this)
         if (!isInvokeInitData) {
             isInvokeInitData = true
             firstLaunchInitData()
@@ -84,7 +86,7 @@ abstract class BaseFragment : Fragment(), IContentViewCreator, FieldsViewModel.C
 
     fun <T : Any> lazyViewModelField(key: String, initializer: () -> T): Lazy<T> {
         return ViewModelFieldLazy(
-            key = key,
+            key = "${viewModelFiledKeyPrefix}_$key",
             ownerViewModelGetter = { fieldsViewModel },
             initializer = initializer
         )
@@ -96,7 +98,7 @@ abstract class BaseFragment : Fragment(), IContentViewCreator, FieldsViewModel.C
 
     override fun onDestroy() {
         super.onDestroy()
-        fieldsViewModel.setViewModelClearObserver(null)
+        fieldsViewModel.removeViewModelClearObserver(this)
         tUiUtilsLog.d(BASE_FRAGMENT_TAG, "Fragment destroyed")
     }
 
