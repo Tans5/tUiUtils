@@ -189,7 +189,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
         if (!mIsInGracePeriod) {
             mHasStaleFragments = false // we've executed all GC checks
 
-            for (ix in 0 until mFragments.size()) {
+            for (ix in 0 until mFragments.size()) { // 移除已经不在 ViewHolder 中的 Fragment.
                 val itemId = mFragments.keyAt(ix)
                 if (!isFragmentViewBound(itemId)) {
                     toRemove.add(itemId)
@@ -408,6 +408,11 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
         }
 
         container.addView(v)
+
+        // TODO: 不知道为什么，有时会出现 container view 没有 layout 的问题.
+        container.postDelayed({
+            container.requestLayout()
+        }, 20)
     }
 
     /**

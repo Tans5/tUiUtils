@@ -42,6 +42,7 @@ abstract class BaseFragment : Fragment(), IContentViewCreator, FieldsViewModel.C
     }
 
     private var lastContentView: View? = null
+    private var useLastContentView: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,12 +53,12 @@ abstract class BaseFragment : Fragment(), IContentViewCreator, FieldsViewModel.C
         return if (lastContentView == null) {
             tUiUtilsLog.d(BASE_FRAGMENT_TAG, "LastContentView is null, create new ContentView")
             val newContentView = tryCreateNewContentView(requireContext(), container)
-            this.lastContentView = newContentView
             if (newContentView != null) {
-                bindContentView(newContentView, false)
+                useLastContentView = false
             } else {
                 tUiUtilsLog.w(BASE_FRAGMENT_TAG, "No content view.")
             }
+            this.lastContentView = newContentView
             newContentView
         } else {
             val contentView = if (configureChangeCreateNewContentView) {
@@ -65,19 +66,24 @@ abstract class BaseFragment : Fragment(), IContentViewCreator, FieldsViewModel.C
                 tUiUtilsLog.d(BASE_FRAGMENT_TAG, "Config changed, create new ContentView")
                 val newContentView = tryCreateNewContentView(requireContext(), container)
                 if (newContentView != null) {
-                    bindContentView(newContentView, false)
+                   useLastContentView = false
                 } else {
                     tUiUtilsLog.w(BASE_FRAGMENT_TAG, "No content view.")
                 }
                 newContentView
             } else {
                 // Use last content view.
-                bindContentView(lastContentView, true)
+                useLastContentView = true
                 lastContentView
             }
             this.lastContentView = contentView
             contentView
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        bindContentView(view, useLastContentView)
     }
 
     abstract fun firstLaunchInitData()
