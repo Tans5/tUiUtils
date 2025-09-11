@@ -146,6 +146,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
         val itemId = holder.itemId
         // ContainerView id
         val viewHolderId = holder.container.id
+        // 当前绑定到 ViewHolder 的 item id.
         val boundItemId = itemForViewHolder(viewHolderId) // item currently bound to the VH
         if (boundItemId != null && boundItemId != itemId) {
             // ViewHolder 中当前的 Fragment 和新添加的 Fragment 发生改变，移除旧的 Fragment
@@ -154,7 +155,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
         }
 
         mItemIdToViewHolder.put(itemId, viewHolderId) // this might overwrite an existing entry
-        ensureFragment(position)
+        ensureFragment(position) // 确保当前位置的 Fragment 已经创建
 
         /* Special case when {@link RecyclerView} decides to keep the {@link container}
          * attached to the window, resulting in no {@link `onViewAttachedToWindow} callback later */
@@ -176,7 +177,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
 
         // Remove Fragments for items that are no longer part of the data-set
         val toRemove: MutableSet<Long> = ArraySet()
-        for (ix in 0 until mFragments.size()) {
+        for (ix in 0 until mFragments.size()) { // 移除已经不存在的 Fragment
             val itemId = mFragments.keyAt(ix)
             if (!containsItem(itemId)) {
                 toRemove.add(itemId)
@@ -268,6 +269,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
     }
 
     override fun onViewAttachedToWindow(holder: FragmentViewHolder) {
+        // 如果 onBindViewHolder 执行时 view 还没有 attach，attach 后在这个回调方法中继续执行后续的操作.
         placeFragmentInViewHolder(holder)
         gcFragments()
     }
@@ -303,29 +305,30 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
         check(!(!fragment.isAdded && view != null)) { "Design assumption violated." }
 
         // { f:added, v:notCreated, v:notAttached} -> schedule callback for when created
-        if (fragment.isAdded && view == null) {
-            // 等待 Fragment 的 View 创建后添加到 Container 中
+        if (fragment.isAdded && view == null) { // Fragment 已经添加，但是对应的 view 还没有创建
+            // 等待 Fragment 的 View 创建后添加到 container 中
             scheduleViewAttach(fragment, container)
             return
         }
 
         // { f:added, v:created, v:attached } -> check if attached to the right container
-        if (fragment.isAdded && view!!.parent != null) {
-            // Fragment 的 View 的 Parent 不是当前 Container
-            if (view.parent !== container) {
+        if (fragment.isAdded && view!!.parent != null) { // Fragment 已经添加，但是对应的 view 的 parent 已经不为空
+            if (view.parent !== container) { // 如果 parent 不是当前 container，需要重新添加到当前 container.
                 addViewToContainer(view, container)
             }
             return
         }
 
         // { f:added, v:created, v:notAttached} -> attach view to container
-        if (fragment.isAdded) {
+        if (fragment.isAdded) { // Fragment 已经添加，对应的 view 已经创建，但是还没有添加 container
             addViewToContainer(view!!, container)
             return
         }
 
+        // 后续就是 Fragment 没有添加的逻辑了。
+
         // { f:notAdded, v:notCreated, v:notAttached } -> add, create, attach
-        if (!shouldDelayFragmentTransactions()) {
+        if (!shouldDelayFragmentTransactions()) { // 不延迟处理
             // 等待 Fragment 中的 View 完成创建
             scheduleViewAttach(fragment, container)
             val onPost =
@@ -341,7 +344,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
             } finally {
                 mFragmentEventDispatcher.dispatchPostEvents(onPost)
             }
-        } else {
+        } else { // 延迟处理，其实就是 FragmentManager 已经执行完 onSaveState
             if (mFragmentManager.isDestroyed) {
                 return  // nothing we can do
             }
@@ -731,13 +734,14 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
                 return
             }
 
+            // 当前选中的 ItemId
             val currentItemId = getItemId(currentItem)
-            if (currentItemId == mPrimaryItemId && !dataSetChanged) {
+            if (currentItemId == mPrimaryItemId && !dataSetChanged) { // 如果选中的 Item 没有改变，同时数据也没有改变，直接返回。
                 return  // nothing to do
             }
 
             val currentItemFragment = mFragments[currentItemId]
-            if (currentItemFragment == null || !currentItemFragment.isAdded) {
+            if (currentItemFragment == null || !currentItemFragment.isAdded) { // 当前选中的 Fragment 为空或者没有被添加到 FragmentManager 中，直接返回。
                 return
             }
 
@@ -751,11 +755,12 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
                 val itemId = mFragments.keyAt(ix)
                 val fragment = mFragments.valueAt(ix)
 
-                if (!fragment.isAdded) {
+                if (!fragment.isAdded) { // 已经添加到 FragmentManager 的 Fragment 跳过
                     continue
                 }
 
                 if (itemId != mPrimaryItemId) {
+                    // 没有被选中的 Fragment 生命周期为 STARTED
                     transaction.setMaxLifecycle(fragment, Lifecycle.State.STARTED)
                     onPost.add(
                         mFragmentEventDispatcher.dispatchMaxLifecyclePreUpdated(
@@ -767,9 +772,11 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
                     toResume = fragment // itemId map key, so only one can match the predicate
                 }
 
+                // 选中的 Fragment 的 Menu 可见
                 fragment.setMenuVisibility(itemId == mPrimaryItemId)
             }
             if (toResume != null) { // in case the Fragment wasn't added yet
+                // 设置选中的 Fragment 生命周期为 RESUMED
                 transaction.setMaxLifecycle(toResume, Lifecycle.State.RESUMED)
                 onPost.add(
                     mFragmentEventDispatcher.dispatchMaxLifecyclePreUpdated(
@@ -780,6 +787,7 @@ abstract class NoRecycleFragmentStateAdapter(// to avoid creation of a synthetic
             }
 
             if (!transaction.isEmpty) {
+                // 提交
                 transaction.commitNowAllowingStateLoss()
                 Collections.reverse(onPost) // to assure 'nesting' of events
                 for (event in onPost) {
