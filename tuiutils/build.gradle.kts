@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.viewpager2)
+    implementation(libs.androidx.constraintlayout)
     compileOnly(libs.androidx.swiperefreshlayout)
 
     compileOnly(libs.rxjava3)
