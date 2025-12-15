@@ -80,6 +80,13 @@
             android:layout_margin="2dp"
             android:text="MediaStoreActivity"/>
 
+        <com.tans.tuiutils.view.ShapeFrameLayout
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:shapeCornerRadius="10dp"
+            app:shapeGradientStartColor="#FF0000"
+            app:shapeGradientEndColor="#00FF00"/>
+
     </com.google.android.flexbox.FlexboxLayout>
 
     <ImageView

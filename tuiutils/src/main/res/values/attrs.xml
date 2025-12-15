@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="ShapeFrameLayout">
+    <declare-styleable name="ShapeLayout">
         <attr name="shapeDrawable" format="enum">
             <enum name="rectangle" value="0"/>
             <enum name="oval" value="1"/>
@@ -32,6 +32,31 @@
         <attr name="shapeSizeWidth" format="dimension"/>
         <attr name="shapeSizeHeight" format="dimension"/>
         <attr name="shapeUseLevel" format="boolean"/>
+    </declare-styleable>
+
+    <declare-styleable name="ShapeFrameLayout">
+        <attr name="shapeDrawable" />
+        <attr name="shapeCornerRadius" />
+        <attr name="shapeCornerTopLeftRadius" />
+        <attr name="shapeCornerTopRightRadius" />
+        <attr name="shapeCornerBottomLeftRadius" />
+        <attr name="shapeCornerBottomRightRadius" />
+        <attr name="shapeSolidColor" />
+        <attr name="shapeGradientStartColor" />
+        <attr name="shapeGradientCenterColor" />
+        <attr name="shapeGradientEndColor" />
+        <attr name="shapeGradientType" />
+        <attr name="shapeGradientAngle" />
+        <attr name="shapeGradientCenterX" />
+        <attr name="shapeGradientCenterY" />
+        <attr name="shapeGradientRadius" />
+        <attr name="shapeStrokeWidth" />
+        <attr name="shapeStrokeColor" />
+        <attr name="shapeStrokeDashWidth" />
+        <attr name="shapeStrokeDashGap" />
+        <attr name="shapeSizeWidth" />
+        <attr name="shapeSizeHeight" />
+        <attr name="shapeUseLevel" />
     </declare-styleable>
 
     <declare-styleable name="ShapeLinearLayout">

@@ -3,8 +3,6 @@ package com.tans.tuiutils.view
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
-import android.graphics.drawable.GradientDrawable
-import com.tans.tuiutils.R
 
 class ShapeFrameLayout : FrameLayout {
 
