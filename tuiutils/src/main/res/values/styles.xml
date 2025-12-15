@@ -18,7 +18,11 @@
     </style>
 
     <style name="tUiDefaultBottomDialogAnima">
-        <item name="android:windowEnterAnimation">@anim/tui_slide_in</item>
-        <item name="android:windowExitAnimation">@anim/tui_slide_out</item>
+        <item name="android:windowEnterAnimation">@anim/tui_bottom_slide_in</item>
+        <item name="android:windowExitAnimation">@anim/tui_bottom_slide_out</item>
+    </style>
+    <style name="tUiDefaultTopDialogAnima">
+        <item name="android:windowEnterAnimation">@anim/tui_top_slide_in</item>
+        <item name="android:windowExitAnimation">@anim/tui_top_slide_out</item>
     </style>
 </resources>

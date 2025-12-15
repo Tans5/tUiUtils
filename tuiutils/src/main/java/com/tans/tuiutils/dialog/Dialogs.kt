@@ -18,6 +18,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.tans.tuiutils.R
 import com.tans.tuiutils.systembar.SystemBarThemeStyle
 import com.tans.tuiutils.systembar.systemBarThemeStyle
+import androidx.core.graphics.drawable.toDrawable
 
 fun Activity.createDefaultDialog(
     contentView: View,
@@ -65,7 +66,7 @@ fun Activity.createDefaultDialog(
         }
         addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         setLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
         setSoftInputMode(LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         setWindowAnimations(windowAnima)
     }
