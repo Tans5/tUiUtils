@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
 import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
@@ -48,7 +49,7 @@ class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State
         val viewBinding = FragmentImagesBinding.bind(contentView)
         val adapterBuilder = SimpleAdapterBuilderImpl<MediaStoreImage>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.image_item_layout),
-            dataSource = FlowDataSourceImpl(stateFlow.map { it.images }),
+            dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { it.images }),
             dataBinder = DataBinderImpl { data, view, _ ->
                 val itemViewBinding = ImageItemLayoutBinding.bind(view)
                 context?.let {

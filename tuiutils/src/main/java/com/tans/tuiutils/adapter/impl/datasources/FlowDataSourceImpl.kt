@@ -4,15 +4,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tans.tuiutils.adapter.AdapterBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import com.tans.tuiutils.Internal
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.Job
+
 
 class FlowDataSourceImpl<Data : Any>(
+    private val coroutineScope: CoroutineScope,
     private val dataFlow: Flow<List<Data>>,
     areDataItemsTheSameParam: (d1: Data, d2: Data) -> Boolean = { d1, d2 -> d1 == d2 },
     areDataItemsContentTheSameParam: (d1: Data, d2: Data) -> Boolean = { d1, d2 -> d1 == d2 },
@@ -24,32 +23,25 @@ class FlowDataSourceImpl<Data : Any>(
     getDataItemsChangePayloadParam = getDataItemsChangePayloadParam,
     getDataItemIdParam = getDataItemIdParam
 ) {
-    @Internal
-    private var coroutineScope: CoroutineScope? = null
 
-    @Internal
+    private var lastJob: Job? = null
+
     override fun onAttachToBuilder(recyclerView: RecyclerView, builder: AdapterBuilder<Data>) {
         super.onAttachToBuilder(recyclerView, builder)
-        val newCoroutineScope = CoroutineScope(Dispatchers.Main.immediate)
-        newCoroutineScope.launch {
+        lastJob?.cancel()
+        lastJob = coroutineScope.launch(Dispatchers.Main.immediate) {
             dataFlow
                 .distinctUntilChanged()
-                .flowOn(Dispatchers.IO)
+                // .flowOn(AppDispatchers.IO)
                 .collect {
                     submitDataList(it)
                 }
         }
-        val oldScope = coroutineScope
-        if (oldScope != null && oldScope.isActive) {
-            oldScope.cancel("Create new scope.")
-        }
-        coroutineScope = newCoroutineScope
     }
 
-    @Internal
     override fun onDetachedFromBuilder(recyclerView: RecyclerView, builder: AdapterBuilder<Data>) {
         super.onDetachedFromBuilder(recyclerView, builder)
-        coroutineScope?.cancel("onAttachToBuilder")
-        coroutineScope = null
+        lastJob?.cancel()
+        lastJob = null
     }
 }

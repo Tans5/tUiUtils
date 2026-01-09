@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
 import com.tans.tuiutils.adapter.impl.builders.plus
 import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
@@ -18,6 +19,7 @@ import com.tans.tuiutils.dialog.createBottomSheetDialog
 import com.tans.tuiutils.mediastore.MediaStoreAudio
 import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,6 +44,7 @@ class AudioSelectDialog : BaseSimpleCoroutineResultCancelableDialogFragment<Audi
         val contentAdapterBuilder = SimpleAdapterBuilderImpl<AudioWithSelected>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.audio_select_item_layout),
             dataSource = FlowDataSourceImpl(
+                coroutineScope = lifecycleScope,
                 dataFlow = stateFlow.map { it.audiosWithSelected },
                 areDataItemsTheSameParam = { d1, d2 -> d1.audio.id == d2.audio.id },
                 getDataItemsChangePayloadParam = { d1, d2 ->
@@ -74,7 +77,7 @@ class AudioSelectDialog : BaseSimpleCoroutineResultCancelableDialogFragment<Audi
         )
         val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
-            dataSource = FlowDataSourceImpl(stateFlow.map { if (it.audiosWithSelected.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
+            dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { if (it.audiosWithSelected.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
             dataBinder = DataBinderImpl{ _, itemView, _ ->
                 val itemViewBinding = EmptyContentLayoutBinding.bind(itemView)
                 itemViewBinding.msgTv.text = "No Audio."

@@ -5,8 +5,10 @@ import com.tans.tuiutils.adapter.AdapterBuilder
 import com.tans.tuiutils.state.Rx3Life
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
 
 class ObservableDataSourceImpl<Data : Any>(
+    private val rx3Life: Rx3Life,
     private val dataObservable: Observable<List<Data>>,
     areDataItemsTheSameParam: (d1: Data, d2: Data) -> Boolean = { d1, d2 -> d1 == d2 },
     areDataItemsContentTheSameParam: (d1: Data, d2: Data) -> Boolean = { d1, d2 -> d1 == d2 },
@@ -18,26 +20,27 @@ class ObservableDataSourceImpl<Data : Any>(
     getDataItemsChangePayloadParam = getDataItemsChangePayloadParam,
     getDataItemIdParam = getDataItemIdParam
 ) {
-    private var rx3Life: Rx3Life? = null
+
+    var job: Disposable? = null
 
     override fun onAttachToBuilder(recyclerView: RecyclerView, builder: AdapterBuilder<Data>) {
         super.onAttachToBuilder(recyclerView, builder)
-        val newRx3Life = Rx3Life()
-        with(newRx3Life) {
-            dataObservable
-                .distinctUntilChanged()
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext {
-                    submitDataList(it)
-                }
-                .bindLife()
-        }
-        rx3Life = newRx3Life
+        job = dataObservable
+            .distinctUntilChanged()
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext {
+                submitDataList(it)
+            }
+            .subscribe()
+            .apply { rx3Life.lifeCompositeDisposable.add(this) }
     }
 
     override fun onDetachedFromBuilder(recyclerView: RecyclerView, builder: AdapterBuilder<Data>) {
         super.onDetachedFromBuilder(recyclerView, builder)
-        rx3Life?.lifeCompositeDisposable?.clear()
-        rx3Life = null
+        job?.let {
+            it.dispose()
+            rx3Life.lifeCompositeDisposable.remove(it)
+        }
+        job = null
     }
 }

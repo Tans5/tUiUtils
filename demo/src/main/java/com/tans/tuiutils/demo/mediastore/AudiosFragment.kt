@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.tans.tuiutils.adapter.decoration.MarginDividerItemDecoration
 import com.tans.tuiutils.adapter.decoration.ignoreLastDividerController
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
@@ -57,7 +58,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
         // Header
         val headerAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.header_footer_item_layout),
-            dataSource = FlowDataSourceImpl(headerFooterDataFlow),
+            dataSource = FlowDataSourceImpl(lifecycleScope, headerFooterDataFlow),
             dataBinder = DataBinderImpl { _, view, _ ->
                 HeaderFooterItemLayoutBinding.bind(view).let { binding ->
                     binding.msgTv.text = "Header"
@@ -68,7 +69,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
         // Audios Content
         val audiosAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreAudio>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.audio_item_layout),
-            dataSource = FlowDataSourceImpl(stateFlow.map { it.audios }),
+            dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { it.audios }),
             dataBinder = DataBinderImpl { data, view, _ ->
                 val itemViewBinding = AudioItemLayoutBinding.bind(view)
                 itemViewBinding.musicTitleTv.text = data.title
@@ -82,7 +83,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
         // Footer
         val footerAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.header_footer_item_layout),
-            dataSource = FlowDataSourceImpl(headerFooterDataFlow),
+            dataSource = FlowDataSourceImpl(lifecycleScope, headerFooterDataFlow),
             dataBinder = DataBinderImpl { _, view, _ ->
                 HeaderFooterItemLayoutBinding.bind(view).let { binding ->
                     binding.msgTv.text = "Footer"
@@ -93,7 +94,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
         // Empty
         val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
-            dataSource = FlowDataSourceImpl(stateFlow.map { if (it.audios.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
+            dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { if (it.audios.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
             dataBinder = DataBinderImpl { _, view, _ ->
                 EmptyContentLayoutBinding.bind(view).let { binding ->
                     binding.msgTv.text = "No Audio."

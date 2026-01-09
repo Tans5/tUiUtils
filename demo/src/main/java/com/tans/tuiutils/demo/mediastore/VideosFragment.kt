@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
 import com.tans.tuiutils.adapter.impl.builders.plus
 import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
@@ -47,7 +48,7 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
         println("${this@VideosFragment::class.java.simpleName} bindContentViewCoroutine()")
         val videosAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreVideo>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.video_item_layout),
-            dataSource = FlowDataSourceImpl(stateFlow.map { it.videos }),
+            dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { it.videos }),
             dataBinder = DataBinderImpl { data, view, _ ->
                 val itemViewBinding = VideoItemLayoutBinding.bind(view)
                 itemViewBinding.videoTitleTv.text = data.title
@@ -58,7 +59,7 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
         )
         val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
             itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
-            dataSource = FlowDataSourceImpl(stateFlow.map { if (it.videos.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
+            dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { if (it.videos.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
             dataBinder = DataBinderImpl { _, view, _ ->
                 val itemViewBinding = EmptyContentLayoutBinding.bind(view)
                 itemViewBinding.msgTv.text = "No Video."
