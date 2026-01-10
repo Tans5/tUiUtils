@@ -1,6 +1,7 @@
 package com.tans.tuiutils.demo
 
 import android.app.Dialog
+import android.os.Bundle
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -14,29 +15,28 @@ import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.demo.databinding.AudioSelectItemLayoutBinding
 import com.tans.tuiutils.demo.databinding.DialogSelectAudioBinding
 import com.tans.tuiutils.demo.databinding.EmptyContentLayoutBinding
-import com.tans.tuiutils.dialog.BaseSimpleCoroutineResultCancelableDialogFragment
+import com.tans.tuiutils.dialog.BaseContinuationStateCancelableResultDialogFragment
 import com.tans.tuiutils.dialog.createBottomSheetDialog
 import com.tans.tuiutils.mediastore.MediaStoreAudio
 import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
+import com.tans.tuiutils.state.Action
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class AudioSelectDialog : BaseSimpleCoroutineResultCancelableDialogFragment<AudioSelectDialog.Companion.State, List<MediaStoreAudio>>(s = State()) {
+class AudioSelectDialog : BaseContinuationStateCancelableResultDialogFragment<AudioSelectDialog.Companion.State, List<MediaStoreAudio>>(s = State()) {
 
     override val contentViewHeightInScreenRatio: Float = 1.0f
 
     override val layoutId: Int = R.layout.dialog_select_audio
 
-    override fun firstLaunchInitData() {
-        launch(Dispatchers.IO) {
-            val audios = this@AudioSelectDialog.queryAudioFromMediaStore()
-            updateState {
-                it.copy(audiosWithSelected = audios.map { a -> AudioWithSelected(a, false) }, hasLoadFirstData = true)
+    override fun firstLaunchInitData(savedInstanceState: Bundle?) {
+        enqueueAction(object : Action<State>() {
+            override suspend fun execute(oldState: State): State {
+                val audios = this@AudioSelectDialog.queryAudioFromMediaStore()
+                return oldState.copy(audiosWithSelected = audios.map { a -> AudioWithSelected(a, false) }, hasLoadFirstData = true)
             }
-        }
+        })
     }
 
     override fun bindContentView(view: View) {
@@ -60,7 +60,7 @@ class AudioSelectDialog : BaseSimpleCoroutineResultCancelableDialogFragment<Audi
                 val itemViewBinding = AudioSelectItemLayoutBinding.bind(itemView)
                 itemViewBinding.musicTitleTv.text = data.audio.title
                 itemViewBinding.artistAlbumTv.text = "${data.audio.artist}-${data.audio.album}"
-                itemViewBinding.root.clicks(this@AudioSelectDialog) {
+                itemViewBinding.root.clicks(lifecycleScope) {
                     withContext(Dispatchers.IO) {
                         val audio = data.audio
                         updateState { oldState ->
@@ -85,12 +85,12 @@ class AudioSelectDialog : BaseSimpleCoroutineResultCancelableDialogFragment<Audi
         )
         viewBinding.audiosRv.adapter = (contentAdapterBuilder + emptyAdapterBuilder).build()
 
-        viewBinding.cancelBt.clicks(this) {
+        viewBinding.cancelBt.clicks(lifecycleScope) {
             onCancel()
         }
 
-        viewBinding.finishBt.clicks(this) {
-            val selectedAudios = currentState().audiosWithSelected.filter { it.isSelected }.map { it.audio }
+        viewBinding.finishBt.clicks(lifecycleScope) {
+            val selectedAudios = state().audiosWithSelected.filter { it.isSelected }.map { it.audio }
             if (selectedAudios.isNotEmpty()) {
                 onResult(selectedAudios)
             } else {

@@ -1,40 +1,45 @@
 package com.tans.tuiutils.dialog
 
-import com.tans.tuiutils.state.CoroutineState
-import com.tans.tuiutils.tUiUtilsLog
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlin.coroutines.CoroutineContext
+import com.tans.tuiutils.state.Action
+import com.tans.tuiutils.state.CoroutineStateLifecycleOwner
+import com.tans.tuiutils.state.CoroutineStateViewModel
 
-abstract class BaseCoroutineStateDialogFragment<State : Any>(defaultState: State) : BaseDialogFragment(),
-    CoroutineState<State> by CoroutineState(defaultState), CoroutineScope {
+abstract class BaseCoroutineStateDialogFragment<State : Any>(defaultState: State) :
+    BaseDialogFragment(), CoroutineStateLifecycleOwner<State> {
 
-    private val coroutineExceptionHandler: CoroutineExceptionHandler by lazy {
-        object : CoroutineExceptionHandler {
-            override val key: CoroutineContext.Key<CoroutineExceptionHandler> = CoroutineExceptionHandler
-            override fun handleException(context: CoroutineContext, exception: Throwable) {
-                onCoroutineScopeException(context, exception)
-                tUiUtilsLog.e(COROUTINE_TAG, "CoroutineScope error: ${exception.message}", exception)
-            }
-        }
+    private val coroutineStateLifecycleOwnerDelegate: CoroutineStateLifecycleOwner<State> =
+        CoroutineStateLifecycleOwner(
+            defaultState = defaultState,
+            lifecycleOwner = this,
+            viewModelStoreOwner = this,
+            viewModelClearListener = this
+        )
+
+    override val viewModel: CoroutineStateViewModel<State>
+        get() = coroutineStateLifecycleOwnerDelegate.viewModel
+
+    override val viewModelFieldKeyPrefix: String
+        get() = coroutineStateLifecycleOwnerDelegate.viewModelFieldKeyPrefix
+
+    override fun <T : Any> lazyViewModelField(
+        key: String,
+        initializer: () -> T
+    ): Lazy<T> = coroutineStateLifecycleOwnerDelegate.lazyViewModelField(key, initializer)
+
+    override fun enqueueAction(action: Action<State>) =
+        coroutineStateLifecycleOwnerDelegate.enqueueAction(action)
+
+    override fun enqueueAction(
+        action: (State) -> State,
+        pre: suspend () -> Unit,
+        post: suspend () -> Unit
+    ) {
+        coroutineStateLifecycleOwnerDelegate.enqueueAction(action, pre, post)
     }
 
-    override val coroutineContext: CoroutineContext by lazy {
-        Dispatchers.Main.immediate + coroutineExceptionHandler + Job()
-    }
+    override fun executeActionsCount(): Int =
+        coroutineStateLifecycleOwnerDelegate.executeActionsCount()
 
-    open fun onCoroutineScopeException(context: CoroutineContext, exception: Throwable) {
-        throw exception
+    override fun onViewModelCleared() {
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        cancel("DialogFragment destroyed.")
-    }
-
 }
-
-private const val COROUTINE_TAG = "BaseCoroutineStateDialogFragment"

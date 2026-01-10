@@ -69,7 +69,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment(), IContentViewCreat
             tUiUtilsLog.w(this::class.java.name, "No content view.")
             super.onCreateDialog(null)
         }
-        firstLaunchInitData()
+        firstLaunchInitData(savedInstanceState)
         return dialog
     }
 
@@ -90,7 +90,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment(), IContentViewCreat
     /**
      * Do data load
      */
-    abstract fun firstLaunchInitData()
+    abstract fun firstLaunchInitData(savedInstanceState: Bundle?)
 
     /**
      * Do UI update.

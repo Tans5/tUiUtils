@@ -24,12 +24,11 @@ import com.tans.tuiutils.dialog.dp2px
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
 import com.tans.tuiutils.mediastore.MediaStoreAudio
 import com.tans.tuiutils.mediastore.queryAudioFromMediaStore
+import com.tans.tuiutils.state.Action
 import com.tans.tuiutils.view.refreshes
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State>(State()) {
 
@@ -40,15 +39,20 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
         println("${this@AudiosFragment::class.java.simpleName} onCreate(): $savedInstanceState")
     }
 
-    override fun CoroutineScope.firstLaunchInitDataCoroutine() {
+    override fun firstLaunchInitData(savedInstanceState: Bundle?) {
         println("${this@AudiosFragment::class.java.simpleName} firstLaunchInitDataCoroutine()")
-        launch {
-            val audios = this@AudiosFragment.queryAudioFromMediaStore()
-            updateState { it.copy(audios = audios, hasLoadFirstData = true) }
-        }
+        enqueueAction(object : Action<State>() {
+            override suspend fun execute(oldState: State): State {
+                val audios = this@AudiosFragment.queryAudioFromMediaStore()
+                return oldState.copy(audios = audios, hasLoadFirstData = true)
+            }
+        })
     }
 
-    override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
+    override fun bindContentView(
+        contentView: View,
+        useLastContentView: Boolean
+    ) {
         println("${this@AudiosFragment::class.java.simpleName} bindContentViewCoroutine()")
         val viewBinding = FragmentAudiosBinding.bind(contentView)
 
@@ -74,7 +78,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
                 val itemViewBinding = AudioItemLayoutBinding.bind(view)
                 itemViewBinding.musicTitleTv.text = data.title
                 itemViewBinding.artistAlbumTv.text = "${data.artist}-${data.album}"
-                view.clicks(this) {
+                view.clicks(lifecycleScope) {
                     Toast.makeText(this@AudiosFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
                 }
             }
@@ -117,7 +121,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
             insets
         }
 
-        viewBinding.swipeRefresh.refreshes(this, Dispatchers.IO) {
+        viewBinding.swipeRefresh.refreshes(lifecycleScope, Dispatchers.IO) {
             delay(500)
             val audios = this@AudiosFragment.queryAudioFromMediaStore()
             updateState { it.copy(audios = audios) }

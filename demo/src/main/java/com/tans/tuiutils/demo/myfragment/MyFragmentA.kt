@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import com.tans.tuiutils.demo.R
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
-import kotlinx.coroutines.CoroutineScope
 
 class MyFragmentA : BaseCoroutineStateFragment<Unit>(Unit) {
 
@@ -15,11 +14,14 @@ class MyFragmentA : BaseCoroutineStateFragment<Unit>(Unit) {
         println("${this@MyFragmentA::class.java.simpleName} onCreate(): $savedInstanceState")
     }
 
-    override fun CoroutineScope.firstLaunchInitDataCoroutine() {
+    override fun firstLaunchInitData(savedInstanceState: Bundle?) {
         println("${this@MyFragmentA::class.java.simpleName}: firstLaunchInitDataCoroutine()")
     }
 
-    override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
+    override fun bindContentView(
+        contentView: View,
+        useLastContentView: Boolean
+    ) {
         println("${this@MyFragmentA::class.java.simpleName}: bindContentViewCoroutine()")
     }
 

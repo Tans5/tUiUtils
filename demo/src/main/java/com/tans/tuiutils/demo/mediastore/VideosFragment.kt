@@ -20,11 +20,9 @@ import com.tans.tuiutils.mediastore.MediaStoreVideo
 import com.tans.tuiutils.mediastore.queryVideoFromMediaStore
 import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.view.refreshes
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State>(State()) {
 
@@ -35,15 +33,17 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
         println("${this@VideosFragment::class.java.simpleName} onCreate(): $savedInstanceState")
     }
 
-    override fun CoroutineScope.firstLaunchInitDataCoroutine() {
-        println("${this@VideosFragment::class.java.simpleName} firstLaunchInitDataCoroutine()")
-        launch {
+    override fun firstLaunchInitData(savedInstanceState: Bundle?) {
+        enqueueAction({ state ->
             val videos = this@VideosFragment.queryVideoFromMediaStore()
-            updateState { it.copy(videos = videos, hasLoadFirstData = true) }
-        }
+            state.copy(videos = videos, hasLoadFirstData = true)
+        }) {}
     }
 
-    override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
+    override fun bindContentView(
+        contentView: View,
+        useLastContentView: Boolean
+    ) {
         val viewBinding = FragmentVideosBinding.bind(contentView)
         println("${this@VideosFragment::class.java.simpleName} bindContentViewCoroutine()")
         val videosAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreVideo>(
@@ -52,7 +52,7 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
             dataBinder = DataBinderImpl { data, view, _ ->
                 val itemViewBinding = VideoItemLayoutBinding.bind(view)
                 itemViewBinding.videoTitleTv.text = data.title
-                itemViewBinding.root.clicks(this) {
+                itemViewBinding.root.clicks(lifecycleScope) {
                     Toast.makeText(this@VideosFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
                 }
             }
@@ -72,7 +72,7 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
             v.setPadding(0, 0, 0, systemBars.bottom)
             insets
         }
-        viewBinding.swipeRefresh.refreshes(this, Dispatchers.IO) {
+        viewBinding.swipeRefresh.refreshes(lifecycleScope, Dispatchers.IO) {
             delay(500)
             val videos = this@VideosFragment.queryVideoFromMediaStore()
             updateState { it.copy(videos = videos) }

@@ -3,7 +3,6 @@ package com.tans.tuiutils.systembar
 import android.app.Activity
 import android.app.Application
 import android.app.Application.ActivityLifecycleCallbacks
-import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import com.tans.tuiutils.systembar.annotation.ContentViewFitSystemWindow
@@ -11,6 +10,7 @@ import com.tans.tuiutils.systembar.annotation.FullScreenStyle
 import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import com.tans.tuiutils.tUiUtilsLog
 import java.util.concurrent.atomic.AtomicBoolean
+import androidx.core.graphics.toColorInt
 
 object AutoApplySystemBarAnnotation : ActivityLifecycleCallbacks {
 
@@ -33,10 +33,10 @@ object AutoApplySystemBarAnnotation : ActivityLifecycleCallbacks {
             tUiUtilsLog.d(msg = "${activity::class.java} found SystemBarStyle annotation.")
             if (activity is ComponentActivity) {
                 activity.systemBarColor(
-                    statusBarLightColor = Color.parseColor(systemBarStyle.statusBarLightColor),
-                    statusBarDarkColor = Color.parseColor(systemBarStyle.statusBarDarkColor),
-                    navigationBarLightColor = Color.parseColor(systemBarStyle.navigationBarLightColor),
-                    navigationBarDarkColor = Color.parseColor(systemBarStyle.navigationBarDarkColor)
+                    statusBarLightColor = systemBarStyle.statusBarLightColor.toColorInt(),
+                    statusBarDarkColor = systemBarStyle.statusBarDarkColor.toColorInt(),
+                    navigationBarLightColor = systemBarStyle.navigationBarLightColor.toColorInt(),
+                    navigationBarDarkColor = systemBarStyle.navigationBarDarkColor.toColorInt()
                 )
             } else {
                 tUiUtilsLog.w(msg = "${activity::class.java} is not ComponentActivity, can't set system bar color.")

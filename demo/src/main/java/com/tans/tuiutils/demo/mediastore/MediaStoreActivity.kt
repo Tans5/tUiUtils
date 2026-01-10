@@ -1,10 +1,8 @@
 package com.tans.tuiutils.demo.mediastore
 
+import android.os.Bundle
 import android.view.View
-import androidx.collection.LongSparseArray
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.google.android.material.tabs.TabLayoutMediator
@@ -13,7 +11,6 @@ import com.tans.tuiutils.demo.R
 import com.tans.tuiutils.demo.databinding.ActivityMediaStoreBinding
 import com.tans.tuiutils.systembar.annotation.SystemBarStyle
 import com.tans.tuiutils.viewpager2.NoRecycleFragmentStateAdapter
-import kotlinx.coroutines.CoroutineScope
 
 @SystemBarStyle
 class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Companion.State>(State()) {
@@ -28,11 +25,11 @@ class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Compani
         )
     }
 
-    override fun CoroutineScope.firstLaunchInitDataCoroutine() {
+    override fun firstLaunchInitData(savedInstanceState: Bundle?) {
 
     }
 
-    override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
+    override fun bindContentView(contentView: View) {
         val viewBinding = ActivityMediaStoreBinding.bind(contentView)
         val fragmentAdapter = object : NoRecycleFragmentStateAdapter(this@MediaStoreActivity) {
             override fun getItemCount(): Int = mediaStoresFragments.size
@@ -57,7 +54,7 @@ class MediaStoreActivity : BaseCoroutineStateActivity<MediaStoreActivity.Compani
             override fun onTabReselected(p0: TabLayout.Tab?) {}
         })
 
-        renderStateNewCoroutine({it.selectedTab}) { selectedTab ->
+        stateFlow().updateUI({ it.selectedTab }) { selectedTab ->
             if (viewBinding.tabLayout.selectedTabPosition != selectedTab.ordinal) {
                 viewBinding.tabLayout.selectTab(viewBinding.tabLayout.getTabAt(selectedTab.ordinal))
             }

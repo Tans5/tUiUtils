@@ -1,8 +1,10 @@
 package com.tans.tuiutils.demo.myfragment
 
+import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import com.tans.tuiutils.activity.BaseCoroutineStateActivity
 import com.tans.tuiutils.view.clicks
 import com.tans.tuiutils.demo.R
@@ -21,14 +23,13 @@ class MyFragmentActivity : BaseCoroutineStateActivity<MyFragmentActivity.Compani
         mapOf(FragmentType.A to MyFragmentA(), FragmentType.B to MyFragmentB())
     }
 
-    override fun CoroutineScope.firstLaunchInitDataCoroutine() {
-
+    override fun firstLaunchInitData(savedInstanceState: Bundle?) {
     }
 
-    override fun CoroutineScope.bindContentViewCoroutine(contentView: View) {
+    override fun bindContentView(contentView: View) {
         val viewBinding = ActivityMyFragmentBinding.bind(contentView)
 
-        renderStateNewCoroutine({ it.selectedFragment }) { selectedType ->
+        stateFlow().updateUI({ it.selectedFragment }) { selectedType ->
             val fm = this@MyFragmentActivity.supportFragmentManager
             val tc = fm.beginTransaction()
 
@@ -50,11 +51,11 @@ class MyFragmentActivity : BaseCoroutineStateActivity<MyFragmentActivity.Compani
             tc.commitAllowingStateLoss()
         }
 
-        viewBinding.showFragmentABt.clicks(this) {
+        viewBinding.showFragmentABt.clicks(lifecycleScope) {
             updateState { it.copy(selectedFragment = FragmentType.A) }
         }
 
-        viewBinding.showFragmentBBt.clicks(this) {
+        viewBinding.showFragmentBBt.clicks(lifecycleScope) {
             updateState { it.copy(selectedFragment = FragmentType.B) }
         }
     }
