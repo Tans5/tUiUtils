@@ -1,6 +1,5 @@
 package com.tans.tuiutils.adapter.impl.builders
 
-import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
 import android.view.ViewGroup
@@ -12,63 +11,47 @@ import com.tans.tuiutils.adapter.DataSource
 import com.tans.tuiutils.adapter.DataSourceParent
 import com.tans.tuiutils.tUiUtilsLog
 
-internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedAdapterBuilderImpl) : ListAdapter<Any, RecyclerView.ViewHolder>(
-    object : DiffUtil.ItemCallback<Any>() {
+internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedAdapterBuilderImpl) : ListAdapter<CombinedAdapterImpl.Companion.CombinedItemWrapper, RecyclerView.ViewHolder>(
+    object : DiffUtil.ItemCallback<CombinedItemWrapper>() {
 
-        private fun printDataTypeAndSize() {
-            for (c in combinedAdapterBuilder.childrenBuilders) {
-                tUiUtilsLog.e(TAG, "DataClass=${c.dataSource.tryGetDataClass()}, DataCount=${c.dataSource.getLastSubmittedDataSize()}")
-            }
-        }
-
-        override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
-            val classA = oldItem::class.java
-            val classB = newItem::class.java
-            return if (classA !== classB) {
+        override fun areItemsTheSame(oldItem: CombinedItemWrapper, newItem: CombinedItemWrapper): Boolean {
+            return if (oldItem.builderIndex != newItem.builderIndex) {
                 false
             } else {
-                val builder = combinedAdapterBuilder.childrenBuilders.find { it.dataSource.tryGetDataClass() === classA }
+                val builder = combinedAdapterBuilder.childrenBuilders.getOrNull(oldItem.builderIndex)
                 if (builder == null) {
-                    tUiUtilsLog.e(TAG, "Can't find datasource contain data class: $classA")
-                    printDataTypeAndSize()
-                    oldItem == newItem
+                    tUiUtilsLog.e(TAG, "Can't find builder for index: ${oldItem.builderIndex}")
+                    false
                 } else {
-                    builder.dataSource.areDataItemsTheSame(oldItem, newItem)
+                    builder.dataSource.areDataItemsTheSame(oldItem.data, newItem.data)
                 }
             }
         }
 
-        @SuppressLint("DiffUtilEquals")
-        override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
-            val classA = oldItem::class.java
-            val classB = newItem::class.java
-            return if (classA !== classB) {
+        override fun areContentsTheSame(oldItem: CombinedItemWrapper, newItem: CombinedItemWrapper): Boolean {
+            return if (oldItem.builderIndex != newItem.builderIndex) {
                 false
             } else {
-                val builder = combinedAdapterBuilder.childrenBuilders.find { it.dataSource.tryGetDataClass() === classA }
+                val builder = combinedAdapterBuilder.childrenBuilders.getOrNull(oldItem.builderIndex)
                 if (builder == null) {
-                    tUiUtilsLog.e(TAG, "Can't find datasource contain data class: $classA")
-                    printDataTypeAndSize()
-                    oldItem == newItem
+                    tUiUtilsLog.e(TAG, "Can't find builder for index: ${oldItem.builderIndex}")
+                    false
                 } else {
-                    builder.dataSource.areDataItemsContentTheSame(oldItem, newItem)
+                    builder.dataSource.areDataItemsContentTheSame(oldItem.data, newItem.data)
                 }
             }
         }
 
-        override fun getChangePayload(oldItem: Any, newItem: Any): Any? {
-            val classA = oldItem::class.java
-            val classB = newItem::class.java
-            return if (classA !== classB) {
+        override fun getChangePayload(oldItem: CombinedItemWrapper, newItem: CombinedItemWrapper): Any? {
+            return if (oldItem.builderIndex != newItem.builderIndex) {
                 null
             } else {
-                val builder = combinedAdapterBuilder.childrenBuilders.find { it.dataSource.tryGetDataClass() === classA }
+                val builder = combinedAdapterBuilder.childrenBuilders.getOrNull(oldItem.builderIndex)
                 if (builder == null) {
-                    tUiUtilsLog.e(TAG, "Can't find datasource contain data class: $classA")
-                    printDataTypeAndSize()
+                    tUiUtilsLog.e(TAG, "Can't find builder for index: ${oldItem.builderIndex}")
                     null
                 } else {
-                    builder.dataSource.getDataItemsChangePayload(oldItem, newItem)
+                    builder.dataSource.getDataItemsChangePayload(oldItem.data, newItem.data)
                 }
             }
         }
@@ -99,24 +82,22 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
     }
 
     override fun getItemId(position: Int): Long {
-        val (builder, positionInDataSource, _) = findTargetBuilderByAdapterPosition(
-            position
-        )
-        val data = builder.dataSource.getLastSubmittedData(positionInDataSource) ?: error("Can't get data for positionInDataSource=$positionInDataSource")
-        return builder.dataSource.getDataItemId(data, positionInDataSource)
+        val wrapper = getItem(position)
+        val builder = childrenBuilders.getOrNull(wrapper.builderIndex) ?: error("Can't find builder for index: ${wrapper.builderIndex}")
+        return builder.dataSource.getDataItemId(wrapper.data, wrapper.positionInDataSource)
     }
 
     override fun getItemViewType(position: Int): Int {
-        val (builder, positionInDataSource, builderIndex) = findTargetBuilderByAdapterPosition(
-            position
-        )
+        val wrapper = getItem(position)
+        val builderIndex = wrapper.builderIndex
         if (builderIndex > MAX_BUILDER_INDEX) {
             error("BuilderIndex($builderIndex) great than MaxBuilderIndex($MAX_BUILDER_INDEX)")
         }
+        val builder = childrenBuilders.getOrNull(builderIndex) ?: error("Can't find builder for index: $builderIndex")
+
         val builderItemViewType = builder.itemViewCreator.getItemViewType(
-            positionInDataSource = positionInDataSource,
-            data = builder.dataSource.getLastSubmittedData(positionInDataSource)
-                ?: error("Wrong data position: $positionInDataSource")
+            positionInDataSource = wrapper.positionInDataSource,
+            data = wrapper.data
         ) ?: super.getItemViewType(position)
         if (builderItemViewType > MAX_ITEM_VIEW_TYPE) {
             error("ItemViewType($builderItemViewType) great than MaxItemViewType($MAX_ITEM_VIEW_TYPE)")
@@ -146,24 +127,24 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
         if (payloads.isEmpty()) {
             onBindViewHolder(holder, position)
         } else {
-            val (builder, positionInDataSource, _) = findTargetBuilderByAdapterPosition(position)
-            val data = builder.dataSource.getLastSubmittedData(positionInDataSource) ?: error("Can't get data for positionInDataSource=$positionInDataSource")
+            val wrapper = getItem(position)
+            val builder = childrenBuilders.getOrNull(wrapper.builderIndex) ?: error("Can't find builder for index: ${wrapper.builderIndex}")
             builder.dataBinder.bindPayloadData(
-                data = data,
+                data = wrapper.data,
                 view = holder.itemView,
-                positionInDataSource = positionInDataSource,
+                positionInDataSource = wrapper.positionInDataSource,
                 payloads = payloads
             )
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val (builder, positionInDataSource, _) = findTargetBuilderByAdapterPosition(position)
-        val data = builder.dataSource.getLastSubmittedData(positionInDataSource) ?: error("Can't get data for positionInDataSource=$positionInDataSource")
+        val wrapper = getItem(position)
+        val builder = childrenBuilders.getOrNull(wrapper.builderIndex) ?: error("Can't find builder for index: ${wrapper.builderIndex}")
         builder.dataBinder.bindData(
-            data = data,
+            data = wrapper.data,
             view = holder.itemView,
-            positionInDataSource = positionInDataSource
+            positionInDataSource = wrapper.positionInDataSource
         )
     }
 
@@ -180,16 +161,24 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
         callback: Runnable?
     ) {
         super.requestSubmitDataList(child, data, callback)
-        val combinedList = mutableListOf<Any>()
+        val combinedList = mutableListOf<CombinedItemWrapper>()
+        var builderIndex = 0
         for (c in childrenBuilders) {
-            if (c.dataSource === child) {
-                combinedList.addAll(data)
+            val list = if (c.dataSource === child) {
+                data
             } else {
-                val append = c.dataSource.lastRequestSubmitDataList
-                if (append != null) {
-                    combinedList.addAll(append)
-                }
+                c.dataSource.lastRequestSubmitDataList ?: emptyList()
             }
+            var i = 0
+            for (item in list) {
+                combinedList.add(CombinedItemWrapper(
+                    data = item,
+                    builderIndex = builderIndex,
+                    positionInDataSource = i
+                ))
+                i++
+            }
+            builderIndex++
         }
         childrenRequestSubmitDataTasks.add(ChildRequestSubmitDataTask(child, callback))
         tUiUtilsLog.d(TAG, "Request submit list count: ${combinedList.size}")
@@ -204,30 +193,6 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
         }
     }
 
-    /**
-     * @return First: AdapterBuilder, Second: position in data source, Third: index of adapter builder.
-     */
-    private fun findTargetBuilderByAdapterPosition(adapterPosition: Int): Triple<AdapterBuilder<Any>, Int, Int> {
-        var startIndex = 0
-        var targetBuilder: AdapterBuilder<Any>? = null
-        var builderIndex = 0
-        for (c in childrenBuilders) {
-            val ds = c.dataSource.getLastSubmittedDataSize()
-            if (adapterPosition in startIndex until (startIndex + ds)) {
-                targetBuilder = c
-                break
-            } else {
-                startIndex += ds
-            }
-            builderIndex ++
-        }
-        return if (targetBuilder != null) {
-            Triple(targetBuilder, adapterPosition - startIndex, builderIndex)
-        } else {
-            error("Can't handle adapter position: $adapterPosition")
-        }
-    }
-
     private fun ifHasWaitingRequestUpdateChildrenSubmitTheme() {
         val i = childrenRequestSubmitDataTasks.iterator()
         while (i.hasNext()) {
@@ -237,6 +202,12 @@ internal class CombinedAdapterImpl(private val combinedAdapterBuilder: CombinedA
     }
 
     companion object {
+
+        internal data class CombinedItemWrapper(
+            val data: Any,
+            val builderIndex: Int,
+            val positionInDataSource: Int
+        )
 
         private data class ChildRequestSubmitDataTask(
             val child: DataSource<Any>,
