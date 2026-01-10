@@ -3,7 +3,6 @@ package com.tans.tuiutils.dialog
 import android.app.Activity
 import android.app.Dialog
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +22,8 @@ import androidx.core.graphics.drawable.toDrawable
 fun Activity.createDefaultDialog(
     contentView: View,
     isCancelable: Boolean = true,
-    dimAmount: Float = 0.6f,
+    isCanceledOnTouchOutside: Boolean = true,
+    dimAmount: Float = 0.3f,
     @StyleRes
     defaultTheme: Int = R.style.tUiUtils_BaseDialog,
     @StyleRes
@@ -45,15 +45,17 @@ fun Activity.createDefaultDialog(
     wrapper.layoutParams = wrapperLayoutParams
     wrapper.addView(contentView)
     if (isCancelable) {
-        wrapper.setOnClickListener {
-            dialog.dismiss()
+        if (isCanceledOnTouchOutside) {
+            wrapper.setOnClickListener {
+                dialog.dismiss()
+            }
+            contentView.setOnClickListener {  }
         }
-        contentView.setOnClickListener {  }
     }
     dialog.apply {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(wrapper)
-        setCanceledOnTouchOutside(isCancelable)
+        setCanceledOnTouchOutside(isCanceledOnTouchOutside)
         setCancelable(isCancelable)
     }
     dialog.window?.apply {
@@ -76,7 +78,8 @@ fun Activity.createDefaultDialog(
 fun Activity.createBottomSheetDialog(
     contentView: View,
     isCancelable: Boolean = true,
-    dimAmount: Float = 0.6f,
+    isCanceledOnTouchOutside: Boolean = true,
+    dimAmount: Float = 0.3f,
     statusBarThemeStyle: SystemBarThemeStyle = SystemBarThemeStyle.Light,
     navigationThemeStyle: SystemBarThemeStyle = SystemBarThemeStyle.Light,
     @ColorInt
@@ -89,7 +92,7 @@ fun Activity.createBottomSheetDialog(
     d.apply {
         setContentView(contentView)
         setCancelable(isCancelable)
-        setCanceledOnTouchOutside(isCancelable)
+        setCanceledOnTouchOutside(isCanceledOnTouchOutside)
         behaviorCallback(behavior)
     }
     d.window?.apply {

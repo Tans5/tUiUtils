@@ -51,9 +51,6 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     compileOnly(libs.androidx.swiperefreshlayout)
 
-    compileOnly(libs.rxjava3)
-    compileOnly(libs.rxandroid3)
-
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.core.jvm)
     implementation(libs.coroutines.android)

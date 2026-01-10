@@ -1,93 +1,41 @@
 package com.tans.tuiutils.fragment
 
-import android.view.View
-import com.tans.tuiutils.state.CoroutineState
-import com.tans.tuiutils.tUiUtilsLog
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.isActive
-import kotlin.coroutines.CoroutineContext
+import com.tans.tuiutils.state.Action
+import com.tans.tuiutils.state.CoroutineStateLifecycleOwner
+import com.tans.tuiutils.state.CoroutineStateViewModel
 
-@Suppress("MemberVisibilityCanBePrivate")
-abstract class BaseCoroutineStateFragment<State : Any>(protected val defaultState: State) : BaseFragment(),
-    CoroutineState<State> by CoroutineState(defaultState) {
+abstract class BaseCoroutineStateFragment<State : Any>(protected val defaultState: State) : BaseFragment(), CoroutineStateLifecycleOwner<State> {
 
-    private val uiCoroutineExceptionHandler: CoroutineExceptionHandler by lazy {
-        object : CoroutineExceptionHandler {
-            override val key: CoroutineContext.Key<CoroutineExceptionHandler> = CoroutineExceptionHandler
-            override fun handleException(context: CoroutineContext, exception: Throwable) {
-                onUICoroutineScopeException(context, exception)
-                tUiUtilsLog.e(BASE_COROUTINE_STATE_FRAGMENT_TAG, "UI CoroutineScope error: ${exception.message}", exception)
-            }
-        }
+    private val coroutineStateLifecycleOwnerDelegate: CoroutineStateLifecycleOwner<State> = CoroutineStateLifecycleOwner(
+        defaultState = defaultState,
+        lifecycleOwner = this,
+        viewModelStoreOwner = this,
+        viewModelClearListener = this
+    )
+
+    override val viewModel: CoroutineStateViewModel<State>
+        get() = coroutineStateLifecycleOwnerDelegate.viewModel
+
+    override val viewModelFieldKeyPrefix: String
+        get() = coroutineStateLifecycleOwnerDelegate.viewModelFieldKeyPrefix
+
+    override fun <T : Any> lazyViewModelField(
+        key: String,
+        initializer: () -> T
+    ): Lazy<T> = coroutineStateLifecycleOwnerDelegate.lazyViewModelField(key, initializer)
+
+    override fun enqueueAction(action: Action<State>) = coroutineStateLifecycleOwnerDelegate.enqueueAction(action)
+
+    override fun enqueueAction(
+        action: (State) -> State,
+        pre: suspend () -> Unit,
+        post: suspend () -> Unit
+    ) {
+        coroutineStateLifecycleOwnerDelegate.enqueueAction(action, pre, post)
     }
 
-    open val firstLaunchCheckDefaultState: Boolean = true
-
-    protected var uiCoroutineScope: CoroutineScope? = null
-        private set
-
-    private val dataCoroutineExceptionHandler: CoroutineExceptionHandler by lazy {
-        object : CoroutineExceptionHandler {
-            override val key: CoroutineContext.Key<CoroutineExceptionHandler> = CoroutineExceptionHandler
-            override fun handleException(context: CoroutineContext, exception: Throwable) {
-                onDataCoroutineScopeException(context, exception)
-                tUiUtilsLog.e(BASE_COROUTINE_STATE_FRAGMENT_TAG, "Data CoroutineScope error: ${exception.message}", exception)
-            }
-        }
-    }
-
-    protected val dataCoroutineScope: CoroutineScope by lazyViewModelField("dataCoroutineScope") {
-        CoroutineScope(Dispatchers.IO + dataCoroutineExceptionHandler)
-    }
-
-    abstract fun CoroutineScope.firstLaunchInitDataCoroutine()
-
-    final override fun firstLaunchInitData() {
-        if (firstLaunchCheckDefaultState) {
-            if (defaultState == currentState()) {
-                dataCoroutineScope.firstLaunchInitDataCoroutine()
-            }
-        } else {
-            dataCoroutineScope.firstLaunchInitDataCoroutine()
-        }
-    }
-
-    abstract fun CoroutineScope.bindContentViewCoroutine(contentView: View)
-
-    final override fun bindContentView(contentView: View, useLastContentView: Boolean) {
-        val newUiCoroutineScope =
-            CoroutineScope(Dispatchers.Main.immediate + uiCoroutineExceptionHandler)
-        newUiCoroutineScope.bindContentViewCoroutine(contentView)
-        uiCoroutineScope?.let {
-            if (it.isActive) {
-                it.cancel("ContentView recreate.")
-            }
-        }
-        uiCoroutineScope = newUiCoroutineScope
-    }
-
-    open fun onUICoroutineScopeException(context: CoroutineContext, exception: Throwable) {
-        throw exception
-    }
-
-    open fun onDataCoroutineScopeException(context: CoroutineContext, exception: Throwable) {
-        throw exception
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        uiCoroutineScope?.cancel("Fragment content view destroyed.")
-        uiCoroutineScope = null
-    }
+    override fun executeActionsCount(): Int = coroutineStateLifecycleOwnerDelegate.executeActionsCount()
 
     override fun onViewModelCleared() {
-        super.onViewModelCleared()
-        dataCoroutineScope.cancel("Fragment ViewModel cleared..")
     }
-
 }
-
-private const val BASE_COROUTINE_STATE_FRAGMENT_TAG = "BaseCoroutineStateFragment"

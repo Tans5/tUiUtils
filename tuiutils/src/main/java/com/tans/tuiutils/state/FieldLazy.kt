@@ -1,31 +1,27 @@
-package com.tans.tuiutils.activity
+package com.tans.tuiutils.state
 
-import com.tans.tuiutils.tUiUtilsLog
 
-internal class ViewModelFieldLazy<T : Any>: Lazy<T> {
+open class FieldLazy<T : Any> : Lazy<T> {
 
     private val key: String
-    private val ownerViewModelGetter: () -> FieldsViewModel
+    private val storageProvider:  () -> ValueStorage
     private val initializer: () -> T
 
     constructor(
         key: String,
-        ownerViewModelGetter: () -> FieldsViewModel,
+        storageProvider: () -> ValueStorage,
         initializer: () -> T
     ) {
         this.key = key
-        this.ownerViewModelGetter = ownerViewModelGetter
+        this.storageProvider = storageProvider
         this.initializer = initializer
     }
 
     @Suppress("UNCHECKED_CAST")
     override val value: T
         get() {
-            val viewModel = ownerViewModelGetter()
-            if (viewModel.isCleared()) {
-                tUiUtilsLog.e(TAG, "ViewModel was cleared.")
-            }
-            val firstCheckValue = viewModel.getField(key)
+            val storage = storageProvider()
+            val firstCheckValue: Any? = storage[key]
             var result: T? = null
             // First check.
             if (firstCheckValue != null) {
@@ -36,7 +32,7 @@ internal class ViewModelFieldLazy<T : Any>: Lazy<T> {
                 }
             } else {
                 synchronized(this) {
-                    val secondCheckValue = viewModel.getField(key)
+                    val secondCheckValue: Any? = storage[key]
                     // Second check.
                     result = if (secondCheckValue != null) {
                         try {
@@ -46,10 +42,11 @@ internal class ViewModelFieldLazy<T : Any>: Lazy<T> {
                         }
                     } else {
                         val newValue = initializer()
-                        if (viewModel.saveField(key, newValue)) {
+                        val oldValue = storage.put(key, newValue)
+                        if (oldValue == null) {
                             newValue
                         } else {
-                            error("Use wrong key: $key")
+                            error("Use wrong key: $key, contain old value: $oldValue")
                         }
                     }
                 }
@@ -58,11 +55,7 @@ internal class ViewModelFieldLazy<T : Any>: Lazy<T> {
         }
 
     override fun isInitialized(): Boolean {
-        return ownerViewModelGetter().containField(key)
-    }
-
-    companion object {
-        private const val TAG = "ViewModelFieldLazy"
+        return storageProvider().containsKey(key)
     }
 
 }

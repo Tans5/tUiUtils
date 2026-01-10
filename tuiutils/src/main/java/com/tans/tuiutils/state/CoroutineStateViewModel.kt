@@ -11,11 +11,10 @@ import kotlinx.coroutines.channels.onClosed
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.channels.onSuccess
 import kotlinx.coroutines.launch
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
-open class CoroutineStateViewModel<State: Any>(defaultState: State, ) : ViewModel(), CoroutineState<State> by CoroutineState(defaultState) {
+open class CoroutineStateViewModel<State: Any>(defaultState: State, private val valueStorage: ValueStorage = SimpleValueStorage()) : ViewModel(), CoroutineState<State> by CoroutineState(defaultState), ValueStorage by valueStorage {
 
     private val actionChannel =
         Channel<Action<State>>(capacity = Channel.UNLIMITED, onUndeliveredElement = {
@@ -24,17 +23,15 @@ open class CoroutineStateViewModel<State: Any>(defaultState: State, ) : ViewMode
 
     private val executedActionsCount = AtomicInteger(0)
 
-    private val simpleData: MutableMap<String, Any> = ConcurrentHashMap()
-
     @Volatile
     private var isCleared: Boolean = false
 
+    private val viewModelClearListeners: MutableList<ViewModelClearListener> = mutableListOf()
+
     open val tag = "CoroutineStateViewModel"
 
-    val viewModelScope by lazy {
-        object : CoroutineScope {
-            override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.IO
-        }
+    val viewModelScope = object : CoroutineScope {
+        override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.IO
     }
 
     init {
@@ -49,6 +46,18 @@ open class CoroutineStateViewModel<State: Any>(defaultState: State, ) : ViewMode
             }
             Log.d(tag, "All actions finished.")
         }
+    }
+
+    fun addViewModelClearListener(l: ViewModelClearListener) {
+        if (isCleared) {
+            l.onViewModelCleared()
+        } else {
+            this.viewModelClearListeners.add(l)
+        }
+    }
+
+    fun removeViewModelClearListener(l: ViewModelClearListener) {
+        viewModelClearListeners.remove(l)
     }
 
     fun enqueueAction(action: Action<State>) {
@@ -92,30 +101,17 @@ open class CoroutineStateViewModel<State: Any>(defaultState: State, ) : ViewMode
 
     fun executeActionsCount(): Int = executedActionsCount.get()
 
-    inline fun <T : Any> getOrSaveSimpleData(key: String, createNew:  () -> T): T {
-        val old = getSimpleData<T>(key)
-        if (old != null) {
-            return old
-        }
-        val new = createNew()
-        saveSimpleData(key, new)
-        return new
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T> getSimpleData(key: String): T? = simpleData[key] as? T
-
-    fun saveSimpleData(key: String, value: Any) {
-        simpleData[key] = value
-    }
-
     override fun onCleared() {
         Log.d(tag, "ViewModel cleared")
         isCleared = true
         super.onCleared()
-        simpleData.clear()
         actionChannel.close()
         viewModelScope.cancel("ViewModel cleared")
+        for (l in viewModelClearListeners) {
+            l.onViewModelCleared()
+        }
+        viewModelClearListeners.clear()
+        valueStorage.clean()
     }
 }
 
@@ -131,4 +127,8 @@ abstract class Action<State : Any> {
     open suspend fun postExecute() {
 
     }
+}
+
+fun interface ViewModelClearListener {
+    fun onViewModelCleared()
 }

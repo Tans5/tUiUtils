@@ -43,7 +43,7 @@ abstract class BaseDialogFragment : AppCompatDialogFragment(), IContentViewCreat
         if (!isInvokeOnCreateDialog) {
             isInvokeOnCreateDialog = true
         } else {
-            return super.onCreateDialog(savedInstanceState)
+            return dialog ?: super.onCreateDialog(savedInstanceState)
         }
         val activity = activity ?: return super.onCreateDialog(null)
 
