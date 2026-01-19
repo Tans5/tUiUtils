@@ -84,8 +84,10 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             app:shapeCornerRadius="10dp"
+            app:shapeGradientAngle="90"
             app:shapeGradientStartColor="#FF0000"
-            app:shapeGradientEndColor="#00FF00"/>
+            app:shapeGradientCenterColor="#0000FF"
+            app:shapeGradientEndColor="#00FF00" />
 
     </com.google.android.flexbox.FlexboxLayout>
 

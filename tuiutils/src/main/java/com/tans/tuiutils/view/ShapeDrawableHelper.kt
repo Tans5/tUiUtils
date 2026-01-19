@@ -1,37 +1,65 @@
 package com.tans.tuiutils.view
 
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Path
+import android.graphics.RectF
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.View
 import android.graphics.drawable.GradientDrawable
 import com.tans.tuiutils.R
 
-object ShapeDrawableHelper {
+interface ShapeLayout {
+    val shapeLayoutParams: ShapeLayoutHelper.ShapeLayoutParams?
 
-    fun apply(view: View, context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
-        view.clipToOutline = true
-        val ta = context.obtainStyledAttributes(attrs, R.styleable.ShapeLayout, defStyleAttr, defStyleRes)
-        val shapeValue = ta.getInt(R.styleable.ShapeLayout_shapeDrawable, -1)
-        val needDrawable = shapeValue != -1 ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeCornerRadius) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeCornerTopLeftRadius) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeCornerTopRightRadius) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeCornerBottomLeftRadius) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeCornerBottomRightRadius) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeSolidColor) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeGradientStartColor) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeGradientCenterColor) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeGradientEndColor) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeStrokeWidth) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeStrokeColor) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeSizeWidth) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeSizeHeight) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeUseLevel)
-        if (!needDrawable) {
-            ta.recycle()
-            return
+    fun setupBackground(view: View) {
+        if (shapeLayoutParams != null) {
+            view.background = ShapeLayoutHelper.createDrawable(view, shapeLayoutParams)
         }
-        val drawable = GradientDrawable()
+    }
+
+    fun clipContent(view: View, canvas: Canvas) {
+        ShapeLayoutHelper.clipContent(view, canvas, shapeLayoutParams)
+    }
+}
+object ShapeLayoutHelper {
+
+    data class ShapeLayoutParams(
+        val shape: Int,
+        val solidColor: Int,
+        val radius: Float,
+        val topLeftRadius: Float,
+        val topRightRadius: Float,
+        val bottomRightRadius: Float,
+        val bottomLeftRadius: Float,
+        val strokeWidth: Float,
+        val strokeColor: Int,
+        val gradientType: Int,
+        val angle: Int,
+        val gradientCenterX: Float,
+        val gradientCenterY: Float,
+        val gradientRadius: Float,
+        val startColor: Int,
+        val centerColor: Int,
+        val endColor: Int,
+        val width: Float,
+        val height: Float,
+        val useLevel: Boolean,
+        val dashWidth: Float,
+        val dashGap: Float,
+        val clipToOutline: Boolean,
+        val hasGradient: Boolean,
+        val hasCenterColor: Boolean,
+        val hasSolidColor: Boolean,
+        val hasUseLevel: Boolean
+    )
+
+    fun parseShapeParams(context: Context, attrs: AttributeSet?): ShapeLayoutParams? {
+        attrs ?: return null
+        val ta = context.obtainStyledAttributes(attrs, R.styleable.ShapeLayout)
+        val shapeValue = ta.getInt(R.styleable.ShapeLayout_shapeDrawable, -1)
         val shape = when (shapeValue) {
             0 -> GradientDrawable.RECTANGLE
             1 -> GradientDrawable.OVAL
@@ -39,58 +67,154 @@ object ShapeDrawableHelper {
             3 -> GradientDrawable.RING
             else -> GradientDrawable.RECTANGLE
         }
-        drawable.shape = shape
-        val cornerRadius = ta.getDimension(R.styleable.ShapeLayout_shapeCornerRadius, 0f)
-        val tl = ta.getDimension(R.styleable.ShapeLayout_shapeCornerTopLeftRadius, 0f)
-        val tr = ta.getDimension(R.styleable.ShapeLayout_shapeCornerTopRightRadius, 0f)
-        val br = ta.getDimension(R.styleable.ShapeLayout_shapeCornerBottomRightRadius, 0f)
-        val bl = ta.getDimension(R.styleable.ShapeLayout_shapeCornerBottomLeftRadius, 0f)
-        if (cornerRadius > 0f) {
-            drawable.cornerRadius = cornerRadius
-        } else if (tl > 0f || tr > 0f || br > 0f || bl > 0f) {
-            drawable.cornerRadii = floatArrayOf(tl, tl, tr, tr, br, br, bl, bl)
+        val solidColor = ta.getColor(R.styleable.ShapeLayout_shapeSolidColor, Color.TRANSPARENT)
+        val radius = ta.getDimension(R.styleable.ShapeLayout_shapeCornerRadius, 0F)
+        val topLeftRadius = ta.getDimension(R.styleable.ShapeLayout_shapeCornerTopLeftRadius, 0F)
+        val topRightRadius = ta.getDimension(R.styleable.ShapeLayout_shapeCornerTopRightRadius, 0F)
+        val bottomRightRadius = ta.getDimension(R.styleable.ShapeLayout_shapeCornerBottomRightRadius, 0F)
+        val bottomLeftRadius = ta.getDimension(R.styleable.ShapeLayout_shapeCornerBottomLeftRadius, 0F)
+        val strokeWidth = ta.getDimension(R.styleable.ShapeLayout_shapeStrokeWidth, 0F)
+        val strokeColor = ta.getColor(R.styleable.ShapeLayout_shapeStrokeColor, Color.TRANSPARENT)
+        val gradientTypeValue = ta.getInt(R.styleable.ShapeLayout_shapeGradientType, 0)
+        val gradientType = when (gradientTypeValue) {
+            0 -> GradientDrawable.LINEAR_GRADIENT
+            1 -> GradientDrawable.RADIAL_GRADIENT
+            2 -> GradientDrawable.SWEEP_GRADIENT
+            else -> GradientDrawable.LINEAR_GRADIENT
         }
-        val hasGradient = ta.hasValue(R.styleable.ShapeLayout_shapeGradientStartColor) ||
-                ta.hasValue(R.styleable.ShapeLayout_shapeGradientEndColor)
-        if (hasGradient) {
-            val start = ta.getColor(R.styleable.ShapeLayout_shapeGradientStartColor, 0)
-            val centerHas = ta.hasValue(R.styleable.ShapeLayout_shapeGradientCenterColor)
-            val center = ta.getColor(R.styleable.ShapeLayout_shapeGradientCenterColor, 0)
-            val end = ta.getColor(R.styleable.ShapeLayout_shapeGradientEndColor, 0)
-            drawable.colors = if (centerHas) intArrayOf(start, center, end) else intArrayOf(start, end)
-            val type = ta.getInt(R.styleable.ShapeLayout_shapeGradientType, 0)
-            drawable.gradientType = type
-            val angle = ta.getInt(R.styleable.ShapeLayout_shapeGradientAngle, 0)
-            drawable.orientation = ShapeDrawableHelper.orientationFromAngle(angle)
-            val centerX = ta.getFloat(R.styleable.ShapeLayout_shapeGradientCenterX, 0.5f)
-            val centerY = ta.getFloat(R.styleable.ShapeLayout_shapeGradientCenterY, 0.5f)
-            drawable.setGradientCenter(centerX, centerY)
-            val radius = ta.getDimension(R.styleable.ShapeLayout_shapeGradientRadius, 0f)
-            if (radius > 0f) drawable.gradientRadius = radius
-        } else if (ta.hasValue(R.styleable.ShapeLayout_shapeSolidColor)) {
-            val solid = ta.getColor(R.styleable.ShapeLayout_shapeSolidColor, 0)
-            drawable.setColor(solid)
+        val angle = ta.getInt(R.styleable.ShapeLayout_shapeGradientAngle, 0)
+        val gradientCenterX = ta.getFloat(R.styleable.ShapeLayout_shapeGradientCenterX, 0.5f)
+        val gradientCenterY = ta.getFloat(R.styleable.ShapeLayout_shapeGradientCenterY, 0.5f)
+        val gradientRadius = ta.getDimension(R.styleable.ShapeLayout_shapeGradientRadius, 0f)
+        val startColor = ta.getColor(R.styleable.ShapeLayout_shapeGradientStartColor, Color.TRANSPARENT)
+        val centerColor = ta.getColor(R.styleable.ShapeLayout_shapeGradientCenterColor, Color.TRANSPARENT)
+        val endColor = ta.getColor(R.styleable.ShapeLayout_shapeGradientEndColor, Color.TRANSPARENT)
+        val width = ta.getDimension(R.styleable.ShapeLayout_shapeSizeWidth, 0f)
+        val height = ta.getDimension(R.styleable.ShapeLayout_shapeSizeHeight, 0f)
+        val useLevel = ta.getBoolean(R.styleable.ShapeLayout_shapeUseLevel, false)
+        val dashWidth = ta.getDimension(R.styleable.ShapeLayout_shapeStrokeDashWidth, 0f)
+        val dashGap = ta.getDimension(R.styleable.ShapeLayout_shapeStrokeDashGap, 0f)
+        val clipToOutline = ta.getBoolean(R.styleable.ShapeLayout_shapeClipToOutline, false)
+
+        val hasGradient = ta.hasValue(R.styleable.ShapeLayout_shapeGradientStartColor) || ta.hasValue(R.styleable.ShapeLayout_shapeGradientEndColor)
+        val hasCenterColor = ta.hasValue(R.styleable.ShapeLayout_shapeGradientCenterColor)
+        val hasSolidColor = ta.hasValue(R.styleable.ShapeLayout_shapeSolidColor)
+        val hasUseLevel = ta.hasValue(R.styleable.ShapeLayout_shapeUseLevel)
+        ta.recycle()
+        return ShapeLayoutParams(
+            shape = shape,
+            solidColor = solidColor,
+            radius = radius,
+            topLeftRadius = topLeftRadius,
+            topRightRadius = topRightRadius,
+            bottomRightRadius = bottomRightRadius,
+            bottomLeftRadius = bottomLeftRadius,
+            strokeWidth = strokeWidth,
+            strokeColor = strokeColor,
+            gradientType = gradientType,
+            angle = angle,
+            gradientCenterX = gradientCenterX,
+            gradientCenterY = gradientCenterY,
+            gradientRadius = gradientRadius,
+            startColor = startColor,
+            centerColor = centerColor,
+            endColor = endColor,
+            width = width,
+            height = height,
+            useLevel = useLevel,
+            dashWidth = dashWidth,
+            dashGap = dashGap,
+            clipToOutline = clipToOutline,
+            hasGradient = hasGradient,
+            hasCenterColor = hasCenterColor,
+            hasSolidColor = hasSolidColor,
+            hasUseLevel = hasUseLevel
+        )
+    }
+
+    fun createDrawable(view: View, params: ShapeLayoutParams?): Drawable? {
+        params ?: return null
+        return with(params) {
+
+            val drawable = GradientDrawable()
+            drawable.shape = shape
+            if (radius > 0f) {
+                drawable.cornerRadius = radius
+            } else if (topLeftRadius > 0f || topRightRadius > 0f || bottomRightRadius > 0f || bottomLeftRadius > 0f) {
+                drawable.cornerRadii = floatArrayOf(
+                    topLeftRadius, topLeftRadius,
+                    topRightRadius, topRightRadius,
+                    bottomRightRadius, bottomRightRadius,
+                    bottomLeftRadius, bottomLeftRadius
+                )
+            }
+            if (hasGradient) {
+                drawable.colors = if (hasCenterColor) {
+                    intArrayOf(startColor, centerColor, endColor)
+                } else {
+                    intArrayOf(startColor, endColor)
+                }
+                drawable.gradientType = gradientType
+                drawable.orientation = orientationFromAngle(angle)
+                drawable.setGradientCenter(gradientCenterX, gradientCenterY)
+                if (gradientRadius > 0f) {
+                    drawable.gradientRadius = gradientRadius
+                }
+            } else if (hasSolidColor) {
+                drawable.setColor(solidColor)
+            }
+            if (strokeWidth > 0) {
+                if (dashWidth > 0f && dashGap > 0f) {
+                    drawable.setStroke(strokeWidth.toInt(), strokeColor, dashWidth, dashGap)
+                } else {
+                    drawable.setStroke(strokeWidth.toInt(), strokeColor)
+                }
+            }
+            if (width > 0 || height > 0) {
+                drawable.setSize(width.toInt(), height.toInt())
+            }
+            if (hasUseLevel) {
+                drawable.useLevel = useLevel
+            }
+            view.clipToOutline = clipToOutline
+            drawable
         }
-        val strokeWidth = ta.getDimensionPixelSize(R.styleable.ShapeLayout_shapeStrokeWidth, 0)
-        if (strokeWidth > 0) {
-            val strokeColor = ta.getColor(R.styleable.ShapeLayout_shapeStrokeColor, 0)
-            val dashWidth = ta.getDimension(R.styleable.ShapeLayout_shapeStrokeDashWidth, 0f)
-            val dashGap = ta.getDimension(R.styleable.ShapeLayout_shapeStrokeDashGap, 0f)
-            if (dashWidth > 0f && dashGap > 0f) {
-                drawable.setStroke(strokeWidth, strokeColor, dashWidth, dashGap)
-            } else {
-                drawable.setStroke(strokeWidth, strokeColor)
+    }
+
+    fun clipContent(view: View, canvas: Canvas, params: ShapeLayoutParams?) {
+        params ?: return
+        params.apply {
+            if (clipToOutline) {
+                if (shape == GradientDrawable.RECTANGLE) { // 矩形裁切
+                    val radii = if (radius > 0.0f) {
+                        floatArrayOf(
+                            radius, radius,
+                            radius, radius,
+                            radius, radius,
+                            radius, radius,
+                        )
+                    } else {
+                        floatArrayOf(
+                            topLeftRadius, topLeftRadius,
+                            topRightRadius, topRightRadius,
+                            bottomRightRadius, bottomRightRadius,
+                            bottomLeftRadius, bottomLeftRadius
+                        )
+                    }
+                    val path = Path()
+                    val rect = RectF(0f, 0f, view.measuredWidth.toFloat(), view.measuredHeight.toFloat())
+                    path.addRoundRect(rect, radii, Path.Direction.CW)
+                    canvas.clipPath(path)
+                }
+
+                if (shape == GradientDrawable.RING || shape == GradientDrawable.OVAL) {
+                    val path = Path()
+                    val rect = RectF(0f, 0f, view.measuredWidth.toFloat(), view.measuredHeight.toFloat())
+                    path.addOval(rect, Path.Direction.CW)
+                    canvas.clipPath(path)
+                }
             }
         }
-        val sizeW = ta.getDimensionPixelSize(R.styleable.ShapeLayout_shapeSizeWidth, 0)
-        val sizeH = ta.getDimensionPixelSize(R.styleable.ShapeLayout_shapeSizeHeight, 0)
-        if (sizeW > 0 || sizeH > 0) drawable.setSize(sizeW, sizeH)
-        if (ta.hasValue(R.styleable.ShapeLayout_shapeUseLevel)) {
-            val useLevel = ta.getBoolean(R.styleable.ShapeLayout_shapeUseLevel, false)
-            drawable.setUseLevel(useLevel)
-        }
-        ta.recycle()
-        view.background = drawable
     }
 
     fun orientationFromAngle(angle: Int): GradientDrawable.Orientation {

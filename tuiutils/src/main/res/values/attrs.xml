@@ -32,6 +32,7 @@
         <attr name="shapeSizeWidth" format="dimension"/>
         <attr name="shapeSizeHeight" format="dimension"/>
         <attr name="shapeUseLevel" format="boolean"/>
+        <attr name="shapeClipToOutline" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="ShapeFrameLayout">
@@ -57,6 +58,7 @@
         <attr name="shapeSizeWidth" />
         <attr name="shapeSizeHeight" />
         <attr name="shapeUseLevel" />
+        <attr name="shapeClipToOutline" />
     </declare-styleable>
 
     <declare-styleable name="ShapeLinearLayout">
@@ -82,6 +84,7 @@
         <attr name="shapeSizeWidth" />
         <attr name="shapeSizeHeight" />
         <attr name="shapeUseLevel" />
+        <attr name="shapeClipToOutline" />
     </declare-styleable>
 
     <declare-styleable name="ShapeConstraintLayout">
@@ -107,5 +110,6 @@
         <attr name="shapeSizeWidth" />
         <attr name="shapeSizeHeight" />
         <attr name="shapeUseLevel" />
+        <attr name="shapeClipToOutline" />
     </declare-styleable>
 </resources>
