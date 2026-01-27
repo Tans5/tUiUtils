@@ -42,7 +42,7 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
     override fun firstLaunchInitData(savedInstanceState: Bundle?) {
         println("${this@AudiosFragment::class.java.simpleName} firstLaunchInitDataCoroutine()")
         enqueueAction(object : Action<State>() {
-            override suspend fun execute(oldState: State): State {
+            override suspend fun onExecute(oldState: State): State {
                 val audios = this@AudiosFragment.queryAudioFromMediaStore()
                 return oldState.copy(audios = audios, hasLoadFirstData = true)
             }

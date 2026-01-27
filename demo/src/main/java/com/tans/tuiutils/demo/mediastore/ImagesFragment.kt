@@ -36,7 +36,7 @@ class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State
     override fun firstLaunchInitData(savedInstanceState: Bundle?) {
         println("${this@ImagesFragment::class.java.simpleName} firstLaunchInitDataCoroutine(): ${this.hashCode()}")
         enqueueAction(object : Action<State>() {
-            override suspend fun execute(oldState: State): State {
+            override suspend fun onExecute(oldState: State): State {
                 val images = this@ImagesFragment.queryImageFromMediaStore()
                 return oldState.copy(images = images)
             }

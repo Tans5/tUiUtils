@@ -18,6 +18,7 @@ open class CoroutineStateViewModel<State: Any>(defaultState: State, private val 
 
     private val actionChannel =
         Channel<Action<State>>(capacity = Channel.UNLIMITED, onUndeliveredElement = {
+            it.onDropped()
             Log.w(tag, "Undelivered event: $it")
         })
 
@@ -38,9 +39,14 @@ open class CoroutineStateViewModel<State: Any>(defaultState: State, private val 
         viewModelScope.launch(Dispatchers.IO) {
             for (action in actionChannel) {
                 Log.d(tag, "Start execute action: $action")
-                action.preExecute()
-                updateSuspend { action.execute(it) }
-                action.postExecute()
+                try {
+                    action.onPreExecute()
+                    updateSuspend { action.onExecute(it) }
+                    action.onPostExecute()
+                } catch (e: Throwable) {
+                    Log.e(tag, "Execute action fail: ${e.message}", e)
+                    action.onDropped()
+                }
                 Log.d(tag, "Execute action finished: $action")
                 executedActionsCount.addAndGet(1)
             }
@@ -68,32 +74,40 @@ open class CoroutineStateViewModel<State: Any>(defaultState: State, private val 
                 }
                 .onClosed {
                     Log.e(tag, "Enqueue action fail: $action, because channel closed: ${it?.message}", it)
+                    action.onDropped()
                 }
                 .onFailure {
                     Log.e(tag, "Enqueue action fail: $action, because channel error: ${it?.message}", it)
+                    action.onDropped()
                 }
         } else {
             Log.e(tag, "Enqueue action fail: $action, because cleared")
+            action.onDropped()
         }
     }
 
     fun enqueueAction(
-        action: (State) -> State,
-        pre: suspend () -> Unit = {},
-        post: suspend () -> Unit
+        onExecute: (State) -> State,
+        onPreExecute: suspend () -> Unit = {},
+        onDropped: () -> Unit = {},
+        onPostExecute: suspend () -> Unit
     ) {
         enqueueAction(object : Action<State>() {
 
-            override suspend fun preExecute() {
-                pre()
+            override suspend fun onPreExecute() {
+                onPreExecute()
             }
 
-            override suspend fun execute(oldState: State): State {
-                return action(oldState)
+            override suspend fun onExecute(oldState: State): State {
+                return onExecute(oldState)
             }
 
-            override suspend fun postExecute() {
-                post()
+            override suspend fun onPostExecute() {
+                onPostExecute()
+            }
+
+            override fun onDropped() {
+                onDropped()
             }
 
         })
@@ -118,13 +132,17 @@ open class CoroutineStateViewModel<State: Any>(defaultState: State, private val 
 
 abstract class Action<State : Any> {
 
-    open suspend fun preExecute() {
+    open suspend fun onPreExecute() {
 
     }
 
-    abstract suspend fun execute(oldState: State): State
+    abstract suspend fun onExecute(oldState: State): State
 
-    open suspend fun postExecute() {
+    open suspend fun onPostExecute() {
+
+    }
+
+    open fun onDropped() {
 
     }
 }

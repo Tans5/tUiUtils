@@ -32,7 +32,7 @@ class AudioSelectDialog : BaseContinuationStateCancelableResultDialogFragment<Au
 
     override fun firstLaunchInitData(savedInstanceState: Bundle?) {
         enqueueAction(object : Action<State>() {
-            override suspend fun execute(oldState: State): State {
+            override suspend fun onExecute(oldState: State): State {
                 val audios = this@AudioSelectDialog.queryAudioFromMediaStore()
                 return oldState.copy(audiosWithSelected = audios.map { a -> AudioWithSelected(a, false) }, hasLoadFirstData = true)
             }

@@ -30,11 +30,17 @@ abstract class BaseCoroutineStateDialogFragment<State : Any>(defaultState: State
         coroutineStateLifecycleOwnerDelegate.enqueueAction(action)
 
     override fun enqueueAction(
-        action: (State) -> State,
-        pre: suspend () -> Unit,
-        post: suspend () -> Unit
+        onExecute: (State) -> State,
+        onPreExecute: suspend () -> Unit,
+        onDropped: () -> Unit,
+        onPostExecute: suspend () -> Unit
     ) {
-        coroutineStateLifecycleOwnerDelegate.enqueueAction(action, pre, post)
+        coroutineStateLifecycleOwnerDelegate.enqueueAction(
+            onExecute = onExecute,
+            onPreExecute = onPreExecute,
+            onDropped = onDropped,
+            onPostExecute = onPostExecute
+        )
     }
 
     override fun executeActionsCount(): Int =

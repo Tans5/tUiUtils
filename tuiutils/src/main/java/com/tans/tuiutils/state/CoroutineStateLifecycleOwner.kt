@@ -32,9 +32,10 @@ interface CoroutineStateLifecycleOwner<State : Any> : LifecycleOwner, CoroutineS
     fun enqueueAction(action: Action<State>)
 
     fun enqueueAction(
-        action: (State) -> State,
-        pre: suspend () -> Unit = {},
-        post: suspend () -> Unit
+        onExecute: (State) -> State,
+        onPreExecute: suspend () -> Unit = {},
+        onDropped: () -> Unit = {},
+        onPostExecute: suspend () -> Unit
     )
 
     fun executeActionsCount(): Int
@@ -112,11 +113,17 @@ fun <State : Any> CoroutineStateLifecycleOwner(
         }
 
         override fun enqueueAction(
-            action: (State) -> State,
-            pre: suspend () -> Unit,
-            post: suspend () -> Unit
+            onExecute: (State) -> State,
+            onPreExecute: suspend () -> Unit,
+            onDropped: () -> Unit,
+            onPostExecute: suspend () -> Unit
         ) {
-            viewModel.enqueueAction(action, pre, post)
+            viewModel.enqueueAction(
+                onExecute = onExecute,
+                onPreExecute = onPreExecute,
+                onDropped = onDropped,
+                onPostExecute = onPostExecute
+            )
         }
 
         override fun executeActionsCount(): Int = viewModel.executeActionsCount()
