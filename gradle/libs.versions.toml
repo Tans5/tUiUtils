@@ -19,6 +19,7 @@ corouines = "1.10.2"
 glide = "5.0.4"
 tuiutils = "1.1.1"
 viewpager2 = "1.1.0"
+lifecycle = "2.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,6 +33,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout",  version.ref="swiperefreshlayout"}
 androidx-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle"}
 flexbox = { group = "com.google.android.flexbox", name = "flexbox", version.ref = "flexbox" }
 rxjava3 = { group = "io.reactivex.rxjava3", name = "rxjava", version.ref = "rxjava3"}
 rxkotlin3 = { group = "io.reactivex.rxjava3", name = "rxkotlin", version.ref = "rxkotlin3" }

@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.coroutines.android)
     implementation(libs.coroutines.rx3)
     implementation(libs.glide)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("androidx.viewpager2:viewpager2:1.1.0")
 
     // implementation(libs.tuiutils)

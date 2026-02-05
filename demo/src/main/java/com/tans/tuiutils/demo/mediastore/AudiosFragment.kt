@@ -54,77 +54,79 @@ class AudiosFragment : BaseCoroutineStateFragment<AudiosFragment.Companion.State
         useLastContentView: Boolean
     ) {
         println("${this@AudiosFragment::class.java.simpleName} bindContentViewCoroutine()")
-        val viewBinding = FragmentAudiosBinding.bind(contentView)
+        viewLifecycleOwner.apply {
+            val viewBinding = FragmentAudiosBinding.bind(contentView)
 
-        val headerFooterDataFlow = stateFlow
-            .map { if (it.audios.isEmpty()) emptyList() else listOf(Unit) }
+            val headerFooterDataFlow = stateFlow
+                .map { if (it.audios.isEmpty()) emptyList() else listOf(Unit) }
 
-        // Header
-        val headerAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
-            itemViewCreator = SingleItemViewCreatorImpl(R.layout.header_footer_item_layout),
-            dataSource = FlowDataSourceImpl(lifecycleScope, headerFooterDataFlow),
-            dataBinder = DataBinderImpl { _, view, _ ->
-                HeaderFooterItemLayoutBinding.bind(view).let { binding ->
-                    binding.msgTv.text = "Header"
+            // Header
+            val headerAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
+                itemViewCreator = SingleItemViewCreatorImpl(R.layout.header_footer_item_layout),
+                dataSource = FlowDataSourceImpl(lifecycleScope, headerFooterDataFlow),
+                dataBinder = DataBinderImpl { _, view, _ ->
+                    HeaderFooterItemLayoutBinding.bind(view).let { binding ->
+                        binding.msgTv.text = "Header"
+                    }
                 }
-            }
-        )
+            )
 
-        // Audios Content
-        val audiosAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreAudio>(
-            itemViewCreator = SingleItemViewCreatorImpl(R.layout.audio_item_layout),
-            dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { it.audios }),
-            dataBinder = DataBinderImpl { data, view, _ ->
-                val itemViewBinding = AudioItemLayoutBinding.bind(view)
-                itemViewBinding.musicTitleTv.text = data.title
-                itemViewBinding.artistAlbumTv.text = "${data.artist}-${data.album}"
-                view.clicks(lifecycleScope) {
-                    Toast.makeText(this@AudiosFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
+            // Audios Content
+            val audiosAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreAudio>(
+                itemViewCreator = SingleItemViewCreatorImpl(R.layout.audio_item_layout),
+                dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { it.audios }),
+                dataBinder = DataBinderImpl { data, view, _ ->
+                    val itemViewBinding = AudioItemLayoutBinding.bind(view)
+                    itemViewBinding.musicTitleTv.text = data.title
+                    itemViewBinding.artistAlbumTv.text = "${data.artist}-${data.album}"
+                    view.clicks(lifecycleScope) {
+                        Toast.makeText(this@AudiosFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }
-        )
+            )
 
-        // Footer
-        val footerAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
-            itemViewCreator = SingleItemViewCreatorImpl(R.layout.header_footer_item_layout),
-            dataSource = FlowDataSourceImpl(lifecycleScope, headerFooterDataFlow),
-            dataBinder = DataBinderImpl { _, view, _ ->
-                HeaderFooterItemLayoutBinding.bind(view).let { binding ->
-                    binding.msgTv.text = "Footer"
+            // Footer
+            val footerAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
+                itemViewCreator = SingleItemViewCreatorImpl(R.layout.header_footer_item_layout),
+                dataSource = FlowDataSourceImpl(lifecycleScope, headerFooterDataFlow),
+                dataBinder = DataBinderImpl { _, view, _ ->
+                    HeaderFooterItemLayoutBinding.bind(view).let { binding ->
+                        binding.msgTv.text = "Footer"
+                    }
                 }
-            }
-        )
+            )
 
-        // Empty
-        val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
-            itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
-            dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { if (it.audios.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
-            dataBinder = DataBinderImpl { _, view, _ ->
-                EmptyContentLayoutBinding.bind(view).let { binding ->
-                    binding.msgTv.text = "No Audio."
+            // Empty
+            val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
+                itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
+                dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { if (it.audios.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
+                dataBinder = DataBinderImpl { _, view, _ ->
+                    EmptyContentLayoutBinding.bind(view).let { binding ->
+                        binding.msgTv.text = "No Audio."
+                    }
                 }
+            )
+            viewBinding.audiosRv.adapter = (headerAdapterBuilder + audiosAdapterBuilder + footerAdapterBuilder + emptyAdapterBuilder).build()
+
+            viewBinding.audiosRv.addItemDecoration(
+                MarginDividerItemDecoration.Companion.Builder()
+                    .divider(MarginDividerItemDecoration.Companion.ColorDivider(color = Color.parseColor("#F2F2F2"), size = requireContext().dp2px(1)))
+                    .dividerDirection(MarginDividerItemDecoration.Companion.DividerDirection.Horizontal)
+                    .marginStart(requireContext().dp2px(16))
+                    .dividerController(ignoreLastDividerController)
+                    .build()
+            )
+            ViewCompat.setOnApplyWindowInsetsListener(viewBinding.audiosRv) { v, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.setPadding(0, 0, 0, systemBars.bottom)
+                insets
             }
-        )
-        viewBinding.audiosRv.adapter = (headerAdapterBuilder + audiosAdapterBuilder + footerAdapterBuilder + emptyAdapterBuilder).build()
 
-        viewBinding.audiosRv.addItemDecoration(
-            MarginDividerItemDecoration.Companion.Builder()
-                .divider(MarginDividerItemDecoration.Companion.ColorDivider(color = Color.parseColor("#F2F2F2"), size = requireContext().dp2px(1)))
-                .dividerDirection(MarginDividerItemDecoration.Companion.DividerDirection.Horizontal)
-                .marginStart(requireContext().dp2px(16))
-                .dividerController(ignoreLastDividerController)
-                .build()
-        )
-        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.audiosRv) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, 0, 0, systemBars.bottom)
-            insets
-        }
-
-        viewBinding.swipeRefresh.refreshes(lifecycleScope, Dispatchers.IO) {
-            delay(500)
-            val audios = this@AudiosFragment.queryAudioFromMediaStore()
-            updateState { it.copy(audios = audios) }
+            viewBinding.swipeRefresh.refreshes(lifecycleScope, Dispatchers.IO) {
+                delay(500)
+                val audios = this@AudiosFragment.queryAudioFromMediaStore()
+                updateState { it.copy(audios = audios) }
+            }
         }
     }
 

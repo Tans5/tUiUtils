@@ -46,36 +46,38 @@ class VideosFragment : BaseCoroutineStateFragment<VideosFragment.Companion.State
     ) {
         val viewBinding = FragmentVideosBinding.bind(contentView)
         println("${this@VideosFragment::class.java.simpleName} bindContentViewCoroutine()")
-        val videosAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreVideo>(
-            itemViewCreator = SingleItemViewCreatorImpl(R.layout.video_item_layout),
-            dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { it.videos }),
-            dataBinder = DataBinderImpl { data, view, _ ->
-                val itemViewBinding = VideoItemLayoutBinding.bind(view)
-                itemViewBinding.videoTitleTv.text = data.title
-                itemViewBinding.root.clicks(lifecycleScope) {
-                    Toast.makeText(this@VideosFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
+        viewLifecycleOwner.apply {
+            val videosAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreVideo>(
+                itemViewCreator = SingleItemViewCreatorImpl(R.layout.video_item_layout),
+                dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { it.videos }),
+                dataBinder = DataBinderImpl { data, view, _ ->
+                    val itemViewBinding = VideoItemLayoutBinding.bind(view)
+                    itemViewBinding.videoTitleTv.text = data.title
+                    itemViewBinding.root.clicks(lifecycleScope) {
+                        Toast.makeText(this@VideosFragment.requireContext(), data.title, Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }
-        )
-        val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
-            itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
-            dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { if (it.videos.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
-            dataBinder = DataBinderImpl { _, view, _ ->
-                val itemViewBinding = EmptyContentLayoutBinding.bind(view)
-                itemViewBinding.msgTv.text = "No Video."
-            }
-        )
-        viewBinding.videosRv.adapter = (videosAdapterBuilder + emptyAdapterBuilder).build()
+            )
+            val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
+                itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
+                dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { if (it.videos.isEmpty() && it.hasLoadFirstData) listOf(Unit) else emptyList() }),
+                dataBinder = DataBinderImpl { _, view, _ ->
+                    val itemViewBinding = EmptyContentLayoutBinding.bind(view)
+                    itemViewBinding.msgTv.text = "No Video."
+                }
+            )
+            viewBinding.videosRv.adapter = (videosAdapterBuilder + emptyAdapterBuilder).build()
 
-        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.videosRv) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, 0, 0, systemBars.bottom)
-            insets
-        }
-        viewBinding.swipeRefresh.refreshes(lifecycleScope, Dispatchers.IO) {
-            delay(500)
-            val videos = this@VideosFragment.queryVideoFromMediaStore()
-            updateState { it.copy(videos = videos) }
+            ViewCompat.setOnApplyWindowInsetsListener(viewBinding.videosRv) { v, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.setPadding(0, 0, 0, systemBars.bottom)
+                insets
+            }
+            viewBinding.swipeRefresh.refreshes(lifecycleScope, Dispatchers.IO) {
+                delay(500)
+                val videos = this@VideosFragment.queryVideoFromMediaStore()
+                updateState { it.copy(videos = videos) }
+            }
         }
     }
 
