@@ -6,12 +6,15 @@ import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
 import com.tans.tuiutils.adapter.impl.builders.SimpleAdapterBuilderImpl
+import com.tans.tuiutils.adapter.impl.builders.plus
 import com.tans.tuiutils.adapter.impl.databinders.DataBinderImpl
 import com.tans.tuiutils.adapter.impl.datasources.FlowDataSourceImpl
 import com.tans.tuiutils.adapter.impl.viewcreatators.SingleItemViewCreatorImpl
 import com.tans.tuiutils.demo.R
+import com.tans.tuiutils.demo.databinding.EmptyContentLayoutBinding
 import com.tans.tuiutils.demo.databinding.FragmentImagesBinding
 import com.tans.tuiutils.demo.databinding.ImageItemLayoutBinding
 import com.tans.tuiutils.fragment.BaseCoroutineStateFragment
@@ -50,9 +53,9 @@ class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State
         println("${this@ImagesFragment::class.java.simpleName} bindContentViewCoroutine()")
         viewLifecycleOwner.apply {
             val viewBinding = FragmentImagesBinding.bind(contentView)
-            val adapterBuilder = SimpleAdapterBuilderImpl<MediaStoreImage>(
+            val imageAdapterBuilder = SimpleAdapterBuilderImpl<MediaStoreImage>(
                 itemViewCreator = SingleItemViewCreatorImpl(R.layout.image_item_layout),
-                dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow.map { it.images }),
+                dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow().map { it.images ?: emptyList() }),
                 dataBinder = DataBinderImpl { data, view, _ ->
                     val itemViewBinding = ImageItemLayoutBinding.bind(view)
                     context?.let {
@@ -65,7 +68,30 @@ class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State
                     }
                 }
             )
-            viewBinding.imagesRv.adapter = adapterBuilder.build()
+
+            // Empty
+            val emptyAdapterBuilder = SimpleAdapterBuilderImpl<Unit>(
+                itemViewCreator = SingleItemViewCreatorImpl(R.layout.empty_content_layout),
+                dataSource = FlowDataSourceImpl(lifecycleScope, stateFlow().map { if (it.images?.isEmpty() == true) listOf(Unit) else emptyList() }),
+                dataBinder = DataBinderImpl { _, view, _ ->
+                    EmptyContentLayoutBinding.bind(view).let { binding ->
+                        binding.msgTv.text = "No Image."
+                    }
+                }
+            )
+
+            viewBinding.imagesRv.layoutManager = GridLayoutManager(context, 2).apply {
+               spanSizeLookup =  object : GridLayoutManager.SpanSizeLookup() {
+                   override fun getSpanSize(position: Int): Int {
+                       return if (state().images?.isEmpty() == true) {
+                           2
+                       } else {
+                           1
+                       }
+                   }
+               }
+            }
+            viewBinding.imagesRv.adapter = (imageAdapterBuilder + emptyAdapterBuilder).build()
             ViewCompat.setOnApplyWindowInsetsListener(viewBinding.imagesRv) { v, insets ->
                 val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
                 v.setPadding(0, 0, 0, systemBars.bottom)
@@ -95,6 +121,6 @@ class ImagesFragment : BaseCoroutineStateFragment<ImagesFragment.Companion.State
     }
 
     companion object {
-        data class State(val images: List<MediaStoreImage> = emptyList())
+        data class State(val images: List<MediaStoreImage>? = null)
     }
 }
